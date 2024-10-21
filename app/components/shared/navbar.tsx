@@ -4,7 +4,7 @@ import { Input } from "~/components/ui/input";
 
 export function Navbar() {
   return (
-    <nav className='  fixed top-0  w-full flex m-0 justify-between   p-8 '>
+    <nav className='  fixed top-0  w-full flex m-0 justify-between   p-8 bg-[#F6EBDA] '>
       <div className='md:flex flex-col gap-4'>
         <Link to={"/"}>
           <h2 className='text-3xl font-jacques  tracking-tight text-gray-900'>
