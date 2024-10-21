@@ -17,6 +17,7 @@ export default {
           "Noto Color Emoji",
         ],
         jacques: ["Jacques Francois", "serif"],
+        nunito: ["Nunito", "sans-serif"],
       },
       borderRadius: {
         lg: "var(--radius)",
