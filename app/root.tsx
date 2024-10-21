@@ -47,7 +47,7 @@ export function Layout({ children }: { children: React.ReactNode }) {
       </head>
       <body>
         <Navbar />
-        <div className='min-h-screen '>{children}</div>
+        <div className='min-h-screen mt-32'>{children}</div>
         <Footer />
         <ScrollRestoration />
         <Scripts />
