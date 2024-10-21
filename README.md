@@ -1,42 +1,61 @@
-# ☕ CheckCafe Web
+## ☕CheckCafe Web
 
-CheckCafe helps people to check the cafe's facility and various info.
+**CheckCafe** is your go-to platform for discovering the perfect café to meet your personal needs.
 
-- 📖 [Remix docs](https://remix.run/docs)
+Whether you're looking for a cozy spot for meetings or a productive environment for remote work, CheckCafe provides comprehensive information about cafés, including their amenities and atmosphere. Let us help you find the ideal place to sip your coffee and get things done!
 
-## Development
+## Features
 
-Run the dev server:
+- Explore cafés
+  Discover suitable cafés for your needs, including their location, price, amenities like Wi-Fi speed, information building, and more.
+
+- Add and review cafés
+  Add your favorite cafés to the platform and share your experiences with others.
+
+- Recommendations for Favorite Cafés
+  Receive personalized recommendations favourites for cafés based on your location.
+
+## Deployment
+
+- CheckCafe can be accessed at [CheckCafe Web](https://checkcafe.com)
+
+## Tech Stack and Dependencies
+
+- Language: TypeScript
+- Runtime: Bun
+- Framework: Remix
+- CSS Framework: Tailwind CSS
+- Components Library: Shadcn UI
+- Data Validation: Zod
+- File Upload: Uploadcare
+
+## UI Design
+
+- You can explore the CheckCafe design at [CheckCafe Design](https://checkcafe.com)
+
+## Installation or Initialize the project
+
+1. Clone the repository
+
+```sh
+git clone https://github.com/checkcafe/checkcafe-web.git
+cd checkcafe-web
+```
+
+2. Install dependencies:
+
+```sh
+bun install
+```
+
+3. Start the development server:
 
 ```sh
 bun dev
 ```
 
-## Deployment
-
-First, build your app for production:
+4. Build your app for production:
 
 ```sh
 bun run build
 ```
-
-Then run the app in production mode:
-
-```sh
-npm start
-```
-
-Now you'll need to pick a host to deploy it to.
-
-### DIY
-
-If you're familiar with deploying Node applications, the built-in Remix app server is production-ready.
-
-Make sure to deploy the output of `bun build`
-
-- `build/server`
-- `build/client`
-
-## Styling
-
-This template comes with [Tailwind CSS](https://tailwindcss.com/) already configured for a simple default starting experience. You can use whatever css framework you prefer. See the [Vite docs on css](https://vitejs.dev/guide/features.html#css) for more information.

@@ -16,6 +16,10 @@ export default {
           "Segoe UI Symbol",
           "Noto Color Emoji",
         ],
+        jacques: ["Jacques Francois", "serif"],
+      },
+      color: {
+        primary: "#372816",
       },
       borderRadius: {
         lg: "var(--radius)",
