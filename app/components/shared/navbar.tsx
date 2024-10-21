@@ -1,6 +1,6 @@
 import { Link } from "@remix-run/react";
 import { ProfileIcon } from "../icons/icons";
-import { Input } from "components/ui/input";
+import { Input } from "~/components/ui/input";
 
 export function Navbar() {
   return (
@@ -21,17 +21,17 @@ export function Navbar() {
       <div className='mt-12 md:mt-0 flex gap-4'>
         <ul className='flex gap-8 font-semibold text-base self-center '>
           <li>
-            <Link to={"/about"} className='text-primary'>
+            <Link to={"/about"} className='text-primButton'>
               About
             </Link>
           </li>
           <li>
-            <Link to={"/favourite"} className='text-primary'>
+            <Link to={"/favourite"} className='text-primButton'>
               Favourite
             </Link>
           </li>
         </ul>
-        <Link to={"/profile"} className='text-primary self-center'>
+        <Link to={"/profile"} className='text-primButton self-center'>
           <ProfileIcon className='w-10 h-10' />
         </Link>
       </div>

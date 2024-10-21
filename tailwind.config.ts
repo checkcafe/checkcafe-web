@@ -18,15 +18,13 @@ export default {
         ],
         jacques: ["Jacques Francois", "serif"],
       },
-      color: {
-        primary: "#372816",
-      },
       borderRadius: {
         lg: "var(--radius)",
         md: "calc(var(--radius) - 2px)",
         sm: "calc(var(--radius) - 4px)",
       },
       colors: {
+        primButton: "#372816",
         background: "hsl(var(--background))",
         foreground: "hsl(var(--foreground))",
         card: {
