@@ -3,6 +3,7 @@ import type { MetaFunction } from "@remix-run/node";
 
 import HeroSection from "~/components/shared/hero-section";
 import HomePopularPlaces from "~/components/shared/home-popular-places/home-popular-places";
+import HomeExploreCity from "~/components/shared/home-explore-city/home-explore-city";
 
 export const meta: MetaFunction = () => {
   return [
@@ -20,6 +21,7 @@ export default function Index(): React.ReactElement {
     <div className="flex flex-col justify-center">
       <HeroSection />
       <HomePopularPlaces />
+      <HomeExploreCity />
     </div>
   );
 }
