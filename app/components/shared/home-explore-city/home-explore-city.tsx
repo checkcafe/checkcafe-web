@@ -56,7 +56,7 @@ const HomeExploreCity = (): React.ReactElement => {
       <h4 className="text-4xl text-[#372816] font-semibold text-center">
         Explore Suitable Places on Your City
       </h4>
-      <div className="grid grid-cols-[repeat(auto-fill,minmax(300px,1fr))] mt-12">
+      <div className="grid grid-cols-[repeat(auto-fill,minmax(250px,1fr))] mt-12 justify-items-center">
         {dummyCities.map((item) => (
           <CityItem key={item.id} amount={item.amount} city={item.name} />
         ))}
