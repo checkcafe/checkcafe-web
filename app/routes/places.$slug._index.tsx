@@ -14,8 +14,6 @@ export async function loader({ params }: LoaderFunctionArgs) {
     throw new Response(null, { status: 404, statusText: "Place Not Found" });
   }
 
-  console.log({ place });
-
   return json({ place });
 }
 
