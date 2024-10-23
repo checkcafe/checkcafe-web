@@ -1,15 +1,16 @@
 import {
+  isRouteErrorResponse,
   Links,
   Meta,
   Outlet,
   Scripts,
   ScrollRestoration,
+  useRouteError,
 } from "@remix-run/react";
 import type { LinksFunction } from "@remix-run/node";
-
+import React from "react";
 import "./tailwind.css";
-import { Footer } from "./components/shared/footer";
-import { Navbar } from "./components/shared/navbar";
+import { AppLayout } from "./components/shared/app-layout";
 
 export const links: LinksFunction = () => [
   {
@@ -24,7 +25,7 @@ export const links: LinksFunction = () => [
   },
   {
     rel: "stylesheet",
-    href: "https://fonts.googleapis.com/css2?family=Jacques+Francois&display=swap",
+    href: "https://fonts.googleapis.com/css2?family=Playwrite+GB+S&display=swap",
   },
   {
     rel: "stylesheet",
@@ -38,17 +39,18 @@ export const links: LinksFunction = () => [
 
 export function Layout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang='en'>
+    <html lang="en">
       <head>
-        <meta charSet='utf-8' />
-        <meta name='viewport' content='width=device-width, initial-scale=1' />
+        <meta charSet="utf-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1" />
         <Meta />
         <Links />
       </head>
       <body>
-        <Navbar />
-        <div className='min-h-screen mt-32'>{children}</div>
-        <Footer />
+        <AppLayout>
+          <div className="min-h-screen ">{children}</div>
+        </AppLayout>
+
         <ScrollRestoration />
         <Scripts />
       </body>
