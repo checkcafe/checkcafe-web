@@ -18,8 +18,6 @@ export async function action({ request }: ActionFunctionArgs) {
     name: String(formData.get("name")),
   };
 
-  console.log({ teamMember });
-
   return json({ teamMember });
 }
 

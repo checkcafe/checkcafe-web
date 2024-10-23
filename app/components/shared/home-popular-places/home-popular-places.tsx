@@ -4,6 +4,7 @@ import React from "react";
 import { ScrollArea, ScrollBar } from "~/components/ui/scroll-area";
 
 import PlaceCard from "./place-card";
+import { Link } from "@remix-run/react";
 
 const dummyPlaces = [
   {
@@ -79,13 +80,14 @@ const HomePopularPlaces = (): React.ReactElement => {
       <ScrollArea className="w-full whitespace-nowrap rounded-md">
         <div className="flex w-max space-x-6">
           {dummyPlaces.map((item) => (
-            <PlaceCard
-              key={item.id}
-              placeName={item.name}
-              city={item.city}
-              price={item.price}
-              time={item.time}
-            />
+            <Link to="/places/:slug" key={item.id}>
+              <PlaceCard
+                placeName={item.name}
+                city={item.city}
+                price={item.price}
+                time={item.time}
+              />
+            </Link>
           ))}
         </div>
         <ScrollBar orientation="horizontal" />
