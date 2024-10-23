@@ -25,7 +25,7 @@ export const links: LinksFunction = () => [
   },
   {
     rel: "stylesheet",
-    href: "https://fonts.googleapis.com/css2?family=Jacques+Francois&display=swap",
+    href: "https://fonts.googleapis.com/css2?family=Playwrite+GB+S&display=swap",
   },
   {
     rel: "stylesheet",
