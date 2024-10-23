@@ -6,6 +6,7 @@ export default {
   theme: {
     extend: {
       fontFamily: {
+        brand: ["Playwrite GB S", "ui-serif", "Georgia", "serif"],
         sans: [
           "Inter",
           "ui-sans-serif",
@@ -16,7 +17,6 @@ export default {
           "Segoe UI Symbol",
           "Noto Color Emoji",
         ],
-        jacques: ["Jacques Francois", "serif"],
       },
       color: {
         primary: "#372816",
