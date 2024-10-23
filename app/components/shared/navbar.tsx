@@ -1,7 +1,7 @@
 import { Link } from "@remix-run/react";
-import { ProfileIcon } from "../icons/icons";
+// import { ProfileIcon } from "../icons/icons";
 import React from "react";
-// import { Searchbar } from "./searchbar";
+import { Searchbar } from "./searchbar";
 import { Button } from "../ui/button";
 
 export function Navbar() {
@@ -14,7 +14,7 @@ export function Navbar() {
           </h2>
         </Link>
       </div>
-      {/* <Searchbar /> */}
+      <Searchbar />
       <div className="mt-12 md:mt-0 flex gap-4">
         <ul className="flex gap-8 font-semibold text-base self-center ">
           {/* <li>
