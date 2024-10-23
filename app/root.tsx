@@ -3,6 +3,7 @@ import {
   Links,
   Meta,
   Outlet,
+  redirect,
   Scripts,
   ScrollRestoration,
   useRouteError,
@@ -36,7 +37,14 @@ export const links: LinksFunction = () => [
     href: "https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&display=swap",
   },
 ];
+import { ActionFunctionArgs } from "@remix-run/node";
 
+export async function action({ request }: ActionFunctionArgs) {
+  const formData = await request.formData();
+  const searchQuery = formData.get("search");
+
+  return redirect(`/places?query=${encodeURIComponent(searchQuery as string)}`);
+}
 export function Layout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="en">
