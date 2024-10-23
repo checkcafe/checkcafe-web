@@ -7,7 +7,7 @@ import { Button } from "../ui/button";
 export function Searchbar() {
   return (
     <>
-      <Form method='post' className='w-[40%] flex gap-5'>
+      <Form method='get' action='/places' className='w-[40%] flex gap-5'>
         <span className='flex w-full bg-white shadow-lg rounded-md h-10'>
           <Input
             type='search'
