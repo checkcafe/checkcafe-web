@@ -1,8 +1,7 @@
 import React from "react";
 
-import { Input } from "components/ui/input";
-
 import MessageIcon from "../icons/message";
+import { Input } from "../ui/input";
 
 /**
  * Show input email in home page
