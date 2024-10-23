@@ -13,7 +13,7 @@ import { Label } from "~/components/ui/label";
 import { auth } from "~/lib/auth";
 import { getPageTitle } from "~/lib/getTitle";
 import { LoginSchema } from "~/schemas/auth";
-
+import React from "react";
 export const meta: MetaFunction = () => {
   return [
     { title: getPageTitle("Login") },
