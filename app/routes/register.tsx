@@ -1,5 +1,5 @@
 import type { ActionFunctionArgs, MetaFunction } from "@remix-run/node";
-import { Form, json, redirect, useActionData } from "@remix-run/react";
+import { Form, json, Link, redirect, useActionData } from "@remix-run/react";
 import { useState } from "react";
 import { z } from "zod";
 import { EyeIcon, HiddenEyeIcon } from "~/components/icons/icons";
@@ -46,7 +46,20 @@ export default function Register() {
   console.log(actionData, "action data");
   return (
     <div className="flex flex-col gap-16 items-center justify-center">
-      <Form method="post" className="flex flex-col gap-3 text-xl min-w-96 ">
+      <Form
+        method="post"
+        className="flex flex-col gap-3 text-xl min-w-96  bg-slate-100 p-8 rounded-md"
+      >
+        <span className="flex flex-col ">
+          <h2 className="text-2xl text-center">Register</h2>
+
+          <span className="text-lg flex gap-1 justify-center">
+            <p> Already have account?</p>
+            <Link to={"/login"} className=" text-amber-900  ">
+              Login!
+            </Link>
+          </span>
+        </span>
         <span className="">
           <Label htmlFor="name">
             <p className="inline-block"> Name</p>
