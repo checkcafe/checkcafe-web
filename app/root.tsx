@@ -1,15 +1,16 @@
 import {
+  isRouteErrorResponse,
   Links,
   Meta,
   Outlet,
   Scripts,
   ScrollRestoration,
+  useRouteError,
 } from "@remix-run/react";
 import type { LinksFunction } from "@remix-run/node";
 
 import "./tailwind.css";
-import { Footer } from "./components/shared/footer";
-import { Navbar } from "./components/shared/navbar";
+import { AppLayout } from "./components/shared/app-layout";
 
 export const links: LinksFunction = () => [
   {
@@ -42,9 +43,10 @@ export function Layout({ children }: { children: React.ReactNode }) {
         <Links />
       </head>
       <body>
-        <Navbar />
-        <div className="min-h-screen ">{children}</div>
-        <Footer />
+        <AppLayout>
+          <div className="min-h-screen ">{children}</div>
+        </AppLayout>
+
         <ScrollRestoration />
         <Scripts />
       </body>
@@ -54,4 +56,31 @@ export function Layout({ children }: { children: React.ReactNode }) {
 
 export default function App() {
   return <Outlet />;
+}
+
+export function ErrorBoundary() {
+  const error = useRouteError();
+
+  return (
+    <html>
+      <head>
+        <title>Oops!</title>
+        <Meta />
+        <Links />
+      </head>
+      <body>
+        <AppLayout>
+          <h1>
+            {isRouteErrorResponse(error)
+              ? `${error.status} ${error.statusText}`
+              : error instanceof Error
+              ? error.message
+              : "Unknown Error"}
+          </h1>
+        </AppLayout>
+
+        <Scripts />
+      </body>
+    </html>
+  );
 }
