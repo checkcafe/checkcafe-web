@@ -6,6 +6,7 @@ export default {
   theme: {
     extend: {
       fontFamily: {
+        brand: ["Playwrite GB S", "ui-serif", "Georgia", "serif"],
         sans: [
           "Inter",
           "ui-sans-serif",
@@ -18,6 +19,9 @@ export default {
         ],
         jacques: ["Jacques Francois", "serif"],
         nunito: ["Nunito", "sans-serif"],
+      },
+      color: {
+        primary: "#372816",
       },
       borderRadius: {
         lg: "var(--radius)",
