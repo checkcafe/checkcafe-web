@@ -6,19 +6,19 @@ import { Button } from "../ui/button";
 export default function HeroSection() {
   return (
     <section className="bg-background py-10 md:py-[74px]">
-      <div className="container mx-auto px-5 md:px-[139px] flex flex-col-reverse md:flex-row gap-5 md:gap-0  justify-between">
+      <div className="mx-auto px-5 md:px-[139px] flex flex-col-reverse md:flex-row gap-5 md:gap-0  justify-between">
         <div className="pt-2 md:pt-14">
           <h1 className="text-[#372816] font-jacques text-4xl md:text-5xl">
             Find your <span className="text-[#FF9129]">comfort</span>
           </h1>
-          <h1 className="text-[#372816] font-jacques text-4xl md:text-5xl">
+          <h1 className="text-[#372816] font-jacques text-4xl md:text-5xl mt-1">
             Enjoy your work
           </h1>
 
           <p className="text-[#9BA0A7] text-lg md:text-2xl mt-10">
             Your Cozy Workspace Awaits
           </p>
-          <p className="text-[#9BA0A7] text-lg md:text-2x">
+          <p className="text-[#9BA0A7] text-lg md:text-2xl mt-1">
             Your Guide to Cozy Cafes and Great Vibes
           </p>
 

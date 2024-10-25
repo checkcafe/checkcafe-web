@@ -35,6 +35,7 @@ export function MapboxView({
     zoom: 4,
   },
   onPlaceClick,
+  height,
 }: {
   places: any;
   initialViewState?: {
@@ -43,6 +44,7 @@ export function MapboxView({
     zoom: number;
   };
   onPlaceClick: (placeId: string) => void;
+  height?: string;
 }) {
   const navigate = useNavigate();
   const mapRef = useRef<MapRef>(null);
@@ -134,7 +136,7 @@ export function MapboxView({
   return (
     <Map
       mapStyle="mapbox://styles/mapbox/streets-v9"
-      style={{ width: "100%", height: "100vh", borderRadius: 5 }}
+      style={{ width: "100%", height: height || "100vh", borderRadius: 5 }}
       initialViewState={initialViewState}
       mapboxAccessToken={MAPBOX_TOKEN}
       interactiveLayerIds={[
