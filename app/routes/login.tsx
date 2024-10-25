@@ -19,8 +19,6 @@ import { LoginSchema } from "~/schemas/auth";
 import React from "react";
 import LoadingSpinner from "~/components/shared/loader-spinner";
 import { serializedCookie } from "~/lib/access-token";
-import { toast } from "sonner";
-import { Toaster } from "~/components/ui/sonner";
 export const meta: MetaFunction = () => {
   return [
     { title: getPageTitle("Login") },
@@ -152,7 +150,6 @@ export default function Login() {
           )}
         </Button>
       </Form>
-      <Toaster />
     </div>
   );
 }
