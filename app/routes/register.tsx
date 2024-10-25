@@ -1,5 +1,12 @@
 import type { ActionFunctionArgs, MetaFunction } from "@remix-run/node";
-import { Form, json, Link, redirect, useActionData } from "@remix-run/react";
+import {
+  Form,
+  json,
+  Link,
+  redirect,
+  useActionData,
+  useNavigation,
+} from "@remix-run/react";
 import { useState } from "react";
 import { z } from "zod";
 import { EyeIcon, HiddenEyeIcon } from "~/components/icons/icons";
@@ -9,7 +16,8 @@ import { Label } from "~/components/ui/label";
 import { auth } from "~/lib/auth";
 import { getPageTitle } from "~/lib/getTitle";
 import { RegisterSchema } from "~/schemas/auth";
-
+import React from "react";
+import LoadingSpinner from "~/components/shared/loader-spinner";
 export const meta: MetaFunction = () => {
   return [
     { title: getPageTitle("Login") },
@@ -22,7 +30,11 @@ export const action = async ({ request }: ActionFunctionArgs) => {
   const userRegister = Object.fromEntries(formData);
   try {
     const validatedRegister = RegisterSchema.parse(userRegister);
-    // await auth.register(validatedRegister);
+    const user = await auth.register(validatedRegister);
+    if (!user) {
+      return null;
+    }
+    return redirect("/login");
   } catch (error) {
     if (error instanceof z.ZodError) {
       const errors: { [key: string]: string } = {};
@@ -32,10 +44,8 @@ export const action = async ({ request }: ActionFunctionArgs) => {
       console.log(errors);
       return json({ errors });
     }
+    console.log(error, "error");
   }
-  //   const login = await auth.login(validationResult);
-  // await updateContact(params.contactId, updates);
-  return redirect(`/login`);
 };
 export default function Register() {
   const [showPassword, setShowPassword] = useState(false);
@@ -44,6 +54,7 @@ export default function Register() {
   };
   const actionData = useActionData<typeof action>();
   console.log(actionData, "action data");
+  const navigation = useNavigation();
   return (
     <div className="flex flex-col gap-16 items-center justify-center">
       <Form
@@ -68,7 +79,7 @@ export default function Register() {
           <Input
             type="text"
             name="name"
-            placeholder="Naruto"
+            placeholder="Penikmat Kopi"
             id="name"
             className="mt-1"
           />
@@ -86,7 +97,7 @@ export default function Register() {
           <Input
             type="text"
             name="username"
-            placeholder="naswa13"
+            placeholder="penikmat_kopi"
             id="username"
             className="mt-1"
           />
@@ -104,7 +115,7 @@ export default function Register() {
           <Input
             type="email"
             name="email"
-            placeholder="naswa13"
+            placeholder="penikmatkopi@gmail.com"
             id="email"
             className="mt-1"
           />
@@ -155,9 +166,10 @@ export default function Register() {
             </p>
           )}
         </span>
+
         <span className="relative">
           <Label htmlFor="confirmPassword" className="">
-            <p className="inline-block"> Password</p>
+            <p className="inline-block"> Confirm Password</p>
             <p className="inline-block text-red-700 text-sm  ml-1">*</p>
           </Label>
           <Input
@@ -196,8 +208,14 @@ export default function Register() {
             </p>
           )}
         </span>
-
-        <Button type="submit">Masuk</Button>
+        <Button type="submit">
+          {navigation.state === "loading" ||
+          navigation.state === "submitting" ? (
+            <LoadingSpinner />
+          ) : (
+            "Register"
+          )}
+        </Button>
       </Form>
     </div>
   );

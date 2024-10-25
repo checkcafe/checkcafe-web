@@ -1,12 +1,17 @@
-import { Outlet } from "@remix-run/react";
-
+import React from "react";
 import { Navbar } from "~/components/shared/navbar";
 import { Footer } from "~/components/shared/footer";
 
-export function AppLayout({ children }: { children: React.ReactNode }) {
+export function AppLayout({
+  children,
+  cookie,
+}: {
+  children: React.ReactNode;
+  cookie: string;
+}) {
   return (
     <>
-      <Navbar />
+      <Navbar cookie={cookie} />
       {children}
       <Footer />
     </>
