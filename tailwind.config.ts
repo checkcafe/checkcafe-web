@@ -6,6 +6,7 @@ export default {
   theme: {
     extend: {
       fontFamily: {
+        brand: ["Playwrite GB S", "ui-serif", "Georgia", "serif"],
         sans: [
           "Inter",
           "ui-sans-serif",
@@ -17,6 +18,7 @@ export default {
           "Noto Color Emoji",
         ],
         jacques: ["Jacques Francois", "serif"],
+        nunito: ["Nunito", "sans-serif"],
       },
       color: {
         primary: "#372816",
@@ -27,6 +29,7 @@ export default {
         sm: "calc(var(--radius) - 4px)",
       },
       colors: {
+        primButton: "#372816",
         background: "hsl(var(--background))",
         foreground: "hsl(var(--foreground))",
         card: {
