@@ -49,7 +49,6 @@ export const auth: Auth = {
       const user = await response.json();
       console.log(user.error.issues, user, "userss");
       if (!user) return null;
-      redirect("/login");
       return user;
     } catch (error) {
       console.log(error);
