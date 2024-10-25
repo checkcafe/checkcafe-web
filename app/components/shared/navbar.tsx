@@ -1,12 +1,13 @@
 import { Link } from "@remix-run/react";
-import { ProfileIcon } from "../icons/icons";
+// import { ProfileIcon } from "../icons/icons";
 import React from "react";
-// import { Searchbar } from "./searchbar";
+import { Searchbar } from "./searchbar";
 import { Button } from "../ui/button";
+import { ProfileIcon } from "../icons/icons";
 
-export function Navbar() {
+export function Navbar({ cookie }: { cookie: string }) {
   return (
-    <nav className=" sticky top-0  w-full flex m-0 justify-between p-8 z-50 bg-[#F6EBDA] ">
+    <nav className=" sticky top-0  w-full flex m-0 justify-between p-8 z-50 bg-background ">
       <div className="md:flex flex-col gap-4">
         <Link to={"/"}>
           <h2 className="text-3xl font-jacques  tracking-tight text-gray-900">
@@ -14,7 +15,7 @@ export function Navbar() {
           </h2>
         </Link>
       </div>
-      {/* <Searchbar /> */}
+      <Searchbar />
       <div className="mt-12 md:mt-0 flex gap-4">
         <ul className="flex gap-8 font-semibold text-base self-center ">
           {/* <li>
@@ -33,17 +34,17 @@ export function Navbar() {
             </Link>
           </li>
         </ul>
-        <Button asChild>
-          <Link to={"/login"} className="text-primary self-center">
-            Login
+        {cookie ? (
+          <Link to={"/profile"} className="text-primary self-center">
+            <ProfileIcon className="w-10 h-10" />
           </Link>
-        </Button>
-        {/* <Link to={"/profile"} className='text-primary self-center'>
-          <ProfileIcon className='w-10 h-10' />
-        </Link> */}
-        <Link to={"/profile"} className="text-primary self-center">
-          <ProfileIcon className="w-10 h-10" />
-        </Link>
+        ) : (
+          <Button asChild>
+            <Link to={"/login"} className="text-primary self-center">
+              Login
+            </Link>
+          </Button>
+        )}
       </div>
     </nav>
   );

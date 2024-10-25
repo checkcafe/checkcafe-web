@@ -1,9 +1,12 @@
+import { type ActionFunctionArgs, type MetaFunction } from "@remix-run/node";
 import {
-  createCookie,
-  type ActionFunctionArgs,
-  type MetaFunction,
-} from "@remix-run/node";
-import { Form, json, Link, redirect, useActionData } from "@remix-run/react";
+  Form,
+  json,
+  Link,
+  redirect,
+  useActionData,
+  useNavigation,
+} from "@remix-run/react";
 import { useState } from "react";
 import { z } from "zod";
 import { EyeIcon, HiddenEyeIcon } from "~/components/icons/icons";
@@ -13,7 +16,9 @@ import { Label } from "~/components/ui/label";
 import { auth } from "~/lib/auth";
 import { getPageTitle } from "~/lib/getTitle";
 import { LoginSchema } from "~/schemas/auth";
-
+import React from "react";
+import LoadingSpinner from "~/components/shared/loader-spinner";
+import { serializedCookie } from "~/lib/access-token";
 export const meta: MetaFunction = () => {
   return [
     { title: getPageTitle("Login") },
@@ -21,20 +26,32 @@ export const meta: MetaFunction = () => {
   ];
 };
 
-export const action = async ({ request }: ActionFunctionArgs) => {
+export async function action({ request }: ActionFunctionArgs) {
   const formData = await request.formData();
   const userLogin = Object.fromEntries(formData);
   try {
     const validatedLogin = LoginSchema.parse(userLogin);
-    await auth.login(validatedLogin);
-    const cookie = createCookie("user-prefs", {
-      secrets: ["n3wsecr3t", "olds3cret"],
-    });
-    return redirect("/", {
-      headers: {
-        "Set-Cookie": await cookie.serialize("test"),
-      },
-    });
+    const login = await auth.login(validatedLogin);
+    const cookieAccessToken = serializedCookie(
+      "accessToken",
+      login?.accessToken || ""
+    );
+    const cookieRefreshToken = serializedCookie(
+      "refreshToken",
+      login?.refreshToken || ""
+    );
+    const cookieRole = serializedCookie(
+      "role",
+      login?.accessToken || "",
+      login?.role || ""
+    );
+
+    const headers = new Headers();
+    headers.append("Set-Cookie", await cookieAccessToken);
+    headers.append("Set-Cookie", await cookieRefreshToken);
+    headers.append("Set-Cookie", await cookieRole);
+
+    return redirect("/", { headers });
   } catch (error) {
     if (error instanceof z.ZodError) {
       const errors: { [key: string]: string } = {};
@@ -44,13 +61,15 @@ export const action = async ({ request }: ActionFunctionArgs) => {
       return json({ errors });
     }
   }
-};
+}
 export default function Login() {
   const [showPassword, setShowPassword] = useState(false);
   const togglePasswordVisibility = () => {
     setShowPassword(!showPassword);
   };
   const actionData = useActionData<typeof action>();
+
+  const navigation = useNavigation();
   return (
     <div className="flex flex-col gap-16 items-center justify-center translate-y-1/2">
       <Form
@@ -71,7 +90,7 @@ export default function Login() {
           <Input
             type="text"
             name="username"
-            placeholder="naswa13"
+            placeholder="penikmat-kopi"
             id="username"
             className="mt-1"
           />
@@ -115,14 +134,21 @@ export default function Login() {
               </span> // Replace with an actual icon
             )}
           </button>
-          {actionData && actionData.errors["password"] && (
+          {actionData && actionData.errors && actionData.errors["password"] && (
             <p className="text-red-700 text-sm">
               {actionData.errors["password"]}
             </p>
           )}
         </span>
 
-        <Button type="submit">Masuk</Button>
+        <Button type="submit">
+          {navigation.state === "loading" ||
+          navigation.state === "submitting" ? (
+            <LoadingSpinner />
+          ) : (
+            "Login"
+          )}
+        </Button>
       </Form>
     </div>
   );
