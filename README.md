@@ -15,6 +15,20 @@ Whether you're looking for a cozy spot for meetings or a productive environment 
 - Recommendations for Favorite Cafés
   Receive personalized recommendations favourites for cafés based on your location.
 
+## List Pages
+
+List all pages in the CheckCafe Web application.
+
+- / : This route is the home page of the application.
+- /about : This route is will filled with informartion about the team who build this application.
+- /register : This route is used to register a new account.
+- /login : This route is used to login to an existing account.
+- /places : This route is used to list all the places in the application.
+- /places/:slug : This route is used to view a specific place.
+- /dashboard : This route is used to view the dashboard of the user.
+- /:username : This route is used to view the profile of the user.
+- /:username/favorites : This route is used to view the favorites of the user.
+
 ## Deployment
 
 - CheckCafe can be accessed at [CheckCafe Web](https://checkcafe.com)
