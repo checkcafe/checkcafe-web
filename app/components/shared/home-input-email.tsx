@@ -3,10 +3,8 @@ import { Input } from "../ui/input";
 
 /**
  * Show input email in home page
- *
- * @returns HomeInputEmail component
  */
-const HomeInputEmail = () => {
+export const HomeInputEmail = () => {
   return (
     <div className="mb-12 mt-16 rounded-lg px-5 md:px-[139px]">
       <div className="rounded-lg bg-[#372816] px-16 py-16">
@@ -36,5 +34,3 @@ const HomeInputEmail = () => {
     </div>
   );
 };
-
-export default HomeInputEmail;

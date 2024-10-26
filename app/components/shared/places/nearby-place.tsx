@@ -4,17 +4,11 @@ type NearbyPlace = {
   latitude: number;
   longitude: number;
 };
-type Props = {
-  place: NearbyPlace;
-};
 
 /**
  * Show nearby place item
- *
- * @param props - props
- * @returns NearbyPlace component
  */
-export default function NearbyPlace({ place }: Props) {
+export function NearbyPlace({ place }: { place: NearbyPlace }) {
   return (
     <div className="mr-7 flex flex-col">
       <h3 className="mb-2 text-lg font-normal text-amber-900">{place.name}</h3>

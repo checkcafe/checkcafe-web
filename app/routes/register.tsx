@@ -16,7 +16,7 @@ import { Button } from "~/components/ui/button";
 import { Input } from "~/components/ui/input";
 import { Label } from "~/components/ui/label";
 import { auth } from "~/lib/auth";
-import { getPageTitle } from "~/lib/getTitle";
+import { getPageTitle } from "~/lib/get-page-title";
 import { RegisterSchema } from "~/schemas/auth";
 
 export const meta: MetaFunction = () => {

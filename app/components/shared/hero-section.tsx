@@ -4,7 +4,7 @@ import { Armchair, Wifi } from "lucide-react";
 import { FloatingCard } from "~/components/shared/floating-card";
 import { Button } from "~/components/ui/button";
 
-export default function HeroSection() {
+export function HomeHeroSection() {
   return (
     <section className="flex justify-center bg-amber-50 py-10 md:py-10">
       <div className="flex flex-col gap-32 px-5 md:flex-row">

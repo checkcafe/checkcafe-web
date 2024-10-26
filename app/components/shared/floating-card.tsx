@@ -1,19 +1,17 @@
 import { cn } from "~/lib/utils";
 
-interface FloatingCardProps {
-  icon?: React.ReactNode;
-  title: string;
-  bgColor?: string;
-  textColor?: string;
-  className?: string;
-}
-
-export const FloatingCard: React.FC<FloatingCardProps> = ({
+export const FloatingCard = ({
   icon,
   title,
   bgColor = "bg-white",
   textColor = "text-black",
   className,
+}: {
+  icon?: React.ReactNode;
+  title: string;
+  bgColor?: string;
+  textColor?: string;
+  className?: string;
 }) => {
   return (
     <div

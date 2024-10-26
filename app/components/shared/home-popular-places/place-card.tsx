@@ -3,34 +3,15 @@ import { Clock } from "lucide-react";
 import { PriceTagIcon } from "~/components/icons/icons";
 import { Card, CardContent } from "~/components/ui/card";
 
-type Props = {
+/**
+ * Card for place item
+ */
+export const PlaceCard = (props: {
   placeName: string;
   city: string;
   price: string;
   time: string;
-};
-
-type FacilityItemProps = {
-  icon: React.ReactNode;
-  title: string;
-};
-
-/**
- * Facility Item with icon and value
- */
-const renderFacilityItem = (props: FacilityItemProps) => (
-  <div className="flex flex-row items-center gap-2">
-    {props.icon}
-    <p className="text-xs font-normal text-[#372816]">{props.title}</p>
-  </div>
-);
-
-/**
- * Card for place item
- * @param props - props
- * @returns PlaceCard component
- */
-const PlaceCard = (props: Props) => {
+}) => {
   const { placeName, city, price, time } = props;
 
   return (
@@ -47,14 +28,11 @@ const PlaceCard = (props: Props) => {
             <p className="text-base font-normal text-[#9BA0A7]">{city}</p>
           </div>
           <div className="flex flex-col gap-1">
-            {renderFacilityItem({
-              icon: <PriceTagIcon className="size-5" />,
-              title: price,
-            })}
-            {renderFacilityItem({
-              icon: <Clock size={20} />,
-              title: time,
-            })}
+            <FacilityItem
+              icon={<PriceTagIcon className="size-5" />}
+              title={price}
+            />
+            <FacilityItem icon={<Clock size={20} />} title={time} />
           </div>
         </div>
       </CardContent>
@@ -62,4 +40,12 @@ const PlaceCard = (props: Props) => {
   );
 };
 
-export default PlaceCard;
+/**
+ * Facility Item with icon and value
+ */
+const FacilityItem = (props: { icon: React.ReactNode; title: string }) => (
+  <div className="flex flex-row items-center gap-2">
+    {props.icon}
+    <p className="text-xs font-normal text-[#372816]">{props.title}</p>
+  </div>
+);

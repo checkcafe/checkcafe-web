@@ -1,4 +1,4 @@
-import CityItem from "./city-item";
+import { CityItem } from "./city-item";
 
 const dummyCities = [
   {
@@ -45,10 +45,8 @@ const dummyCities = [
 
 /**
  * Show Explore Cities section on home page
- *
- * @returns - HomeExploreCity component
  */
-const HomeExploreCity = () => {
+export const HomeExploreCity = () => {
   return (
     <div className="mt-28 px-5 md:px-[139px]">
       <h4 className="text-center text-4xl font-semibold text-[#372816]">
@@ -62,5 +60,3 @@ const HomeExploreCity = () => {
     </div>
   );
 };
-
-export default HomeExploreCity;

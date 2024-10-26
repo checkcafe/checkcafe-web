@@ -1,23 +1,15 @@
 import { Link } from "@remix-run/react";
 import { ChevronRightIcon } from "lucide-react";
-import * as React from "react";
 
+import { PlaceCard } from "~/components/shared/home-popular-places/place-card";
 import { ScrollArea, ScrollBar } from "~/components/ui/scroll-area";
 import { PlaceItem } from "~/types";
-import { formatPrice } from "~/utils/formatter.utils";
-
-import PlaceCard from "./place-card";
-
-type Props = {
-  places: PlaceItem[];
-};
+import { formatPrice } from "~/utils/formatter";
 
 /**
  * Show list of popular places
- *
- * @returns HomePopularPlaces component
  */
-const HomePopularPlaces = (props: Props) => {
+export const HomePopularPlaces = (props: { places: PlaceItem[] }) => {
   const { places } = props;
 
   return (
@@ -48,5 +40,3 @@ const HomePopularPlaces = (props: Props) => {
     </div>
   );
 };
-
-export default HomePopularPlaces;

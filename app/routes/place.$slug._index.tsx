@@ -2,13 +2,13 @@ import { json, LoaderFunctionArgs } from "@remix-run/node";
 import { redirect, useLoaderData } from "@remix-run/react";
 import { MapPin, Receipt } from "lucide-react";
 
-import Facility from "~/components/shared/places/facility";
-import ImageCarousel from "~/components/shared/places/image-carousel";
-import OperatingHour from "~/components/shared/places/operating-hour";
+import { Facility } from "~/components/shared/places/facility";
+import { ImageCarousel } from "~/components/shared/places/image-carousel";
+import { OperatingHourItem } from "~/components/shared/places/operating-hour";
 import { MapboxView } from "~/components/ui/mapbox-view";
 import { BACKEND_API_URL } from "~/lib/env";
 import { type Place } from "~/types";
-import { formatPrice } from "~/utils/formatter.utils";
+import { formatPrice } from "~/utils/formatter";
 
 /**
  * Loader for get place
@@ -63,7 +63,7 @@ export default function PlaceSlug() {
           <div className="mt-2">
             {place.operatingHours?.length > 0 &&
               place.operatingHours.map((operatingHour, index) => (
-                <OperatingHour operatingHour={operatingHour} key={index} />
+                <OperatingHourItem operatingHour={operatingHour} key={index} />
               ))}
           </div>
         </header>
