@@ -2,6 +2,7 @@ import {
   json,
   Links,
   Meta,
+  MetaFunction,
   Outlet,
   redirect,
   Scripts,
@@ -16,6 +17,22 @@ import type {
 import React from "react";
 import "./tailwind.css";
 import { AppLayout, CookiesType } from "./components/shared/app-layout";
+
+import { createCustomCookie } from "./lib/access-token";
+
+import "./tailwind.css";
+import { auth } from "./lib/auth";
+
+export const meta: MetaFunction = () => {
+  return [
+    { title: "CheckCafe" },
+    {
+      name: "description",
+      content:
+        "Check the best cafe for social, food, WFC, and comfortable experience",
+    },
+  ];
+};
 
 export const links: LinksFunction = () => [
   {
@@ -41,8 +58,6 @@ export const links: LinksFunction = () => [
     href: "https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&display=swap",
   },
 ];
-import { createCustomCookie } from "./lib/access-token";
-import { auth } from "./lib/auth";
 
 export async function action({ request }: ActionFunctionArgs) {
   const formData = await request.formData();
@@ -101,8 +116,10 @@ export async function loader({ request }: LoaderFunctionArgs) {
     cookie,
   });
 }
+
 export function Layout({ children }: { children: React.ReactNode }) {
-  const loaders = useLoaderData<typeof loader>();
+  const loaderData = useLoaderData<typeof loader>();
+
   return (
     <html lang="en">
       <head>
@@ -112,7 +129,9 @@ export function Layout({ children }: { children: React.ReactNode }) {
         <Links />
       </head>
       <body>
-        <AppLayout cookie={loaders ? (loaders.cookie as CookiesType) : null}>
+        <AppLayout
+          cookie={loaderData ? (loaderData.cookie as CookiesType) : null}
+        >
           <div className="min-h-screen ">{children}</div>
         </AppLayout>
 

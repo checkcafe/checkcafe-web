@@ -25,19 +25,14 @@ export function Navbar({ cookie }: { cookie: CookiesType | null }) {
       <Searchbar />
       <div className="mt-12 md:mt-0 flex gap-4">
         <ul className="flex gap-8 font-semibold text-base self-center ">
-          {/* <li>
-            <Link to={"/contribute"} className='text-primary'>
-              Contribute
-            </Link>
-          </li> */}
           <li>
-            <Link to={"/about"} className="text-primary">
-              About
+            <Link to={"/places"} className="text-primary">
+              Places
             </Link>
           </li>
           <li>
-            <Link to={"/favourite"} className="text-primary">
-              Favourite
+            <Link to={"/about"} className="text-primary">
+              About
             </Link>
           </li>
         </ul>
