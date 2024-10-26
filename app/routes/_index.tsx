@@ -1,10 +1,13 @@
-import React from "react";
-import type { MetaFunction } from "@remix-run/node";
+import * as React from "react";
+import { json, type MetaFunction } from "@remix-run/node";
+import { useLoaderData } from "@remix-run/react";
 
 import HeroSection from "~/components/shared/hero-section";
 import HomePopularPlaces from "~/components/shared/home-popular-places/home-popular-places";
 // import HomeExploreCity from "~/components/shared/home-explore-city/home-explore-city";
 import HomeInputEmail from "~/components/shared/home-input-email";
+import { BACKEND_API_URL } from "~/lib/env";
+import type { PlaceItem } from "~/types";
 
 export const meta: MetaFunction = () => {
   return [
@@ -17,11 +20,30 @@ export const meta: MetaFunction = () => {
   ];
 };
 
-export default function Index(): React.ReactElement {
+/**
+ * Loader
+ *
+ * @returns places loader
+ */
+export async function loader() {
+  const url = `${BACKEND_API_URL}/places`;
+  const responsePlaces = await fetch(url);
+  const places: PlaceItem[] = await responsePlaces.json();
+
+  if (!places) {
+    throw new Response(null, { status: 404, statusText: "Places Not Found" });
+  }
+
+  return json({ places });
+}
+
+export default function Index() {
+  const { places } = useLoaderData<typeof loader>();
+
   return (
     <div className="flex flex-col justify-center">
       <HeroSection />
-      <HomePopularPlaces />
+      <HomePopularPlaces places={places} />
       {/* <HomeExploreCity /> */}
       <HomeInputEmail />
     </div>
