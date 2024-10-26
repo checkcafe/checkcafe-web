@@ -8,10 +8,14 @@ import {
   ScrollRestoration,
   useLoaderData,
 } from "@remix-run/react";
-import type { LinksFunction, LoaderFunctionArgs } from "@remix-run/node";
+import type {
+  ActionFunctionArgs,
+  LinksFunction,
+  LoaderFunctionArgs,
+} from "@remix-run/node";
 import React from "react";
 import "./tailwind.css";
-import { AppLayout } from "./components/shared/app-layout";
+import { AppLayout, CookiesType } from "./components/shared/app-layout";
 
 export const links: LinksFunction = () => [
   {
@@ -38,15 +42,64 @@ export const links: LinksFunction = () => [
   },
 ];
 import { createCustomCookie } from "./lib/access-token";
+import { auth } from "./lib/auth";
+
+export async function action({ request }: ActionFunctionArgs) {
+  const formData = await request.formData();
+  const cookieHeader = request.headers.get("Cookie");
+  const createRefreshTokenCookie = createCustomCookie("refreshToken");
+  const refreshTokenCookie = createRefreshTokenCookie.parse(cookieHeader);
+  const refreshToken = await refreshTokenCookie;
+  const action = formData.get("action");
+  console.log(action, "act");
+  if (action === "logout") {
+    const logout = await auth.logout(refreshToken);
+    if (logout?.ok) {
+      const cookieAccessToken = createCustomCookie("accessToken");
+      const cookieRefreshToken = createCustomCookie("refreshToken");
+      const cookieRole = createCustomCookie("role");
+
+      const headers = new Headers();
+      headers.append(
+        "Set-Cookie",
+        await cookieAccessToken.serialize("", { maxAge: 1 })
+      );
+      headers.append(
+        "Set-Cookie",
+        await cookieRefreshToken.serialize("", { maxAge: 1 })
+      );
+      headers.append(
+        "Set-Cookie",
+        await cookieRole.serialize("", { maxAge: 1 })
+      );
+
+      return redirect("/login", {
+        headers,
+      });
+    }
+  }
+  return null;
+}
 
 export async function loader({ request }: LoaderFunctionArgs) {
   const cookieHeader = request.headers.get("Cookie");
-  const accessTokenCookie = createCustomCookie("accessToken");
-  const cookie = accessTokenCookie.parse(cookieHeader);
+  const createAccessTokenCookie = createCustomCookie("accessToken");
+  const createRefreshTokenCookie = createCustomCookie("refreshToken");
+  const createRoleCookie = createCustomCookie("role");
+  const accessTokenCookie = createAccessTokenCookie.parse(cookieHeader);
+  const refreshTokenCookie = createRefreshTokenCookie.parse(cookieHeader);
+  const roleCookie = createRoleCookie.parse(cookieHeader);
 
-  if (!cookie) return redirect("/login");
+  const cookie = {
+    accessToken: await accessTokenCookie,
+    refreshToken: await refreshTokenCookie,
+    role: await roleCookie,
+  };
+  if (!accessTokenCookie) return redirect("/login");
 
-  return json({ accessToken: await cookie });
+  return json({
+    cookie,
+  });
 }
 export function Layout({ children }: { children: React.ReactNode }) {
   const loaders = useLoaderData<typeof loader>();
@@ -59,7 +112,7 @@ export function Layout({ children }: { children: React.ReactNode }) {
         <Links />
       </head>
       <body>
-        <AppLayout cookie={loaders ? loaders.accessToken : ""}>
+        <AppLayout cookie={loaders ? (loaders.cookie as CookiesType) : null}>
           <div className="min-h-screen ">{children}</div>
         </AppLayout>
 

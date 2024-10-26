@@ -1,11 +1,18 @@
-import { Link } from "@remix-run/react";
+import { Form, Link } from "@remix-run/react";
 // import { ProfileIcon } from "../icons/icons";
 import React from "react";
 import { Searchbar } from "./searchbar";
 import { Button } from "../ui/button";
-import { ProfileIcon } from "../icons/icons";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "../ui/tooltip";
+import { UserIcon } from "lucide-react";
+import { CookiesType } from "./app-layout";
 
-export function Navbar({ cookie }: { cookie: string }) {
+export function Navbar({ cookie }: { cookie: CookiesType | null }) {
   return (
     <nav className=" sticky top-0  w-full flex m-0 justify-between p-8 z-50 bg-background ">
       <div className="md:flex flex-col gap-4">
@@ -34,10 +41,36 @@ export function Navbar({ cookie }: { cookie: string }) {
             </Link>
           </li>
         </ul>
-        {cookie ? (
-          <Link to={"/profile"} className="text-primary self-center">
-            <ProfileIcon className="w-10 h-10" />
-          </Link>
+        {cookie?.accessToken ? (
+          <TooltipProvider>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <span className="bg-primary rounded-full p-1 flex items-center justify-center cursor-pointer">
+                  <UserIcon className=" w-8 h-8 text-white" />
+                </span>
+              </TooltipTrigger>
+              <TooltipContent className="flex flex-col gap-4">
+                <Link
+                  to={"/profile"}
+                  className="text-primary self-center hover:transform hover:scale-110 "
+                >
+                  Profile Account
+                </Link>
+                <Link
+                  to={"/dashboard"}
+                  className="text-primary self-center  hover:transform hover:scale-110 "
+                >
+                  Dashboard
+                </Link>
+                <Form method="post">
+                  <input type="hidden" name="action" value="logout" />{" "}
+                  <Button type="submit" className=" self-center text-white">
+                    Logout
+                  </Button>
+                </Form>
+              </TooltipContent>
+            </Tooltip>
+          </TooltipProvider>
         ) : (
           <Button asChild>
             <Link to={"/login"} className="text-primary self-center">
