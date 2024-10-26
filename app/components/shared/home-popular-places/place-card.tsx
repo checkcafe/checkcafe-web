@@ -1,5 +1,4 @@
 import { Clock } from "lucide-react";
-import React from "react";
 
 import PriceTagIcon from "~/components/icons/price-tag";
 import { Card, CardContent } from "~/components/ui/card";

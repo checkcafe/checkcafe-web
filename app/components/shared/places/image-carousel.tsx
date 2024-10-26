@@ -1,9 +1,10 @@
-import React from "react";
+import { useEffect, useState } from "react";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 
 import { Card, CardContent } from "~/components/ui/card";
 import {
   Carousel,
+  CarouselApi,
   CarouselContent,
   CarouselItem,
   CarouselNext,
@@ -15,17 +16,12 @@ type Props = {
   images: string[];
 };
 
-type CarouselApi = {
-  selectedScrollSnap: () => number;
-  on: (event: string, callback: () => void) => void;
-};
-
 export default function ImageCarousel(props: Props) {
   const { images } = props;
-  const [api, setApi] = React.useState<CarouselApi>();
-  const [current, setCurrent] = React.useState(0);
+  const [api, setApi] = useState<CarouselApi>();
+  const [current, setCurrent] = useState(0);
 
-  React.useEffect(() => {
+  useEffect(() => {
     if (!api) {
       return;
     }

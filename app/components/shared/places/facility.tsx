@@ -1,5 +1,3 @@
-import React from "react";
-
 import type { PlaceFacility } from "~/types";
 
 type Props = {

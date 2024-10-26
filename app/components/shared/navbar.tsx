@@ -1,6 +1,5 @@
 import { Link } from "@remix-run/react";
-// import { ProfileIcon } from "../icons/icons";
-import React from "react";
+
 import { Searchbar } from "./searchbar";
 import { Button } from "../ui/button";
 import { ProfileIcon } from "../icons/icons";

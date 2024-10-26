@@ -12,44 +12,6 @@ import { BACKEND_API_URL } from "~/lib/env";
 import { formatPrice } from "~/utils/formatter.utils";
 import type { Place } from "~/types";
 
-const dummyNearbyPlaces = [
-  {
-    name: "Kopi Nako",
-    image:
-      "https://ditaanggraeniy.com/wp-content/uploads/2023/01/lokasi-dan-harga-menu-kopi-nako-summarecon-bekasi.jpeg?w=645",
-    latitude: -6.2221583483225205,
-    longitude: 106.99756345319413,
-  },
-  {
-    name: "Kopi Nako",
-    image:
-      "https://ditaanggraeniy.com/wp-content/uploads/2023/01/lokasi-dan-harga-menu-kopi-nako-summarecon-bekasi.jpeg?w=645",
-    latitude: -6.2221583483225205,
-    longitude: 106.99756345319413,
-  },
-  {
-    name: "Kopi Nako",
-    image:
-      "https://ditaanggraeniy.com/wp-content/uploads/2023/01/lokasi-dan-harga-menu-kopi-nako-summarecon-bekasi.jpeg?w=645",
-    latitude: -6.2221583483225205,
-    longitude: 106.99756345319413,
-  },
-  {
-    name: "Kopi Nako",
-    image:
-      "https://ditaanggraeniy.com/wp-content/uploads/2023/01/lokasi-dan-harga-menu-kopi-nako-summarecon-bekasi.jpeg?w=645",
-    latitude: -6.2221583483225205,
-    longitude: 106.99756345319413,
-  },
-  {
-    name: "Kopi Nako",
-    image:
-      "https://ditaanggraeniy.com/wp-content/uploads/2023/01/lokasi-dan-harga-menu-kopi-nako-summarecon-bekasi.jpeg?w=645",
-    latitude: -6.2221583483225205,
-    longitude: 106.99756345319413,
-  },
-];
-
 /**
  * Loader for get place
  *
@@ -71,19 +33,16 @@ export async function loader({ params }: LoaderFunctionArgs) {
   return json({ place });
 }
 
-/**
- * Place Detail
- *
- * @returns PlaceSlug component
- */
 export default function PlaceSlug() {
   const { place } = useLoaderData<typeof loader>();
-  console.log("place", place);
 
   return (
     <div className="py-20 px-32">
       <section className="flex flex-row gap-28">
-        <ImageCarousel images={place.placePhotos} />
+        {place.placePhotos?.length > 0 && (
+          <ImageCarousel images={place.placePhotos} />
+        )}
+
         <header className="text-amber-900">
           <h1 className="text-3xl font-semibold ">{place.name}</h1>
           <p className="text-base font-normal mb-8">{place.description}</p>
@@ -111,6 +70,7 @@ export default function PlaceSlug() {
           </div>
         </header>
       </section>
+
       <section className="flex flex-row gap-28 mt-20">
         <aside className="w-1/2 h-96">
           <MapboxView
@@ -121,7 +81,6 @@ export default function PlaceSlug() {
                 longitude: place.longitude,
                 latitude: place.latitude,
               },
-              ...dummyNearbyPlaces,
             ]}
             initialViewState={{
               longitude: place.longitude || 0,
@@ -132,23 +91,15 @@ export default function PlaceSlug() {
             height="50vh"
           />
         </aside>
+
         <div className="flex flex-col">
           <h1 className="text-2xl font-semibold text-amber-900 mt-4 mb-12">
             Facility
           </h1>
-          {place.placeFacilities.map((facility, index) => (
-            <Facility facility={facility} key={index} />
-          ))}
-        </div>
-      </section>
-      <section className="flex flex-col mt-28">
-        <h1 className="text-2xl font-semibold text-amber-900 mb-5">
-          Nearby Places
-        </h1>
-        <div className="flex flex-row">
-          {dummyNearbyPlaces.map((place, index) => (
-            <NearbyPlace place={place} key={index} />
-          ))}
+          {place.placeFacilities?.length > 0 &&
+            place.placeFacilities?.map((facility, index) => (
+              <Facility facility={facility} key={index} />
+            ))}
         </div>
       </section>
     </div>

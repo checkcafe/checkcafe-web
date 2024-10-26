@@ -16,12 +16,12 @@ import { Label } from "~/components/ui/label";
 import { auth } from "~/lib/auth";
 import { getPageTitle } from "~/lib/getTitle";
 import { RegisterSchema } from "~/schemas/auth";
-import React from "react";
 import LoadingSpinner from "~/components/shared/loader-spinner";
+
 export const meta: MetaFunction = () => {
   return [
-    { title: getPageTitle("Login") },
-    { name: "Talenta 37 apps", content: "Welcome to Talenta 37!" },
+    { title: getPageTitle("Register") },
+    { name: "description", content: "Create a new account" },
   ];
 };
 
