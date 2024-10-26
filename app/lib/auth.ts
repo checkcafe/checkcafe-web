@@ -10,17 +10,21 @@ export type User = {
   email: string;
   role: string;
 };
-export type loginResponse = {
+export type LoginResponse = {
   accessToken?: string;
   refreshToken?: string;
   role?: string;
 };
+export type LogoutResponse = {
+  ok: boolean;
+  error?: string;
+};
 export type Auth = {
   // getToken: () => string | null;
   register(userRegister: z.infer<typeof RegisterSchema>): Promise<void | null>;
-  login(userLogin: z.infer<typeof LoginSchema>): Promise<loginResponse | null>;
+  login(userLogin: z.infer<typeof LoginSchema>): Promise<LoginResponse | null>;
   // checkUser(): Promise<User | undefined>;
-  // logout(): void;
+  logout(token: string): Promise<LogoutResponse | null>;
 };
 
 // export type register = {
@@ -64,7 +68,7 @@ export const auth: Auth = {
         headers: { "Content-Type": "application/json" },
       });
       const result = await response.json();
-      const { accessToken, refreshToken, role } = result as loginResponse;
+      const { accessToken, refreshToken, role } = result as LoginResponse;
       if (!accessToken || !refreshToken) {
         return null;
       }
@@ -98,18 +102,21 @@ export const auth: Auth = {
   //   }
   // },
 
-  // async logout() {
-  //   const refreshToken = getRefreshToken();
-  //   if (!refreshToken) return redirect("/login");
+  async logout(token: string) {
+    if (!token) return redirect("/login");
+    const logout = await fetch(`${BACKEND_API_URL}/auth/logout`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ refreshToken: token }),
+    });
 
-  //   fetch(`${BACKEND_API_URL}/auth/logout`, {
-  //     method: "POST",
-  //     headers: { "Content-Type": "application/json" },
-  //     body: JSON.stringify({ refreshToken: refreshToken }),
-  //   });
-  //   removeAccessToken();
-  //   removeRefreshToken();
-  //   removeRole();
-  //   redirect("/");
-  // },
+    const result = await logout.json();
+    console.log(result, result.ok, "logout");
+    if (result.error) {
+      return redirect("/");
+    }
+    return {
+      ok: true,
+    };
+  },
 };
