@@ -1,13 +1,44 @@
 {
-  "semi": true,
+  "semi": false,
   "singleQuote": false,
-  "trailingComma": "es5",
-  "bracketSpacing": true,
-  "arrowParens": "always",
-  "printWidth": 80,
   "tabWidth": 2,
+  "trailingComma": "all",
+  "useTabs": false,
+
+  "arrowParens": "avoid",
+  "bracketSameLine": false,
+  "bracketSpacing": true,
+  "embeddedLanguageFormatting": "auto",
   "endOfLine": "lf",
-  "quoteProps": "as-needed",
+  "htmlWhitespaceSensitivity": "css",
+  "insertPragma": false,
   "jsxSingleQuote": false,
-  "htmlWhitespaceSensitivity": "ignore"
+  "proseWrap": "always",
+  "quoteProps": "as-needed",
+  "requirePragma": false,
+  "singleAttributePerLine": false,
+  "importOrderTypeScriptVersion": "5.0.0",
+  "importOrder": [
+    "",
+    "<BUILTIN_MODULES>",
+    "",
+    "<THIRD_PARTY_MODULES>",
+    "",
+    "^[~]",
+    "",
+    "^[.]",
+    "",
+    ".css$"
+  ],
+  "plugins": [
+    "@ianvs/prettier-plugin-sort-imports",
+    "prettier-plugin-packagejson",
+    "prettier-plugin-tailwindcss"
+  ],
+  "overrides": [
+    {
+      "files": ["**/*.md", "**/*.json"],
+      "options": { "useTabs": false }
+    }
+  ]
 }
