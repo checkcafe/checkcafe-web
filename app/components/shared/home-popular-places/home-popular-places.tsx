@@ -9,9 +9,7 @@ import { formatPrice } from "~/utils/formatter";
 /**
  * Show list of popular places
  */
-export const HomePopularPlaces = (props: { places: PlaceItem[] }) => {
-  const { places } = props;
-
+export const HomePopularPlaces = ({ places }: { places: PlaceItem[] }) => {
   return (
     <div className="mt-12 px-5 md:px-[139px]">
       <div className="mb-5 flex flex-row justify-between">

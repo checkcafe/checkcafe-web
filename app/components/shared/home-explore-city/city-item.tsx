@@ -1,14 +1,13 @@
-type CityItemProps = {
-  city: string;
-  amount: number;
-};
-
 /**
  * Show City Item with information about city name and places amount
  */
-export const CityItem = (props: CityItemProps) => {
-  const { amount, city } = props;
-
+export const CityItem = ({
+  amount,
+  city,
+}: {
+  city: string;
+  amount: number;
+}) => {
   return (
     <div className="mb-14 hover:cursor-pointer hover:opacity-50">
       <div className="relative h-60 w-60 rounded-md">

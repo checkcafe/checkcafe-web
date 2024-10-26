@@ -12,8 +12,7 @@ import {
   CarouselPrevious,
 } from "~/components/ui/carousel";
 
-export function ImageCarousel(props: { images: string[] }) {
-  const { images } = props;
+export function ImageCarousel({ images }: { images: string[] }) {
   const [api, setApi] = useState<CarouselApi>();
   const [current, setCurrent] = useState(0);
 

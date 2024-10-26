@@ -6,14 +6,17 @@ import { Card, CardContent } from "~/components/ui/card";
 /**
  * Card for place item
  */
-export const PlaceCard = (props: {
+export const PlaceCard = ({
+  placeName,
+  city,
+  price,
+  time,
+}: {
   placeName: string;
   city: string;
   price: string;
   time: string;
 }) => {
-  const { placeName, city, price, time } = props;
-
   return (
     <Card className="h-80 w-56 shadow-lg hover:cursor-pointer hover:opacity-50">
       <CardContent className="flex flex-col px-5 py-5">
@@ -43,9 +46,15 @@ export const PlaceCard = (props: {
 /**
  * Facility Item with icon and value
  */
-const FacilityItem = (props: { icon: React.ReactNode; title: string }) => (
+const FacilityItem = ({
+  icon,
+  title,
+}: {
+  icon: React.ReactNode;
+  title: string;
+}) => (
   <div className="flex flex-row items-center gap-2">
-    {props.icon}
-    <p className="text-xs font-normal text-[#372816]">{props.title}</p>
+    {icon}
+    <p className="text-xs font-normal text-[#372816]">{title}</p>
   </div>
 );
