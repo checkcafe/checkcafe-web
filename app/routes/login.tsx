@@ -8,7 +8,6 @@ import {
   useNavigation,
 } from "@remix-run/react";
 import { useState } from "react";
-import { z } from "zod";
 import { EyeIcon, HiddenEyeIcon } from "~/components/icons/icons";
 import { Button } from "~/components/ui/button";
 import { Input } from "~/components/ui/input";
@@ -25,50 +24,68 @@ export const meta: MetaFunction = () => {
     { name: "Talenta 37 apps", content: "Welcome to Talenta 37!" },
   ];
 };
-
+export interface ActionData {
+  errors?: Record<string, string>;
+  success?: boolean;
+}
 export async function action({ request }: ActionFunctionArgs) {
   const formData = await request.formData();
   const userLogin = Object.fromEntries(formData);
-  try {
-    const validatedLogin = LoginSchema.parse(userLogin);
-    const login = await auth.login(validatedLogin);
-    const cookieAccessToken = serializedCookie(
-      "accessToken",
-      login?.accessToken || ""
+  // try {
+  const validatedLogin = LoginSchema.safeParse(userLogin);
+  if (!validatedLogin.success) {
+    // Collect and return errors to the form page
+    const errors = validatedLogin.error?.errors.reduce(
+      (acc, error) => ({
+        ...acc,
+        [error.path[0]]: error.message,
+      }),
+      {}
     );
-    const cookieRefreshToken = serializedCookie(
-      "refreshToken",
-      login?.refreshToken || ""
-    );
-    const cookieRole = serializedCookie(
-      "role",
-      login?.accessToken || "",
-      login?.role || ""
-    );
-
-    const headers = new Headers();
-    headers.append("Set-Cookie", await cookieAccessToken);
-    headers.append("Set-Cookie", await cookieRefreshToken);
-    headers.append("Set-Cookie", await cookieRole);
-
-    return redirect("/", { headers });
-  } catch (error) {
-    if (error instanceof z.ZodError) {
-      const errors: { [key: string]: string } = {};
-      error.errors.forEach((err) => {
-        errors[err.path[0]] = err.message;
-      });
-      return json({ errors });
-    }
+    return json({ errors });
   }
+  const login = await auth.login(validatedLogin.data);
+
+  console.log(login, "login");
+  if (login?.error || !login) {
+    return null;
+  }
+  const cookieAccessToken = serializedCookie(
+    "accessToken",
+    login?.accessToken || ""
+  );
+  const cookieRefreshToken = serializedCookie(
+    "refreshToken",
+    login?.refreshToken || ""
+  );
+  const cookieRole = serializedCookie(
+    "role",
+    login?.accessToken || "",
+    login?.role || ""
+  );
+
+  const headers = new Headers();
+  headers.append("Set-Cookie", await cookieAccessToken);
+  headers.append("Set-Cookie", await cookieRefreshToken);
+  headers.append("Set-Cookie", await cookieRole);
+  return redirect("/", { headers });
 }
+//  catch (error) {
+//   if (error instanceof z.ZodError) {
+//     const errors: { [key: string]: string } = {};
+//     error.errors.forEach((err) => {
+//       errors[err.path[0]] = err.message;
+//     });
+//     return json({ errors });
+//   }
+// }
+// }
 export default function Login() {
   const [showPassword, setShowPassword] = useState(false);
   const togglePasswordVisibility = () => {
     setShowPassword(!showPassword);
   };
-  const actionData = useActionData<typeof action>();
-
+  const actionData = useActionData<typeof action>() as ActionData;
   const navigation = useNavigation();
   return (
     <div className="flex flex-col gap-16 items-center justify-center translate-y-1/2">
@@ -94,9 +111,9 @@ export default function Login() {
             id="username"
             className="mt-1"
           />
-          {actionData && actionData.errors["username"] && (
+          {actionData && actionData.errors?.username && (
             <span className="text-red-700 text-sm  ">
-              {actionData.errors["username"]}
+              {actionData.errors.username}
             </span>
           )}
         </span>
@@ -119,7 +136,7 @@ export default function Login() {
             type="button"
             onClick={togglePasswordVisibility}
             className={`absolute ${
-              actionData && actionData.errors["password"]
+              actionData && actionData.errors?.password
                 ? "top-[45%]"
                 : "top-[55%]"
             }  right-0 flex items-center pr-3 `}
@@ -134,10 +151,8 @@ export default function Login() {
               </span> // Replace with an actual icon
             )}
           </button>
-          {actionData && actionData.errors && actionData.errors["password"] && (
-            <p className="text-red-700 text-sm">
-              {actionData.errors["password"]}
-            </p>
+          {actionData && actionData.errors && actionData.errors.password && (
+            <p className="text-red-700 text-sm">{actionData.errors.password}</p>
           )}
         </span>
 

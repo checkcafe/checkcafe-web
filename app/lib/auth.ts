@@ -14,6 +14,7 @@ export type loginResponse = {
   accessToken?: string;
   refreshToken?: string;
   role?: string;
+  error?: string;
 };
 export type Auth = {
   // getToken: () => string | null;
@@ -64,14 +65,17 @@ export const auth: Auth = {
         headers: { "Content-Type": "application/json" },
       });
       const result = await response.json();
-      const { accessToken, refreshToken, role } = result as loginResponse;
-      if (!accessToken || !refreshToken) {
+      console.log(result, "res");
+      const { accessToken, refreshToken, role, error } =
+        result as loginResponse;
+      if (error) {
         return null;
       }
       return {
         accessToken,
         refreshToken,
         role,
+        error,
       };
     } catch (error: unknown) {
       console.error(error, "error");
@@ -79,6 +83,7 @@ export const auth: Auth = {
         accessToken: "",
         refreshToken: "",
         role: "",
+        error: error,
       };
     }
   },
