@@ -1,10 +1,10 @@
-import * as React from "react";
-import { ChevronRightIcon } from "lucide-react";
 import { Link } from "@remix-run/react";
+import { ChevronRightIcon } from "lucide-react";
+import * as React from "react";
 
 import { ScrollArea, ScrollBar } from "~/components/ui/scroll-area";
-import { formatPrice } from "~/utils/formatter.utils";
 import { PlaceItem } from "~/types";
+import { formatPrice } from "~/utils/formatter.utils";
 
 import PlaceCard from "./place-card";
 
@@ -21,22 +21,22 @@ const HomePopularPlaces = (props: Props) => {
   const { places } = props;
 
   return (
-    <div className="px-5 md:px-[139px] mt-12">
-      <div className="flex flex-row justify-between mb-5">
-        <p className="text-xl text-[#372816] font-medium">Popular Places</p>
+    <div className="mt-12 px-5 md:px-[139px]">
+      <div className="mb-5 flex flex-row justify-between">
+        <p className="text-xl font-medium text-[#372816]">Popular Places</p>
         <ChevronRightIcon size={36} color="#372816" />
       </div>
       <ScrollArea className="w-full whitespace-nowrap rounded-md">
         <div className="flex w-max space-x-6">
           {places &&
             places.length > 0 &&
-            places.map((place) => (
+            places.map(place => (
               <Link to={`/place/${place.slug}`} key={place.id}>
                 <PlaceCard
                   placeName={place.name}
                   city={place.address.city}
                   price={`${place.currency} ${formatPrice(
-                    parseInt(place.priceRange)
+                    parseInt(place.priceRange),
                   )}`}
                   time={`${place.openingTime} - ${place.closingTime}`}
                 />

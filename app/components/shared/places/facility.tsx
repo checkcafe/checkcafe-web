@@ -12,7 +12,7 @@ type Props = {
  */
 export default function Facility({ facility }: Props) {
   return (
-    <div key={facility.facility} className="flex flex-row mb-1">
+    <div key={facility.facility} className="mb-1 flex flex-row">
       <p className="text-lg font-normal text-amber-900">
         * {facility.facility} -
       </p>

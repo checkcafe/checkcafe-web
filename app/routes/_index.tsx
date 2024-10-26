@@ -1,11 +1,11 @@
-import * as React from "react";
 import { json, type MetaFunction } from "@remix-run/node";
 import { useLoaderData } from "@remix-run/react";
+import * as React from "react";
 
 import HeroSection from "~/components/shared/hero-section";
-import HomePopularPlaces from "~/components/shared/home-popular-places/home-popular-places";
 // import HomeExploreCity from "~/components/shared/home-explore-city/home-explore-city";
 import HomeInputEmail from "~/components/shared/home-input-email";
+import HomePopularPlaces from "~/components/shared/home-popular-places/home-popular-places";
 import { BACKEND_API_URL } from "~/lib/env";
 import type { PlaceItem } from "~/types";
 

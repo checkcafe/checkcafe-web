@@ -1,14 +1,14 @@
-import { json, LoaderFunctionArgs } from "@remix-run/node"
-import { redirect, useLoaderData } from "@remix-run/react"
-import { MapPin, Receipt } from "lucide-react"
+import { json, LoaderFunctionArgs } from "@remix-run/node";
+import { redirect, useLoaderData } from "@remix-run/react";
+import { MapPin, Receipt } from "lucide-react";
 
-import Facility from "~/components/shared/places/facility"
-import ImageCarousel from "~/components/shared/places/image-carousel"
-import OperatingHour from "~/components/shared/places/operating-hour"
-import { MapboxView } from "~/components/ui/mapbox-view"
-import { BACKEND_API_URL } from "~/lib/env"
-import { type Place } from "~/types"
-import { formatPrice } from "~/utils/formatter.utils"
+import Facility from "~/components/shared/places/facility";
+import ImageCarousel from "~/components/shared/places/image-carousel";
+import OperatingHour from "~/components/shared/places/operating-hour";
+import { MapboxView } from "~/components/ui/mapbox-view";
+import { BACKEND_API_URL } from "~/lib/env";
+import { type Place } from "~/types";
+import { formatPrice } from "~/utils/formatter.utils";
 
 /**
  * Loader for get place
@@ -17,22 +17,22 @@ import { formatPrice } from "~/utils/formatter.utils"
  * @returns place loader
  */
 export async function loader({ params }: LoaderFunctionArgs) {
-  const { slug } = params
-  if (!slug) return redirect("/places")
+  const { slug } = params;
+  if (!slug) return redirect("/places");
 
-  const url = `${BACKEND_API_URL}/places/${slug}`
-  const responsePlace = await fetch(url)
-  const place: Place = await responsePlace.json()
+  const url = `${BACKEND_API_URL}/places/${slug}`;
+  const responsePlace = await fetch(url);
+  const place: Place = await responsePlace.json();
 
   if (!place) {
-    throw new Response(null, { status: 404, statusText: "Place Not Found" })
+    throw new Response(null, { status: 404, statusText: "Place Not Found" });
   }
 
-  return json({ place })
+  return json({ place });
 }
 
 export default function PlaceSlug() {
-  const { place } = useLoaderData<typeof loader>()
+  const { place } = useLoaderData<typeof loader>();
 
   return (
     <div className="px-32 py-20">
@@ -101,5 +101,5 @@ export default function PlaceSlug() {
         </div>
       </section>
     </div>
-  )
+  );
 }

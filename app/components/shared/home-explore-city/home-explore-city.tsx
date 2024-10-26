@@ -48,14 +48,14 @@ const dummyCities = [
  *
  * @returns - HomeExploreCity component
  */
-const HomeExploreCity = (): React.ReactElement => {
+const HomeExploreCity = () => {
   return (
-    <div className="px-5 md:px-[139px] mt-28">
-      <h4 className="text-4xl text-[#372816] font-semibold text-center">
+    <div className="mt-28 px-5 md:px-[139px]">
+      <h4 className="text-center text-4xl font-semibold text-[#372816]">
         Explore Suitable Places on Your City
       </h4>
-      <div className="grid grid-cols-[repeat(auto-fill,minmax(250px,1fr))] mt-12 justify-items-center">
-        {dummyCities.map((item) => (
+      <div className="mt-12 grid grid-cols-[repeat(auto-fill,minmax(250px,1fr))] justify-items-center">
+        {dummyCities.map(item => (
           <CityItem key={item.id} amount={item.amount} city={item.name} />
         ))}
       </div>

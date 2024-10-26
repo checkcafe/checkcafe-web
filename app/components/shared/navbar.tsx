@@ -1,15 +1,15 @@
 import { Link } from "@remix-run/react";
 
-import { Searchbar } from "./searchbar";
-import { Button } from "../ui/button";
 import { ProfileIcon } from "../icons/icons";
+import { Button } from "../ui/button";
+import { Searchbar } from "./searchbar";
 
 export function Navbar({ cookie }: { cookie: string }) {
   return (
-    <nav className="sticky top-0 w-full flex m-0 justify-between p-8 z-50 bg-amber-50">
-      <div className="md:flex flex-col gap-4">
+    <nav className="sticky top-0 z-50 m-0 flex w-full justify-between bg-amber-50 p-8">
+      <div className="flex-col gap-4 md:flex">
         <Link to={"/"}>
-          <h2 className="text-3xl font-brand tracking-tight text-gray-900">
+          <h2 className="font-brand text-3xl tracking-tight text-gray-900">
             ☕CheckCafe
           </h2>
         </Link>
@@ -17,8 +17,8 @@ export function Navbar({ cookie }: { cookie: string }) {
 
       <Searchbar />
 
-      <div className="mt-12 md:mt-0 flex gap-4">
-        <ul className="flex items-center gap-8 font-semibold text-base self-center ">
+      <div className="mt-12 flex gap-4 md:mt-0">
+        <ul className="flex items-center gap-8 self-center text-base font-semibold">
           <li>
             <Link to={"/places"} className="text-primary">
               Places
@@ -32,14 +32,14 @@ export function Navbar({ cookie }: { cookie: string }) {
           <li>
             {!cookie && (
               <Button asChild>
-                <Link to={"/login"} className="text-primary self-center">
+                <Link to={"/login"} className="self-center text-primary">
                   Login
                 </Link>
               </Button>
             )}
             {cookie && (
-              <Link to={"/profile"} className="text-primary self-center">
-                <ProfileIcon className="w-10 h-10" />
+              <Link to={"/profile"} className="self-center text-primary">
+                <ProfileIcon className="h-10 w-10" />
               </Link>
             )}
           </li>

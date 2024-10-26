@@ -1,8 +1,9 @@
-import { BACKEND_API_URL } from "./env";
-
 import { redirect } from "react-router-dom";
 import { z } from "zod";
+
 import { LoginSchema, RegisterSchema } from "~/schemas/auth";
+
+import { BACKEND_API_URL } from "./env";
 
 export type User = {
   name: string;

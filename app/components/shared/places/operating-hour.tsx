@@ -12,7 +12,7 @@ type Props = {
  */
 export default function OperatingHour({ operatingHour }: Props) {
   return (
-    <div className="flex flex-row w-60 justify-between">
+    <div className="flex w-60 flex-row justify-between">
       <p>{operatingHour.day}</p>
       <div className="flex flex-row">
         <p>{operatingHour.start} - </p>

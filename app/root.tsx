@@ -1,3 +1,8 @@
+import type {
+  LinksFunction,
+  LoaderFunctionArgs,
+  MetaFunction,
+} from "@remix-run/node";
 import {
   json,
   Links,
@@ -8,11 +13,6 @@ import {
   ScrollRestoration,
   useLoaderData,
 } from "@remix-run/react";
-import type {
-  LinksFunction,
-  LoaderFunctionArgs,
-  MetaFunction,
-} from "@remix-run/node";
 
 import { AppLayout } from "./components/shared/app-layout";
 import { createCustomCookie } from "./lib/access-token";
@@ -78,7 +78,7 @@ export function Layout({ children }: { children: React.ReactNode }) {
       </head>
       <body>
         <AppLayout cookie={loaderData ? loaderData.accessToken : ""}>
-          <div className="min-h-screen ">{children}</div>
+          <div className="min-h-screen">{children}</div>
         </AppLayout>
 
         <ScrollRestoration />
