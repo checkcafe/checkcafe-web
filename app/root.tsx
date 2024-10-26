@@ -8,10 +8,27 @@ import {
   ScrollRestoration,
   useLoaderData,
 } from "@remix-run/react";
-import type { LinksFunction, LoaderFunctionArgs } from "@remix-run/node";
-import React from "react";
-import "./tailwind.css";
+import type {
+  LinksFunction,
+  LoaderFunctionArgs,
+  MetaFunction,
+} from "@remix-run/node";
+
 import { AppLayout } from "./components/shared/app-layout";
+import { createCustomCookie } from "./lib/access-token";
+
+import "./tailwind.css";
+
+export const meta: MetaFunction = () => {
+  return [
+    { title: "CheckCafe" },
+    {
+      name: "description",
+      content:
+        "Check the best cafe for social, food, WFC, and comfortable experience",
+    },
+  ];
+};
 
 export const links: LinksFunction = () => [
   {
@@ -37,7 +54,6 @@ export const links: LinksFunction = () => [
     href: "https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&display=swap",
   },
 ];
-import { createCustomCookie } from "./lib/access-token";
 
 export async function loader({ request }: LoaderFunctionArgs) {
   const cookieHeader = request.headers.get("Cookie");
@@ -48,8 +64,10 @@ export async function loader({ request }: LoaderFunctionArgs) {
 
   return json({ accessToken: await cookie });
 }
+
 export function Layout({ children }: { children: React.ReactNode }) {
-  const loaders = useLoaderData<typeof loader>();
+  const loaderData = useLoaderData<typeof loader>();
+
   return (
     <html lang="en">
       <head>
@@ -59,7 +77,7 @@ export function Layout({ children }: { children: React.ReactNode }) {
         <Links />
       </head>
       <body>
-        <AppLayout cookie={loaders ? loaders.accessToken : ""}>
+        <AppLayout cookie={loaderData ? loaderData.accessToken : ""}>
           <div className="min-h-screen ">{children}</div>
         </AppLayout>
 
