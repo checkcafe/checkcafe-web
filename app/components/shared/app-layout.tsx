@@ -1,6 +1,6 @@
-import { Navbar } from "~/components/shared/navbar";
 import { Footer } from "~/components/shared/footer";
 import React from "react";
+import { Navbar } from "./navbar";
 export type CookiesType = {
   accessToken: string;
   refreshToken: string;

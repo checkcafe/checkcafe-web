@@ -1,13 +1,11 @@
-import * as React from "react";
 import { json, type MetaFunction } from "@remix-run/node";
 import { useLoaderData } from "@remix-run/react";
 
-import HeroSection from "~/components/shared/hero-section";
-import HomePopularPlaces from "~/components/shared/home-popular-places/home-popular-places";
-// import HomeExploreCity from "~/components/shared/home-explore-city/home-explore-city";
-import HomeInputEmail from "~/components/shared/home-input-email";
+import { HomeHeroSection } from "~/components/shared/hero-section";
+import { HomeInputEmail } from "~/components/shared/home-input-email";
+import { HomePopularPlaces } from "~/components/shared/home-popular-places/home-popular-places";
 import { BACKEND_API_URL } from "~/lib/env";
-import type { PlaceItem } from "~/types";
+import { type PlaceItem } from "~/types";
 
 export const meta: MetaFunction = () => {
   return [
@@ -20,11 +18,6 @@ export const meta: MetaFunction = () => {
   ];
 };
 
-/**
- * Loader
- *
- * @returns places loader
- */
 export async function loader() {
   const url = `${BACKEND_API_URL}/places`;
   const responsePlaces = await fetch(url);
@@ -42,9 +35,12 @@ export default function Index() {
 
   return (
     <div className="flex flex-col justify-center">
-      <HeroSection />
+      <HomeHeroSection />
+
       <HomePopularPlaces places={places} />
+
       {/* <HomeExploreCity /> */}
+
       <HomeInputEmail />
     </div>
   );

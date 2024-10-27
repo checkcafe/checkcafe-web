@@ -1,18 +1,15 @@
-import type { OperatingHour as OperatingHourType } from "~/types";
-
-type Props = {
-  operatingHour: OperatingHourType;
-};
+import type { OperatingHour } from "~/types";
 
 /**
  * Show operating hour item
- *
- * @param props - props
- * @returns OperatingHour component
  */
-export default function OperatingHour({ operatingHour }: Props) {
+export function OperatingHourItem({
+  operatingHour,
+}: {
+  operatingHour: OperatingHour;
+}) {
   return (
-    <div className="flex flex-row w-60 justify-between">
+    <div className="flex w-60 flex-row justify-between">
       <p>{operatingHour.day}</p>
       <div className="flex flex-row">
         <p>{operatingHour.start} - </p>

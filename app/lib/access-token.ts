@@ -1,5 +1,4 @@
 import { createCookie } from "@remix-run/node";
-
 import { jwtDecode } from "jwt-decode";
 
 // Create the cookie
@@ -21,7 +20,7 @@ export const createCustomCookie = (name: string, options?: CookieOptions) => {
 export const serializedCookie = (
   name: string,
   token: string,
-  role?: string
+  role?: string,
 ) => {
   const decodedToken: { exp: number } = jwtDecode(token);
   const expirationDate = new Date(decodedToken.exp * 1000);

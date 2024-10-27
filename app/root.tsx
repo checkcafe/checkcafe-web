@@ -1,19 +1,20 @@
+import type {
+  ActionFunctionArgs,
+  LinksFunction,
+  LoaderFunctionArgs,
+  MetaFunction,
+} from "@remix-run/node";
 import {
   json,
   Links,
   Meta,
-  MetaFunction,
   Outlet,
   redirect,
   Scripts,
   ScrollRestoration,
   useLoaderData,
 } from "@remix-run/react";
-import type {
-  ActionFunctionArgs,
-  LinksFunction,
-  LoaderFunctionArgs,
-} from "@remix-run/node";
+
 import React from "react";
 import "./tailwind.css";
 import { AppLayout, CookiesType } from "./components/shared/app-layout";

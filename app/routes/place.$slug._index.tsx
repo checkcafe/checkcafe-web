@@ -1,16 +1,14 @@
-import * as React from "react";
 import { json, LoaderFunctionArgs } from "@remix-run/node";
 import { redirect, useLoaderData } from "@remix-run/react";
 import { MapPin, Receipt } from "lucide-react";
 
-import ImageCarousel from "~/components/shared/places/image-carousel";
+import { Facility } from "~/components/shared/places/facility";
+import { ImageCarousel } from "~/components/shared/places/image-carousel";
+import { OperatingHourItem } from "~/components/shared/places/operating-hour";
 import { MapboxView } from "~/components/ui/mapbox-view";
-import NearbyPlace from "~/components/shared/places/nearby-place";
-import Facility from "~/components/shared/places/facility";
-import OperatingHour from "~/components/shared/places/operating-hour";
 import { BACKEND_API_URL } from "~/lib/env";
-import { formatPrice } from "~/utils/formatter.utils";
-import type { Place } from "~/types";
+import { type Place } from "~/types";
+import { formatPrice } from "~/utils/formatter";
 
 /**
  * Loader for get place
@@ -37,42 +35,42 @@ export default function PlaceSlug() {
   const { place } = useLoaderData<typeof loader>();
 
   return (
-    <div className="py-20 px-32">
+    <div className="px-32 py-20">
       <section className="flex flex-row gap-28">
         {place.placePhotos?.length > 0 && (
           <ImageCarousel images={place.placePhotos} />
         )}
 
         <header className="text-amber-900">
-          <h1 className="text-3xl font-semibold ">{place.name}</h1>
-          <p className="text-base font-normal mb-8">{place.description}</p>
+          <h1 className="text-3xl font-semibold">{place.name}</h1>
+          <p className="mb-8 text-base font-normal">{place.description}</p>
           <span className="flex flex-row gap-2">
             <MapPin size={24} />
-            <p className="text-sm font-medium mb-2">
+            <p className="mb-2 text-sm font-medium">
               {place.address.street}, {place.address.state},{" "}
               {place.address.country}
             </p>
           </span>
-          <span className="flex flex-row gap-2 items-center mt-2">
+          <span className="mt-2 flex flex-row items-center gap-2">
             <Receipt size={24} />
             <p className="text-sm font-medium">
               {place.currency} {formatPrice(parseInt(place.priceRange))}
             </p>
           </span>
-          <p className="text-base font-semibold text-lime-600 mt-16">
+          <p className="mt-16 text-base font-semibold text-lime-600">
             Operational Time
           </p>
           <div className="mt-2">
             {place.operatingHours?.length > 0 &&
               place.operatingHours.map((operatingHour, index) => (
-                <OperatingHour operatingHour={operatingHour} key={index} />
+                <OperatingHourItem operatingHour={operatingHour} key={index} />
               ))}
           </div>
         </header>
       </section>
 
-      <section className="flex flex-row gap-28 mt-20">
-        <aside className="w-1/2 h-96">
+      <section className="mt-20 flex flex-row gap-28">
+        <aside className="h-96 w-1/2">
           <MapboxView
             places={[
               {
@@ -93,7 +91,7 @@ export default function PlaceSlug() {
         </aside>
 
         <div className="flex flex-col">
-          <h1 className="text-2xl font-semibold text-amber-900 mt-4 mb-12">
+          <h1 className="mb-12 mt-4 text-2xl font-semibold text-amber-900">
             Facility
           </h1>
           {place.placeFacilities?.length > 0 &&

@@ -1,6 +1,7 @@
-import { useEffect, useState } from "react";
 import { ChevronLeft, ChevronRight } from "lucide-react";
+import { useEffect, useState } from "react";
 
+import { Button } from "~/components/ui/button";
 import { Card, CardContent } from "~/components/ui/card";
 import {
   Carousel,
@@ -10,14 +11,8 @@ import {
   CarouselNext,
   CarouselPrevious,
 } from "~/components/ui/carousel";
-import { Button } from "~/components/ui/button";
 
-type Props = {
-  images: string[];
-};
-
-export default function ImageCarousel(props: Props) {
-  const { images } = props;
+export function ImageCarousel({ images }: { images: string[] }) {
   const [api, setApi] = useState<CarouselApi>();
   const [current, setCurrent] = useState(0);
 
@@ -34,9 +29,9 @@ export default function ImageCarousel(props: Props) {
   }, [api]);
 
   return (
-    <Card className="w-2/4 h-96">
+    <Card className="h-96 w-2/4">
       <CardContent className="p-0">
-        <Carousel setApi={setApi} className="w-full h-full">
+        <Carousel setApi={setApi} className="h-full w-full">
           <CarouselContent>
             {images.map((image, index) => (
               <CarouselItem key={index}>
@@ -44,7 +39,7 @@ export default function ImageCarousel(props: Props) {
                   <img
                     src={image}
                     alt="Place Image"
-                    className="object-cover w-full h-full rounded-lg"
+                    className="h-full w-full rounded-lg object-cover"
                   />
                 </div>
               </CarouselItem>
