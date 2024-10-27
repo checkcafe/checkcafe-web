@@ -1,9 +1,10 @@
 import { LoaderFunctionArgs } from "@remix-run/node";
 import { json, redirect, useLoaderData } from "@remix-run/react";
 import { createCustomCookie } from "~/lib/access-token";
-import { auth } from "~/lib/auth";
+import { profile } from "~/lib/profile-http-request";
 
-export async function loader({ request }: LoaderFunctionArgs) {
+export async function loader({ params,request }: LoaderFunctionArgs) {
+  const { username } = params;
     const cookieHeader = request.headers.get("Cookie");
     const createAccessTokenCookie = createCustomCookie("accessToken");
     const accessTokenCookie = createAccessTokenCookie.parse(cookieHeader);
@@ -13,9 +14,9 @@ export async function loader({ request }: LoaderFunctionArgs) {
     };
     if (!accessTokenCookie) return redirect("/login");
   
-    const user = await auth.checkUser(cookie.accessToken);
+    const user = await profile.getProfileUser(cookie.accessToken,username!);
   
-    console.log(user,'user')
+    console.log(user,'user loader')
     return json({
       user
     });
@@ -34,7 +35,7 @@ export default function Profile() {
    <img src={loaderData.user?.avatarUrl} alt={loaderData.user?.name} className="rounded-full" />
     <span>
     <h1 className="font-bold text-2xl">{loaderData.user?.name}</h1>
-    <p className="text-slate-500">{loaderData.user?.email}</p>
+    <p className="text-slate-500">{loaderData.user?.username}</p>
     </span>
     </section>
 </main>
