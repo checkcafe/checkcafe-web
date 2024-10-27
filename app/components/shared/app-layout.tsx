@@ -1,5 +1,6 @@
 import { Footer } from "~/components/shared/footer";
 import { Navbar } from "~/components/shared/navbar";
+import { Toaster } from "~/components/ui/toaster"
 
 export function AppLayout({
   children,
@@ -13,6 +14,7 @@ export function AppLayout({
       <Navbar cookie={cookie} />
       {children}
       <Footer />
+      <Toaster />
     </>
   );
 }
