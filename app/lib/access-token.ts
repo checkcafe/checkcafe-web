@@ -35,3 +35,12 @@ export const serializedCookie = (
     maxAge: Math.floor((expirationDate.getTime() - Date.now()) / 1000),
   });
 };
+
+export const isTokenExpired = (token: string): boolean => {
+  try {
+    const { exp } = jwtDecode<{ exp: number }>(token);
+    return exp ? exp < Math.floor(Date.now() / 1000) : true;
+  } catch {
+    return true;
+  }
+};
