@@ -3,13 +3,9 @@ import { z } from "zod";
 import { LoginSchema, RegisterSchema } from "~/schemas/auth";
 
 import { BACKEND_API_URL } from "./env";
+import { redirect } from "@remix-run/react";
 
-export type User = {
-  name: string;
-  username: string;
-  email: string;
-  role: string;
-};
+
 export type LoginResponse = {
   accessToken?: string;
   refreshToken?: string;
@@ -23,15 +19,29 @@ export type Auth = {
   // getToken: () => string | null;
   register(userRegister: z.infer<typeof RegisterSchema>): Promise<void | null>;
   login(userLogin: z.infer<typeof LoginSchema>): Promise<LoginResponse | null>;
-  // checkUser(): Promise<User | undefined>;
+  checkUser(token: string): Promise<User | undefined>;
   logout(token: string): Promise<LogoutResponse | null>;
+};  
+
+export type User = {
+  id: string;
+  name: string;
+  email: string;
+  username: string;
+  password: string;
+  avatarUrl: string;
+  roleId: string;
+  createdAt: string; // ISO date string format
+  updatedAt: string; // ISO date string format
+  role: {
+    id: string;
+    name: string;
+    parentId: string | null;
+    createdAt: string; // ISO date string format
+    updatedAt: string; // ISO date string format
+  };
 };
 
-// export type register = {
-//   ok: boolean;
-//   data: User;
-//   message: string;
-// };
 export const auth: Auth = {
   // getToken() {
   //   // const getToken = getAccessToken();
@@ -87,20 +97,19 @@ export const auth: Auth = {
     }
   },
 
-  // async checkUser() {
-  //   if (token) {
-  //     try {
-  //       const response = await fetch(`${BACKEND_API_URL}/auth/me`, {
-  //         headers: { Authorization: `Bearer ${token}` },
-  //       });
-  //       const result = await response.json();
-  //       const user: User = result.data;
-  //       return user;
-  //     } catch (error) {
-  //       console.error(error);
-  //     }
-  //   }
-  // },
+  async checkUser(token:string) {
+    if (token) {
+      try {
+        const response = await fetch(`${BACKEND_API_URL}/auth/me`, {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+        const result = await response.json();
+        return result;
+      } catch (error) {
+        console.error(error);
+      }
+    }
+  },
 
   async logout(token: string) {
     if (!token) return redirect("/login");
