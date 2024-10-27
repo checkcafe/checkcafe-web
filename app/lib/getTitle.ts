@@ -1,4 +1,1 @@
-export const getPageTitle = (pageTitle: string) => {
-  const baseTitle = "CheckCafe";
-  return `${baseTitle} | ${pageTitle} `;
-};
+export const getPageTitle = (title: string) => `${title} | CheckCafe`;

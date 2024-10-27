@@ -9,6 +9,7 @@ import {
 } from "@remix-run/react";
 import { useState } from "react";
 import { z } from "zod";
+
 import { EyeIcon, HiddenEyeIcon } from "~/components/icons/icons";
 import { Button } from "~/components/ui/button";
 import { Input } from "~/components/ui/input";
@@ -16,13 +17,13 @@ import { Label } from "~/components/ui/label";
 import { auth } from "~/lib/auth";
 import { getPageTitle } from "~/lib/getTitle";
 import { LoginSchema } from "~/schemas/auth";
-import React from "react";
 import LoadingSpinner from "~/components/shared/loader-spinner";
 import { serializedCookie } from "~/lib/access-token";
+
 export const meta: MetaFunction = () => {
   return [
     { title: getPageTitle("Login") },
-    { name: "Talenta 37 apps", content: "Welcome to Talenta 37!" },
+    { name: "description", content: "Login to existing account" },
   ];
 };
 

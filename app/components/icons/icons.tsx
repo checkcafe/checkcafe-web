@@ -1,8 +1,10 @@
 import * as React from "react";
+
 interface Props {
   className?: string;
   fills?: string;
 }
+
 export const ProfileIcon = (props: Props): React.ReactElement => {
   const { className = "w-8 h-8" } = props;
   return (

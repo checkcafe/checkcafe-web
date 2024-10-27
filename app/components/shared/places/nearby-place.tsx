@@ -1,5 +1,3 @@
-import React from "react";
-
 type NearbyPlace = {
   name: string;
   image: string;

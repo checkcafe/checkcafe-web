@@ -1,5 +1,3 @@
-import React from "react";
-
 import CityItem from "./city-item";
 
 const dummyCities = [

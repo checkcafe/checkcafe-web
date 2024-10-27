@@ -1,5 +1,3 @@
-import React from "react";
-
 import type { OperatingHour as OperatingHourType } from "~/types";
 
 type Props = {
