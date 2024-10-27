@@ -22,7 +22,7 @@ import { AppLayout, CookiesType } from "./components/shared/app-layout";
 import { createCustomCookie } from "./lib/access-token";
 
 import "./tailwind.css";
-import { auth } from "./lib/auth";
+import { auth, User } from "./lib/auth";
 
 export const meta: MetaFunction = () => {
   return [
@@ -113,8 +113,14 @@ export async function loader({ request }: LoaderFunctionArgs) {
   };
   if (!accessTokenCookie) return redirect("/login");
 
+  const user = await auth.checkUser(cookie.accessToken);
+  // if(!user){
+  //   return redirect("/login");
+  // }
+  console.log(user,'user')
   return json({
     cookie,
+    user
   });
 }
 
@@ -132,6 +138,7 @@ export function Layout({ children }: { children: React.ReactNode }) {
       <body>
         <AppLayout
           cookie={loaderData ? (loaderData.cookie as CookiesType) : null}
+          user={loaderData ? (loaderData.user as User) : null}
         >
           <div className="min-h-screen ">{children}</div>
         </AppLayout>

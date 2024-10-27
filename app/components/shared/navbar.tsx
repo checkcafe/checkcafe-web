@@ -10,10 +10,8 @@ import {
 } from "../ui/tooltip";
 import { UserIcon } from "lucide-react";
 import { CookiesType } from "./app-layout";
-
-import { ProfileIcon } from "../icons/icons";
-
-export function Navbar({ cookie }: { cookie: CookiesType | null }) {
+import { User } from "~/lib/auth";
+export function Navbar({ cookie , user}: { cookie: CookiesType | null, user:User|null }) {
   return (
     <nav className="sticky top-0 z-50 m-0 flex w-full justify-between bg-amber-50 p-8">
       <div className="flex-col gap-4 md:flex">
@@ -39,44 +37,34 @@ export function Navbar({ cookie }: { cookie: CookiesType | null }) {
             </Link>
           </li>
           <li>
-            {!cookie && (
-              <Button asChild>
-                <Link to={"/login"} className="self-center text-primary">
-                  Login
-                </Link>
-              </Button>
-            )}
-            {cookie && (
-              <Link to={"/profile"} className="self-center text-primary">
-                <ProfileIcon className="h-10 w-10" />
-              </Link>
-            )}
-          </li>
-        </ul>
-        {cookie?.accessToken ? (
+          {cookie?.accessToken ? (
           <TooltipProvider>
             <Tooltip>
               <TooltipTrigger asChild>
-                <span className="bg-primary rounded-full p-1 flex items-center justify-center cursor-pointer">
-                  <UserIcon className=" w-8 h-8 text-white" />
+                <span className="bg-background rounded-full p-1 flex items-center justify-center cursor-pointer">
+                  {/* <UserIcon className=" w-8 h-8 text-white" /> */}
+                  <img src={user?.avatarUrl} alt={user?.name} className="w-8 h-8 rounded-full" />
                 </span>
               </TooltipTrigger>
-              <TooltipContent className="flex flex-col gap-4">
+              <TooltipContent className="flex flex-col gap-4 bg-amber-50">
                 <Link
-                  to={"/profile"}
-                  className="text-primary self-center hover:transform hover:scale-110 "
+                  to={`${user?.username}`}
+                  className=" flex gap-2 text-primary self-center hover:transform hover:scale-110 "
                 >
-                  Profile Account
+                  <img src={user?.avatarUrl} alt={user?.name} className="w-8 h-8 rounded-full" />
+                  <p className="self-center">
+                     {user?.name}
+                    </p>
                 </Link>
-                <Link
+                {/* <Link
                   to={"/dashboard"}
                   className="text-primary self-center  hover:transform hover:scale-110 "
                 >
                   Dashboard
-                </Link>
+                </Link> */}
                 <Form method="post">
                   <input type="hidden" name="action" value="logout" />{" "}
-                  <Button type="submit" className=" self-center text-white">
+                  <Button type="submit" className=" self-center text-white w-full">
                     Logout
                   </Button>
                 </Form>
@@ -90,6 +78,9 @@ export function Navbar({ cookie }: { cookie: CookiesType | null }) {
             </Link>
           </Button>
         )}
+          </li>
+        </ul>
+      
       </div>
     </nav>
   );
