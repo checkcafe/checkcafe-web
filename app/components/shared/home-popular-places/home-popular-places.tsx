@@ -1,99 +1,40 @@
-import { ChevronRightIcon } from "lucide-react";
-import React from "react";
-
-import { ScrollArea, ScrollBar } from "~/components/ui/scroll-area";
-
-import PlaceCard from "./place-card";
 import { Link } from "@remix-run/react";
+import { ChevronRightIcon } from "lucide-react";
 
-const dummyPlaces = [
-  {
-    id: "1",
-    name: "Kopi Nako",
-    city: "Jakarta",
-    price: "$ - $$$",
-    time: "09:00 - 23:00",
-  },
-  {
-    id: "2",
-    name: "Kopi Nako",
-    city: "Jakarta",
-    price: "$ - $$$",
-    time: "09:00 - 23:00",
-  },
-  {
-    id: "3",
-    name: "Kopi Nako",
-    city: "Jakarta",
-    price: "$ - $$$",
-    time: "09:00 - 23:00",
-  },
-  {
-    id: "4",
-    name: "Kopi Nako",
-    city: "Jakarta",
-    price: "$ - $$$",
-    time: "09:00 - 23:00",
-  },
-  {
-    id: "5",
-    name: "Kopi Nako",
-    city: "Jakarta",
-    price: "$ - $$$",
-    time: "09:00 - 23:00",
-  },
-  {
-    id: "6",
-    name: "Kopi Nako",
-    city: "Jakarta",
-    price: "$ - $$$",
-    time: "09:00 - 23:00",
-  },
-  {
-    id: "7",
-    name: "Kopi Nako",
-    city: "Jakarta",
-    price: "$ - $$$",
-    time: "09:00 - 23:00",
-  },
-  {
-    id: "8",
-    name: "Kopi Nako",
-    city: "Jakarta",
-    price: "$ - $$$",
-    time: "09:00 - 23:00",
-  },
-];
+import { PlaceCard } from "~/components/shared/home-popular-places/place-card";
+import { ScrollArea, ScrollBar } from "~/components/ui/scroll-area";
+import { PlaceItem } from "~/types";
+import { formatPrice } from "~/utils/formatter";
 
 /**
  * Show list of popular places
- *
- * @returns HomePopularPlaces component
  */
-const HomePopularPlaces = (): React.ReactElement => {
+export const HomePopularPlaces = ({ places }: { places: PlaceItem[] }) => {
   return (
-    <div className="px-5 md:px-[139px] mt-12">
-      <div className="flex flex-row justify-between mb-5">
-        <p className="text-xl text-[#372816] font-medium">Popular Places</p>
+    <div className="mt-12 px-5 md:px-[139px]">
+      <div className="mb-5 flex flex-row justify-between">
+        <p className="text-xl font-medium text-[#372816]">Popular Places</p>
         <ChevronRightIcon size={36} color="#372816" />
       </div>
       <ScrollArea className="w-full whitespace-nowrap rounded-md">
         <div className="flex w-max space-x-6">
-          {dummyPlaces.map((item) => (
-            <Link to="/places/:slug" key={item.id}>
-              <PlaceCard
-                placeName={item.name}
-                city={item.city}
-                price={item.price}
-                time={item.time}
-              />
-            </Link>
-          ))}
+          {places &&
+            places.length > 0 &&
+            places.map(place => (
+              <Link to={`/place/${place.slug}`} key={place.id}>
+                <PlaceCard
+                  placeName={place.name}
+                  city={place.address.city}
+                  price={`${place.currency} ${formatPrice(
+                    parseInt(place.priceRange),
+                  )}`}
+                  time={`${place.openingTime} - ${place.closingTime}`}
+                />
+              </Link>
+            ))}
         </div>
         <ScrollBar orientation="horizontal" />
       </ScrollArea>
     </div>
   );
 };
-
-export default HomePopularPlaces;

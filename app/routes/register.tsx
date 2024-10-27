@@ -9,19 +9,20 @@ import {
 } from "@remix-run/react";
 import { useState } from "react";
 import { z } from "zod";
+
 import { EyeIcon, HiddenEyeIcon } from "~/components/icons/icons";
+import LoadingSpinner from "~/components/shared/loader-spinner";
 import { Button } from "~/components/ui/button";
 import { Input } from "~/components/ui/input";
 import { Label } from "~/components/ui/label";
 import { auth } from "~/lib/auth";
-import { getPageTitle } from "~/lib/getTitle";
+import { getPageTitle } from "~/lib/get-page-title";
 import { RegisterSchema } from "~/schemas/auth";
-import React from "react";
-import LoadingSpinner from "~/components/shared/loader-spinner";
+
 export const meta: MetaFunction = () => {
   return [
-    { title: getPageTitle("Login") },
-    { name: "Talenta 37 apps", content: "Welcome to Talenta 37!" },
+    { title: getPageTitle("Register") },
+    { name: "description", content: "Create a new account" },
   ];
 };
 
@@ -38,7 +39,7 @@ export const action = async ({ request }: ActionFunctionArgs) => {
   } catch (error) {
     if (error instanceof z.ZodError) {
       const errors: { [key: string]: string } = {};
-      error.errors.forEach((err) => {
+      error.errors.forEach(err => {
         errors[err.path[0]] = err.message;
       });
       console.log(errors);
@@ -56,17 +57,17 @@ export default function Register() {
   console.log(actionData, "action data");
   const navigation = useNavigation();
   return (
-    <div className="flex flex-col gap-16 items-center justify-center">
+    <div className="flex flex-col items-center justify-center gap-16">
       <Form
         method="post"
-        className="flex flex-col gap-3 text-xl min-w-96  bg-slate-100 p-8 rounded-md"
+        className="flex min-w-96 flex-col gap-3 rounded-md bg-slate-100 p-8 text-xl"
       >
-        <span className="flex flex-col ">
-          <h2 className="text-2xl text-center">Register</h2>
+        <span className="flex flex-col">
+          <h2 className="text-center text-2xl">Register</h2>
 
-          <span className="text-lg flex gap-1 justify-center">
+          <span className="flex justify-center gap-1 text-lg">
             <p> Already have account?</p>
-            <Link to={"/login"} className=" text-amber-900  ">
+            <Link to={"/login"} className="text-amber-900">
               Login!
             </Link>
           </span>
@@ -74,7 +75,7 @@ export default function Register() {
         <span className="">
           <Label htmlFor="name">
             <p className="inline-block"> Name</p>
-            <p className="inline-block text-red-700 text-sm  ml-1">*</p>
+            <p className="ml-1 inline-block text-sm text-red-700">*</p>
           </Label>
           <Input
             type="text"
@@ -84,7 +85,7 @@ export default function Register() {
             className="mt-1"
           />
           {actionData && actionData.errors["name"] && (
-            <span className="text-red-700 text-sm  ">
+            <span className="text-sm text-red-700">
               {actionData.errors["name"]}
             </span>
           )}
@@ -92,7 +93,7 @@ export default function Register() {
         <span className="">
           <Label htmlFor="username">
             <p className="inline-block"> Username</p>
-            <p className="inline-block text-red-700 text-sm  ml-1">*</p>
+            <p className="ml-1 inline-block text-sm text-red-700">*</p>
           </Label>
           <Input
             type="text"
@@ -102,7 +103,7 @@ export default function Register() {
             className="mt-1"
           />
           {actionData && actionData.errors["username"] && (
-            <span className="text-red-700 text-sm  ">
+            <span className="text-sm text-red-700">
               {actionData.errors["username"]}
             </span>
           )}
@@ -110,7 +111,7 @@ export default function Register() {
         <span className="">
           <Label htmlFor="email">
             <p className="inline-block"> email</p>
-            <p className="inline-block text-red-700 text-sm  ml-1">*</p>
+            <p className="ml-1 inline-block text-sm text-red-700">*</p>
           </Label>
           <Input
             type="email"
@@ -120,7 +121,7 @@ export default function Register() {
             className="mt-1"
           />
           {actionData && actionData.errors["email"] && (
-            <span className="text-red-700 text-sm  ">
+            <span className="text-sm text-red-700">
               {actionData.errors["email"]}
             </span>
           )}
@@ -129,7 +130,7 @@ export default function Register() {
         <span className="relative">
           <Label htmlFor="password" className="">
             <p className="inline-block"> Password</p>
-            <p className="inline-block text-red-700 text-sm  ml-1">*</p>
+            <p className="ml-1 inline-block text-sm text-red-700">*</p>
           </Label>
           <Input
             type={showPassword ? "text" : "password"}
@@ -138,7 +139,7 @@ export default function Register() {
             id="password"
             className="peer mt-1"
           />
-          <span className="absolute opacity-0 top-[50%] -right-[105%] peer-focus-visible:flex flex-col gap-2 justify-center peer-focus-visible:opacity-100  transition-opacity duration-500 transform  rounded w-full z-100 text-slate-400 text-sm">
+          <span className="z-100 absolute -right-[105%] top-[50%] w-full transform flex-col justify-center gap-2 rounded text-sm text-slate-400 opacity-0 transition-opacity duration-500 peer-focus-visible:flex peer-focus-visible:opacity-100">
             <p className="">*Minimum password 8 Characters</p>
           </span>
           <button
@@ -148,20 +149,20 @@ export default function Register() {
               actionData && actionData.errors["password"]
                 ? "top-[45%]"
                 : "top-[55%]"
-            }  right-0 flex items-center pr-3 `}
+            } right-0 flex items-center pr-3`}
           >
             {showPassword ? (
               <span role="img" aria-label="Hide password">
-                <HiddenEyeIcon className="w-6 h-6" />
+                <HiddenEyeIcon className="h-6 w-6" />
               </span> // Replace with an actual icon
             ) : (
               <span role="img" aria-label="Show password">
-                <EyeIcon className="w-6 h-6" />
+                <EyeIcon className="h-6 w-6" />
               </span> // Replace with an actual icon
             )}
           </button>
           {actionData && actionData.errors["password"] && (
-            <p className="text-red-700 text-sm">
+            <p className="text-sm text-red-700">
               {actionData.errors["password"]}
             </p>
           )}
@@ -170,7 +171,7 @@ export default function Register() {
         <span className="relative">
           <Label htmlFor="confirmPassword" className="">
             <p className="inline-block"> Confirm Password</p>
-            <p className="inline-block text-red-700 text-sm  ml-1">*</p>
+            <p className="ml-1 inline-block text-sm text-red-700">*</p>
           </Label>
           <Input
             type={showPassword ? "text" : "password"}
@@ -179,7 +180,7 @@ export default function Register() {
             id="confirmPassword"
             className="peer mt-1"
           />
-          <span className="absolute opacity-0 top-[50%] -right-[105%] peer-focus-visible:flex flex-col gap-2 justify-center peer-focus-visible:opacity-100  transition-opacity duration-500 transform  rounded w-full z-100 text-slate-400 text-sm">
+          <span className="z-100 absolute -right-[105%] top-[50%] w-full transform flex-col justify-center gap-2 rounded text-sm text-slate-400 opacity-0 transition-opacity duration-500 peer-focus-visible:flex peer-focus-visible:opacity-100">
             <p className="">*Minimum password 8 Characters</p>
           </span>
           <button
@@ -189,21 +190,21 @@ export default function Register() {
               actionData && actionData.errors["confirmPassword"]
                 ? "top-[45%]"
                 : "top-[55%]"
-            }  right-0 flex items-center pr-3`}
+            } right-0 flex items-center pr-3`}
           >
             {showPassword ? (
               <span role="img" aria-label="Hide password">
-                <HiddenEyeIcon className="w-6 h-6" />
+                <HiddenEyeIcon className="h-6 w-6" />
               </span> // Replace with an actual icon
             ) : (
               <span role="img" aria-label="Show password">
-                <EyeIcon className="w-6 h-6" />
+                <EyeIcon className="h-6 w-6" />
               </span> // Replace with an actual icon
             )}
           </button>
 
           {actionData && actionData.errors["confirmPassword"] && (
-            <p className="text-red-700 text-sm">
+            <p className="text-sm text-red-700">
               {actionData.errors["confirmPassword"]}
             </p>
           )}

@@ -1,19 +1,38 @@
 ## ☕CheckCafe Web
 
-**CheckCafe** is your go-to platform for discovering the perfect café to meet your personal needs.
+**CheckCafe** is your go-to platform for discovering the perfect café to meet
+your personal needs.
 
-Whether you're looking for a cozy spot for meetings or a productive environment for remote work, CheckCafe provides comprehensive information about cafés, including their amenities and atmosphere. Let us help you find the ideal place to sip your coffee and get things done!
+Whether you're looking for a cozy spot for meetings or a productive environment
+for remote work, CheckCafe provides comprehensive information about cafés,
+including their amenities and atmosphere. Let us help you find the ideal place
+to sip your coffee and get things done!
 
 ## Features
 
-- Explore cafés
-  Discover suitable cafés for your needs, including their location, price, amenities like Wi-Fi speed, information building, and more.
+- Explore cafés Discover suitable cafés for your needs, including their
+  location, price, amenities like Wi-Fi speed, information building, and more.
 
-- Add and review cafés
-  Add your favorite cafés to the platform and share your experiences with others.
+- Add and review cafés Add your favorite cafés to the platform and share your
+  experiences with others.
 
-- Recommendations for Favorite Cafés
-  Receive personalized recommendations favourites for cafés based on your location.
+- Recommendations for Favorite Cafés Receive personalized recommendations
+  favourites for cafés based on your location.
+
+## List Pages
+
+List all pages in the CheckCafe Web application.
+
+- / : This route is the home page of the application.
+- /about : This route is will filled with informartion about the team who build
+  this application.
+- /register : This route is used to register a new account.
+- /login : This route is used to login to an existing account.
+- /places : This route is used to list all the places in the application.
+- /places/:slug : This route is used to view a specific place.
+- /dashboard : This route is used to view the dashboard of the user.
+- /:username : This route is used to view the profile of the user.
+- /:username/favorites : This route is used to view the favorites of the user.
 
 ## Deployment
 
@@ -31,7 +50,8 @@ Whether you're looking for a cozy spot for meetings or a productive environment 
 
 ## UI Design
 
-- You can explore the CheckCafe design at [CheckCafe Design](https://checkcafe.com)
+- You can explore the CheckCafe design at
+  [CheckCafe Design](https://checkcafe.com)
 
 ## Installation or Initialize the project
 

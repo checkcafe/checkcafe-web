@@ -1,17 +1,34 @@
+import type {
+  LinksFunction,
+  LoaderFunctionArgs,
+  MetaFunction,
+} from "@remix-run/node";
 import {
-  isRouteErrorResponse,
+  json,
   Links,
   Meta,
   Outlet,
   redirect,
   Scripts,
   ScrollRestoration,
-  useRouteError,
+  useLoaderData,
 } from "@remix-run/react";
-import type { LinksFunction } from "@remix-run/node";
-import React from "react";
-import "./tailwind.css";
+
 import { AppLayout } from "./components/shared/app-layout";
+import { createCustomCookie } from "./lib/access-token";
+
+import "./tailwind.css";
+
+export const meta: MetaFunction = () => {
+  return [
+    { title: "CheckCafe" },
+    {
+      name: "description",
+      content:
+        "Check the best cafe for social, food, WFC, and comfortable experience",
+    },
+  ];
+};
 
 export const links: LinksFunction = () => [
   {
@@ -37,15 +54,20 @@ export const links: LinksFunction = () => [
     href: "https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&display=swap",
   },
 ];
-import { ActionFunctionArgs } from "@remix-run/node";
 
-export async function action({ request }: ActionFunctionArgs) {
-  const formData = await request.formData();
-  const searchQuery = formData.get("search");
+export async function loader({ request }: LoaderFunctionArgs) {
+  const cookieHeader = request.headers.get("Cookie");
+  const accessTokenCookie = createCustomCookie("accessToken");
+  const cookie = accessTokenCookie.parse(cookieHeader);
 
-  return redirect(`/places?query=${encodeURIComponent(searchQuery as string)}`);
+  if (!cookie) return redirect("/login");
+
+  return json({ accessToken: await cookie });
 }
+
 export function Layout({ children }: { children: React.ReactNode }) {
+  const loaderData = useLoaderData<typeof loader>();
+
   return (
     <html lang="en">
       <head>
@@ -55,8 +77,8 @@ export function Layout({ children }: { children: React.ReactNode }) {
         <Links />
       </head>
       <body>
-        <AppLayout>
-          <div className="min-h-screen ">{children}</div>
+        <AppLayout cookie={loaderData ? loaderData.accessToken : ""}>
+          <div className="min-h-screen">{children}</div>
         </AppLayout>
 
         <ScrollRestoration />
