@@ -37,8 +37,8 @@ export default function PlaceSlug() {
   return (
     <div className="px-32 py-20">
       <section className="flex flex-row gap-28">
-        {place.placePhotos?.length > 0 && (
-          <ImageCarousel images={place.placePhotos} />
+        {place.photos?.length > 0 && (
+          <ImageCarousel images={place.photos} />
         )}
 
         <header className="text-amber-900">
