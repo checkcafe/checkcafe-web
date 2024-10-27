@@ -1,16 +1,17 @@
+import { type FeatureCollection } from "geojson";
+import { type GeoJSONFeature } from "mapbox-gl";
 import { useRef } from "react";
-import { useNavigate } from "react-router-dom";
 import {
+  Layer,
   Map,
   Source,
-  Layer,
-  type MapRef,
   type GeoJSONSource,
+  type MapRef,
 } from "react-map-gl";
-import { type GeoJSONFeature } from "mapbox-gl";
-import { type FeatureCollection } from "geojson";
+import { useNavigate } from "react-router-dom";
 
 import "mapbox-gl/dist/mapbox-gl.css";
+
 import {
   clusterCountLayer,
   clusterLayer,
@@ -35,6 +36,7 @@ export function MapboxView({
     zoom: 4,
   },
   onPlaceClick,
+  height,
 }: {
   places: any;
   initialViewState?: {
@@ -43,6 +45,7 @@ export function MapboxView({
     zoom: number;
   };
   onPlaceClick: (placeId: string) => void;
+  height?: string;
 }) {
   const navigate = useNavigate();
   const mapRef = useRef<MapRef>(null);
@@ -93,7 +96,7 @@ export function MapboxView({
 
       const updatedGeojson = {
         ...geojson,
-        features: geojson.features.map((feat) => {
+        features: geojson.features.map(feat => {
           if (!feat.properties) {
             return feat;
           }
@@ -109,7 +112,7 @@ export function MapboxView({
       };
 
       (mapRef.current?.getSource("places-source") as GeoJSONSource)?.setData(
-        updatedGeojson
+        updatedGeojson,
       );
     }
   };
@@ -134,7 +137,7 @@ export function MapboxView({
   return (
     <Map
       mapStyle="mapbox://styles/mapbox/streets-v9"
-      style={{ width: "100%", height: "100vh", borderRadius: 5 }}
+      style={{ width: "100%", height: height || "100vh", borderRadius: 5 }}
       initialViewState={initialViewState}
       mapboxAccessToken={MAPBOX_TOKEN}
       interactiveLayerIds={[

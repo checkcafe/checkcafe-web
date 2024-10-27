@@ -1,7 +1,7 @@
 import { Badge } from "components/ui/badge";
 import { useRef } from "react";
-import { DollarIcon, LoveIcon, PinIcon } from "~/components/icons/icons";
 
+import { DollarIcon, LoveIcon, PinIcon } from "~/components/icons/icons";
 import { Card, CardContent, CardTitle } from "~/components/ui/card";
 import { Input } from "~/components/ui/input";
 import { MapboxView } from "~/components/ui/mapbox-view";
@@ -186,7 +186,7 @@ export default function Places() {
 
   const handleScrollToCard = (placeId: string) => {
     const cardIndex = dummyFavourite.findIndex(
-      (place: any) => place.id === placeId
+      (place: any) => place.id === placeId,
     );
     const selectedCard = cardRefs.current[cardIndex];
     if (selectedCard) {
@@ -195,9 +195,9 @@ export default function Places() {
   };
 
   return (
-    <div className="container mx-auto px-8 flex flex-col gap-8 pt-5">
-      <div className="flex justify-between items-end pr-[8px]">
-        <div className="flex gap-4 w-1/2">
+    <div className="container mx-auto flex flex-col gap-8 px-8 pt-5">
+      <div className="flex items-end justify-between pr-[8px]">
+        <div className="flex w-1/2 gap-4">
           <span>
             <p className="font-bold">Price per person</p>
             <span className="flex gap-6">
@@ -241,57 +241,57 @@ export default function Places() {
           </span>
         </div>
 
-        <button className="bg-[#372816] text-white font-semibold py-2 px-10 rounded-sm ">
+        <button className="rounded-sm bg-[#372816] px-10 py-2 font-semibold text-white">
           Apply
         </button>
       </div>
 
       <div className="flex gap-2">
         <main className="w-1/2">
-          <ul className="w-full flex flex-col gap-7">
+          <ul className="flex w-full flex-col gap-7">
             {dummyFavourite.map((cafe, index) => (
               <Card
                 key={cafe.id}
-                ref={(el) => (cardRefs.current[index] = el)} // Attach ref to each card
-                className="flex w-full border-[#F9D9AA] border h-[30vh]"
+                ref={el => (cardRefs.current[index] = el)} // Attach ref to each card
+                className="flex h-[30vh] w-full border border-[#F9D9AA]"
               >
                 <img src="/cafe-dummy.png" alt={cafe.name} className="w-6/12" />
                 <div className="flex flex-col justify-between p-3">
                   <CardTitle className="flex justify-between">
                     <span>
-                      <h4 className="font-semibold text-2xl">{cafe.name}</h4>
-                      <span className="text-slate-400 text-sm flex gap-2">
-                        <PinIcon className="w-4 h-4" />
+                      <h4 className="text-2xl font-semibold">{cafe.name}</h4>
+                      <span className="flex gap-2 text-sm text-slate-400">
+                        <PinIcon className="h-4 w-4" />
                         <p className="self-center text-sm">{cafe.location}</p>
                       </span>
                     </span>
                     <LoveIcon className="" />
                   </CardTitle>
                   <CardContent className="items-end p-0">
-                    <span className="flex gap-4 font-bold mb-2">
-                      <DollarIcon className="w-4 h-4" />
+                    <span className="mb-2 flex gap-4 font-bold">
+                      <DollarIcon className="h-4 w-4" />
                       <p className="text-sm">{cafe.rangePrice}</p>
                     </span>
                     <ol className="flex gap-4">
                       {cafe.categories.length > 6 ? (
                         <>
-                          {cafe.categories.slice(0, 6).map((category) => (
+                          {cafe.categories.slice(0, 6).map(category => (
                             <li key={category}>
-                              <Badge className="font-medium text-sm bg-[#F1F1F1] text-[#8D8E8F] p-1 rounded">
+                              <Badge className="rounded bg-[#F1F1F1] p-1 text-sm font-medium text-[#8D8E8F]">
                                 {category}
                               </Badge>
                             </li>
                           ))}
                           <li>
-                            <Badge className="font-medium text-sm bg-[#F1F1F1] text-[#8D8E8F] p-1 rounded">
+                            <Badge className="rounded bg-[#F1F1F1] p-1 text-sm font-medium text-[#8D8E8F]">
                               +{cafe.categories.length - 6}
                             </Badge>
                           </li>
                         </>
                       ) : (
-                        cafe.categories.map((category) => (
+                        cafe.categories.map(category => (
                           <li key={category}>
-                            <Badge className="font-medium text-sm bg-[#F1F1F1] text-[#8D8E8F] p-1 rounded">
+                            <Badge className="rounded bg-[#F1F1F1] p-1 text-sm font-medium text-[#8D8E8F]">
                               {category}
                             </Badge>
                           </li>
@@ -305,7 +305,7 @@ export default function Places() {
           </ul>
         </main>
 
-        <aside className="w-1/2 h-full sticky top-0">
+        <aside className="sticky top-0 h-full w-1/2">
           <MapboxView
             places={dummyFavourite}
             onPlaceClick={handleScrollToCard}

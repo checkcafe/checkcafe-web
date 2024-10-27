@@ -1,28 +1,31 @@
-import { cn } from "~/lib/utils"
+import { cn } from "~/lib/utils";
 
-interface FloatingCardProps {
-    icon?: React.ReactNode
-    title: string
-    bgColor?: string
-    textColor?: string
-    className?: string
-}
-
-const FloatingCard: React.FC<FloatingCardProps> = ({
-    icon,
-    title,
-    bgColor = "bg-white",
-    textColor = "text-black",
-    className,
+export const FloatingCard = ({
+  icon,
+  title,
+  bgColor = "bg-white",
+  textColor = "text-black",
+  className,
+}: {
+  icon?: React.ReactNode;
+  title: string;
+  bgColor?: string;
+  textColor?: string;
+  className?: string;
 }) => {
-    return (
-        <div className={cn(`${bgColor} px-2 md:px-5 py-1 rounded-md absolute`, className)}>
-            <div className={`text-xs md:text-lg font-semibold flex items-center gap-1 ${textColor}`}>
-                {icon}
-                {title}
-            </div>
-        </div>
-    )
-}
-
-export default FloatingCard
+  return (
+    <div
+      className={cn(
+        `${bgColor} absolute rounded-md px-2 py-1 md:px-5`,
+        className,
+      )}
+    >
+      <div
+        className={`flex items-center gap-1 text-xs font-semibold md:text-lg ${textColor}`}
+      >
+        {icon}
+        {title}
+      </div>
+    </div>
+  );
+};
