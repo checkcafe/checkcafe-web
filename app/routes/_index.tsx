@@ -19,15 +19,18 @@ export const meta: MetaFunction = () => {
 };
 
 export async function loader() {
-  const url = `${BACKEND_API_URL}/places`;
-  const responsePlaces = await fetch(url);
-  const places: PlaceItem[] = await responsePlaces.json();
+  try {
+    const response = await fetch(`${BACKEND_API_URL}/places`);
 
-  if (!places) {
-    throw new Response(null, { status: 404, statusText: "Places Not Found" });
+    if (!response.ok) {
+      throw new Error(response.statusText || "Failed to fetch places");
+    }
+
+    const places: PlaceItem[] = await response.json();
+    return json({ places });
+  } catch (error: Error | any) {
+    return json({ places: [], error: error.message });
   }
-
-  return json({ places });
 }
 
 export default function Index() {
@@ -36,11 +39,7 @@ export default function Index() {
   return (
     <div className="flex flex-col justify-center">
       <HomeHeroSection />
-
-      <HomePopularPlaces places={places} />
-
-      {/* <HomeExploreCity /> */}
-
+      {places?.length > 0 && <HomePopularPlaces places={places} />}
       <HomeInputEmail />
     </div>
   );
