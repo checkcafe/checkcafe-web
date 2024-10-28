@@ -1,23 +1,13 @@
 import { LoaderFunctionArgs } from "@remix-run/node";
-import { useLoaderData } from "@remix-run/react";
+import { Link, useLoaderData } from "@remix-run/react";
 import { useRef } from "react";
 
 import AllPlaceCard from "~/components/shared/all-places/all-place-card";
 import PlaceFilter from "~/components/shared/all-places/filter-places";
-import { Input } from "~/components/ui/input";
 import { MapboxView } from "~/components/ui/mapbox-view";
 import { BACKEND_API_URL } from "~/lib/env";
 import { PlaceItem } from "~/types";
-
-interface Filter {
-  name?: string;
-  priceRange?: { from?: string; to?: string };
-  "city.name"?: string;
-  operatingHours?: {
-    openingTime?: { gte: string };
-    closingTime?: { lte: string };
-  };
-}
+import { Filter } from "~/types/filter";
 
 export async function loader({ request }: LoaderFunctionArgs) {
   const url = new URL(request.url);
@@ -27,30 +17,29 @@ export async function loader({ request }: LoaderFunctionArgs) {
   const nameQuery = url.searchParams.get("q");
   if (nameQuery) filter.name = nameQuery;
 
-  const priceRangeFrom = url.searchParams.get("priceRangeFrom");
-  const priceRangeTo = url.searchParams.get("priceRangeTo");
-  if (priceRangeFrom || priceRangeTo) {
+  const priceFrom = url.searchParams.get("priceFrom");
+  const priceTo = url.searchParams.get("priceTo");
+  if (priceFrom || priceTo) {
     filter.priceRange = {};
-    if (priceRangeFrom) filter.priceRange.from = priceRangeFrom;
-    if (priceRangeTo) filter.priceRange.to = priceRangeTo;
+    if (priceFrom) filter.priceRange.gte = priceFrom;
+    if (priceTo) filter.priceRange.lte = priceTo;
   }
 
   const city = url.searchParams.get("city");
   if (city) filter["city.name"] = city;
 
-  const openingTimeGte = url.searchParams.get("openingTimeGte");
-  if (openingTimeGte) {
-    filter.operatingHours = filter.operatingHours || {};
-    filter.operatingHours.openingTime = { gte: openingTimeGte };
+  const openTime = url.searchParams.get("openTime");
+  if (openTime) {
+    filter["operatingHours.openingTime"] = { gte: openTime };
   }
 
-  const closingTimeLte = url.searchParams.get("closingTimeLte");
-  if (closingTimeLte) {
-    filter.operatingHours = filter.operatingHours || {};
-    filter.operatingHours.closingTime = { lte: closingTimeLte };
+  const closingTime = url.searchParams.get("closeTime");
+  if (closingTime) {
+    filter["operatingHours.closingTime"] = { lte: closingTime };
   }
 
   const apiUrl = new URL(`${BACKEND_API_URL}/places`);
+
   if (Object.keys(filter).length > 0) {
     apiUrl.searchParams.append("filter", JSON.stringify(filter));
   }
@@ -84,22 +73,25 @@ export default function Places() {
   };
 
   return (
-    <div className="container mx-auto flex flex-col gap-8 px-8 pt-5">
+    <div
+      className={`container mx-auto flex ${hasCityParam ? "flex-col" : ""} gap-8 px-8 pt-5`}
+    >
       <PlaceFilter />
 
-      <div className="flex gap-2">
+      <div className="flex w-full gap-2">
         {places.length === 0 ? (
           <p className="w-full text-center text-gray-500">Not Found</p>
         ) : (
           <>
-            <main className="w-1/2">
+            <main className={`${hasCityParam ? "w-1/2" : "w-full"}`}>
               <ul className="flex w-full flex-col gap-7">
                 {places.map((place: PlaceItem, index: number) => (
-                  <AllPlaceCard
-                    place={place}
-                    ref={el => (cardRefs.current[index] = el)}
-                    key={place.id}
-                  />
+                  <Link to={`/place/${place.slug}`} key={place.id}>
+                    <AllPlaceCard
+                      place={place}
+                      ref={el => (cardRefs.current[index] = el)}
+                    />
+                  </Link>
                 ))}
               </ul>
             </main>

@@ -18,7 +18,11 @@ const AllPlaceCard = forwardRef<HTMLDivElement, PlaceCardProps>(
       key={place.id}
       className="flex h-[30vh] w-full border border-[#F9D9AA]"
     >
-      <img src="/cafe-dummy.png" alt={place.name} className="w-6/12" />
+      <img
+        src={place.thumbnail || "https://placehold.co/150?text=No%20Image"}
+        alt={place.name}
+        className="w-full min-w-96 max-w-96 rounded-l-lg object-cover"
+      />
       <div className="flex w-full flex-col justify-between p-3">
         <CardTitle className="flex justify-between">
           <span>

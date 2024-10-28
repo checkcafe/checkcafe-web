@@ -1,5 +1,5 @@
 import { type FeatureCollection } from "geojson";
-import { type GeoJSONFeature } from "mapbox-gl";
+import { MapMouseEvent, type GeoJSONFeature } from "mapbox-gl";
 import { useRef } from "react";
 import {
   Layer,
@@ -39,7 +39,7 @@ export function MapboxView({
     : {
         latitude: -0.4752106,
         longitude: 116.6995672,
-        zoom: 4,
+        zoom: 12,
       },
   onPlaceClick,
   height,
@@ -72,33 +72,56 @@ export function MapboxView({
     })),
   };
 
-  const onClick = (event: any) => {
+  const onClick = (event: MapMouseEvent) => {
     const features = event.features as GeoJSONFeature[];
     if (!features.length) return;
 
     const feature = features[0];
+    const map = mapRef.current;
+
+    if (!map || !feature || !feature.layer) return;
+
     const featureProperties = feature.properties as FeatureProperties;
 
-    if (featureProperties.type === "Place") {
+    // Check if the clicked feature is a cluster
+    if (feature.layer.id === clusterLayer.id) {
+      const clusterId = feature.id as number;
+
+      const source = map.getSource("places-source") as GeoJSONSource;
+
+      source.getClusterExpansionZoom(clusterId, (err, zoom) => {
+        if (err) return;
+
+        if (feature.geometry.type === "Point") {
+          const [longitude, latitude] = feature.geometry.coordinates as [
+            number,
+            number,
+          ];
+
+          // Fly to the cluster with expanded zoom
+          map.flyTo({
+            center: [longitude, latitude],
+            zoom: 15,
+            speed: 2,
+          });
+        }
+      });
+    } else if (featureProperties.type === "Place") {
       const placeId = featureProperties.id;
       onPlaceClick(placeId);
 
-      // Get the coordinates of the clicked point
       if (feature.geometry.type === "Point") {
         const [longitude, latitude] = feature.geometry.coordinates;
 
         // Zoom in to the clicked point
-        mapRef.current?.flyTo({
+        map.flyTo({
           center: [longitude, latitude],
-          zoom: 12, // Set your desired zoom level here
-          speed: 2, // Set the speed of the zoom transition
-          curve: 1, // Set the curve of the zoom transition
-          easing(t) {
-            return t; // You can customize the easing function here
-          },
+          zoom: 16,
+          speed: 2,
         });
       }
 
+      // Update geojson with active state for clicked place
       const updatedGeojson = {
         ...geojson,
         features: geojson.features.map(feat => {
@@ -116,13 +139,13 @@ export function MapboxView({
         }),
       };
 
-      (mapRef.current?.getSource("places-source") as GeoJSONSource)?.setData(
+      (map.getSource("places-source") as GeoJSONSource)?.setData(
         updatedGeojson,
       );
     }
   };
 
-  const onMouseEnter = (event: any) => {
+  const onMouseEnter = (event: MapMouseEvent) => {
     const features = event.features as GeoJSONFeature[];
     if (features.length) {
       const canvas = mapRef.current?.getCanvas();

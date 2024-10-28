@@ -1,4 +1,8 @@
-import { type ActionFunctionArgs, type MetaFunction } from "@remix-run/node";
+import type {
+  ActionFunctionArgs,
+  LoaderFunction,
+  MetaFunction,
+} from "@remix-run/node";
 import {
   Form,
   json,
@@ -7,18 +11,21 @@ import {
   useActionData,
   useNavigation,
 } from "@remix-run/react";
-import { useState } from "react";
+import { EyeClosedIcon, EyeIcon } from "lucide-react";
+import { useEffect, useState } from "react";
 import { z } from "zod";
 
-import { EyeIcon, HiddenEyeIcon } from "~/components/icons/icons";
 import LoadingSpinner from "~/components/shared/loader-spinner";
 import { Button } from "~/components/ui/button";
 import { Input } from "~/components/ui/input";
 import { Label } from "~/components/ui/label";
-import { serializedCookie } from "~/lib/access-token";
+import { useToast } from "~/hooks/use-toast";
 import { auth } from "~/lib/auth";
+import { setCookie } from "~/lib/cookie";
 import { getPageTitle } from "~/lib/get-page-title";
+import { getExpirationDate } from "~/lib/jwt";
 import { LoginSchema } from "~/schemas/auth";
+import { ActionData, Issue } from "~/types/auth";
 
 export const meta: MetaFunction = () => {
   return [
@@ -27,130 +34,186 @@ export const meta: MetaFunction = () => {
   ];
 };
 
-export async function action({ request }: ActionFunctionArgs) {
-  const formData = await request.formData();
-  const userLogin = Object.fromEntries(formData);
-  try {
-    const validatedLogin = LoginSchema.parse(userLogin);
-    const login = await auth.login(validatedLogin);
-    const cookieAccessToken = serializedCookie(
-      "accessToken",
-      login?.accessToken || "",
-    );
-    const cookieRefreshToken = serializedCookie(
-      "refreshToken",
-      login?.refreshToken || "",
-    );
-    const cookieRole = serializedCookie(
-      "role",
-      login?.accessToken || "",
-      login?.role || "",
-    );
+export const loader: LoaderFunction = async ({ request }) => {
+  const isLoggedIn = await auth.isLoggedIn();
 
-    const headers = new Headers();
-    headers.append("Set-Cookie", await cookieAccessToken);
-    headers.append("Set-Cookie", await cookieRefreshToken);
-    headers.append("Set-Cookie", await cookieRole);
+  if (isLoggedIn) {
+    const referer = request.headers.get("Referer") || "/";
 
-    return redirect("/", { headers });
-  } catch (error) {
-    if (error instanceof z.ZodError) {
-      const errors: { [key: string]: string } = {};
-      error.errors.forEach(err => {
-        errors[err.path[0]] = err.message;
-      });
-      return json({ errors });
-    }
+    return redirect(referer);
   }
-}
+
+  return null;
+};
+
 export default function Login() {
   const [showPassword, setShowPassword] = useState(false);
+  const actionData = useActionData<ActionData>();
+  const navigation = useNavigation();
+  const { toast } = useToast();
+
   const togglePasswordVisibility = () => {
     setShowPassword(!showPassword);
   };
-  const actionData = useActionData<typeof action>();
 
-  const navigation = useNavigation();
+  const errors =
+    actionData?.error && typeof actionData.error !== "string"
+      ? actionData.error.issues.reduce(
+          (acc: Record<string, string>, issue: Issue) => {
+            acc[issue.path[0]] = issue.message;
+            return acc;
+          },
+          {},
+        )
+      : {};
+
+  useEffect(() => {
+    if (typeof actionData?.error === "string") {
+      toast({
+        title: "Error",
+        description: actionData.error,
+        variant: "destructive",
+      });
+    }
+  }, [actionData, toast]);
+
   return (
-    <div className="flex translate-y-1/2 flex-col items-center justify-center gap-16">
-      <Form
-        method="post"
-        className="flex min-w-96 flex-col gap-4 rounded-md bg-slate-100 p-8 text-xl"
-      >
-        <span className="flex justify-between">
-          <h2 className="text-2xl">Login</h2>
-          <Link to={"/register"} className="text-amber-900">
-            register
-          </Link>
-        </span>
-        <span className="">
-          <Label htmlFor="username">
-            <p className="inline-block"> Username</p>
-            <p className="ml-1 inline-block text-sm text-red-700">*</p>
-          </Label>
-          <Input
-            type="text"
-            name="username"
-            placeholder="penikmat-kopi"
-            id="username"
-            className="mt-1"
-          />
-          {actionData && actionData.errors["username"] && (
-            <span className="text-sm text-red-700">
-              {actionData.errors["username"]}
-            </span>
-          )}
-        </span>
-        <span className="relative">
-          <Label htmlFor="username" className="">
-            <p className="inline-block"> Password</p>
-            <p className="ml-1 inline-block text-sm text-red-700">*</p>
-          </Label>
-          <Input
-            type={showPassword ? "text" : "password"}
-            name="password"
-            placeholder="password"
-            id="password"
-            className="peer mt-1"
-          />
-          <span className="z-100 absolute -right-[105%] top-[50%] w-full transform flex-col justify-center gap-2 rounded text-sm text-slate-400 opacity-0 transition-opacity duration-500 peer-focus-visible:flex peer-focus-visible:opacity-100">
-            <p className="">*Minimum password 8 Characters</p>
-          </span>
-          <button
-            type="button"
-            onClick={togglePasswordVisibility}
-            className={`absolute ${
-              actionData && actionData.errors["password"]
-                ? "top-[45%]"
-                : "top-[55%]"
-            } right-0 flex items-center pr-3`}
-          >
-            {showPassword ? (
-              <span role="img" aria-label="Hide password">
-                <HiddenEyeIcon className="h-6 w-6" />
-              </span> // Replace with an actual icon
-            ) : (
-              <span role="img" aria-label="Show password">
-                <EyeIcon className="h-6 w-6" />
-              </span> // Replace with an actual icon
-            )}
-          </button>
-          {actionData && actionData.errors && actionData.errors["password"] && (
-            <p className="text-sm text-red-700">
-              {actionData.errors["password"]}
-            </p>
-          )}
-        </span>
+    <div className="flex min-h-screen items-center justify-center bg-gray-50">
+      <div className="w-full max-w-sm rounded-lg bg-white p-6 shadow-md">
+        <h2 className="mb-4 text-center text-2xl font-semibold">Login</h2>
 
-        <Button type="submit">
-          {navigation.state === "loading" ||
-          navigation.state === "submitting" ? (
-            <LoadingSpinner />
-          ) : (
-            "Login"
-          )}
-        </Button>
-      </Form>
+        <Form method="post" className="flex flex-col gap-3">
+          <span>
+            <Label
+              htmlFor="username"
+              className="block text-sm font-medium text-gray-700"
+            >
+              Username
+            </Label>
+            <Input
+              type="text"
+              name="username"
+              id="username"
+              placeholder="Enter your username or email"
+              className={`mt-1 rounded-md border p-2 ${errors.username ? "border-red-500" : "border-gray-300"}`}
+            />
+            {errors.username && (
+              <p className="mt-1 text-sm text-red-700">{errors.username}</p>
+            )}
+          </span>
+
+          <span>
+            <Label
+              htmlFor="password"
+              className="block text-sm font-medium text-gray-700"
+            >
+              Password
+            </Label>
+            <div className="relative">
+              <Input
+                type={showPassword ? "text" : "password"}
+                name="password"
+                id="password"
+                placeholder="Enter your password"
+                className={`mt-1 rounded-md border p-2 ${errors.password ? "border-red-500" : "border-gray-300"}`}
+              />
+              <button
+                type="button"
+                onClick={togglePasswordVisibility}
+                className="absolute right-2.5 top-2.5"
+              >
+                {showPassword ? (
+                  <EyeIcon className="h-5 w-5" />
+                ) : (
+                  <EyeClosedIcon className="h-5 w-5" />
+                )}
+              </button>
+            </div>
+            {errors.password && (
+              <p className="mt-1 text-sm text-red-700">{errors.password}</p>
+            )}
+          </span>
+
+          <Button
+            type="submit"
+            className="rounded-md bg-blue-600 py-2 font-semibold text-white transition duration-200 hover:bg-blue-700"
+          >
+            {navigation.state === "submitting" ? <LoadingSpinner /> : "Login"}
+          </Button>
+        </Form>
+
+        <div className="mt-4 text-center">
+          <p className="text-sm text-gray-600">
+            Don&apos;t have an account yet?{" "}
+            <Link
+              to={"/register"}
+              className="font-semibold text-blue-600 hover:underline"
+            >
+              Register
+            </Link>
+          </p>
+        </div>
+      </div>
     </div>
   );
+}
+
+export async function action({ request }: ActionFunctionArgs) {
+  const formData = await request.formData();
+  const userLogin = Object.fromEntries(formData);
+
+  try {
+    const validatedLogin = LoginSchema.parse(userLogin);
+    const loginResponse = await auth.login(validatedLogin);
+
+    if (!loginResponse.success) {
+      return json(
+        { error: loginResponse.error?.message || "Login failed" },
+        { status: loginResponse.error?.status || 401 },
+      );
+    }
+
+    const { accessToken, refreshToken, role } = loginResponse.data || {};
+
+    if (!accessToken || !refreshToken || !role) {
+      return json(
+        { error: "Login response is missing required tokens." },
+        { status: 500 },
+      );
+    }
+
+    const [accessTokenExpiration, refreshTokenExpiration] = [
+      getExpirationDate(accessToken),
+      getExpirationDate(refreshToken),
+    ];
+
+    setCookie("accessToken", accessToken, accessTokenExpiration);
+    setCookie("refreshToken", refreshToken, refreshTokenExpiration);
+    setCookie("role", role, refreshTokenExpiration);
+
+    return redirect("/");
+  } catch (error) {
+    if (error instanceof z.ZodError) {
+      const issues = error.errors.map(err => ({
+        code: "custom",
+        message: err.message,
+        path: err.path,
+      }));
+
+      return json(
+        {
+          success: false,
+          error: {
+            issues,
+          },
+        },
+        { status: 400 },
+      );
+    }
+
+    return json(
+      { error: "An unexpected error occurred. Please try again later." },
+      { status: 500 },
+    );
+  }
 }
