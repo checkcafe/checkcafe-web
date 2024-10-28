@@ -1,10 +1,17 @@
-import { Link } from "@remix-run/react";
-
-import { ProfileIcon } from "../icons/icons";
-import { Button } from "../ui/button";
+import { Form, Link } from "@remix-run/react";
+// import { ProfileIcon } from "../icons/icons";
 import { Searchbar } from "./searchbar";
+import { Button } from "../ui/button";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "../ui/tooltip";
+import { UserProfile } from "~/lib/profile-http-request";
+export function Navbar({  user,token}: { user:Partial<UserProfile>|null,token:string|null }) {
 
-export function Navbar({ cookie }: { cookie: string }) {
+  console.log(token,'token')
   return (
     <nav className="sticky top-0 z-50 m-0 flex w-full justify-between bg-amber-50 p-8">
       <div className="flex-col gap-4 md:flex">
@@ -30,20 +37,51 @@ export function Navbar({ cookie }: { cookie: string }) {
             </Link>
           </li>
           <li>
-            {!cookie && (
-              <Button asChild>
-                <Link to={"/login"} className="self-center text-primary">
-                  Login
+          {user ? (
+          <TooltipProvider>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <span className="bg-background rounded-full p-1 flex items-center justify-center cursor-pointer">
+                  {/* <UserIcon className=" w-8 h-8 text-white" /> */}
+                  <img src={user?.avatarUrl} alt={user?.name} className="w-8 h-8 rounded-full" />
+                </span>
+              </TooltipTrigger>
+              <TooltipContent className="flex flex-col gap-4 bg-amber-50">
+                <Link
+                  to={`${user?.username}`}
+                  className=" flex gap-2 text-primary self-center hover:transform hover:scale-110 "
+                >
+                  <img src={user?.avatarUrl} alt={user?.name} className="w-8 h-8 rounded-full" />
+                  <p className="self-center">
+                     {user?.name}
+                    </p>
                 </Link>
-              </Button>
-            )}
-            {cookie && (
-              <Link to={"/profile"} className="self-center text-primary">
-                <ProfileIcon className="h-10 w-10" />
-              </Link>
-            )}
+                {/* <Link
+                  to={"/dashboard"}
+                  className="text-primary self-center  hover:transform hover:scale-110 "
+                >
+                  Dashboard
+                </Link> */}
+                {/* <Form method="post"> */}
+                  {/* <input type="hidden" name="action" value="logout" />{" "} */}
+                  <Button asChild className=" self-center text-white w-full">
+                    <Link to={'/logout'}>
+                    Logout</Link>
+                  </Button>
+                {/* </Form> */}
+              </TooltipContent>
+            </Tooltip>
+          </TooltipProvider>
+        ) : (
+          <Button asChild>
+            <Link to={"/login"} className="text-primary self-center">
+              Login
+            </Link>
+          </Button>
+        )}
           </li>
         </ul>
+      
       </div>
     </nav>
   );
