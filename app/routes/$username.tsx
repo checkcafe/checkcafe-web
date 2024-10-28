@@ -5,18 +5,11 @@ import { profile } from "~/lib/profile-http-request";
 
 export async function loader({ params,request }: LoaderFunctionArgs) {
   const { username } = params;
-    const cookieHeader = request.headers.get("Cookie");
-    const createAccessTokenCookie = createCustomCookie("accessToken");
-    const accessTokenCookie = createAccessTokenCookie.parse(cookieHeader);
   
-    const cookie = {
-      accessToken: await accessTokenCookie,
-    };
-    if (!accessTokenCookie) return redirect("/login");
   
-    const user = await profile.getProfileUser(cookie.accessToken,username!);
   
-    console.log(user,'user loader')
+    const user = await profile.getProfileUser(username!);
+  
     return json({
       user
     });

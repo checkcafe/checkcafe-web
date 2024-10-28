@@ -1,3 +1,5 @@
+import { UserProfile } from "~/lib/profile-http-request";
+
 export type Issue = {
   code: string;
   message: string;
@@ -14,6 +16,7 @@ export type ActionData = {
 };
 
 export type User = {
+  id:string
   name: string;
   username: string;
   email: string;
@@ -53,3 +56,9 @@ export type LoginResponse = {
     }>;
   };
 };
+
+
+export type isLoggedInResponse = {
+isLoggedIn:boolean;
+user:Partial<UserProfile>|null;
+}

@@ -1,27 +1,25 @@
 import { Footer } from "~/components/shared/footer";
-import React from "react";
-import { Navbar } from "./navbar";
-import { User } from "~/lib/auth";
-export type CookiesType = {
-  accessToken: string;
-  refreshToken: string;
-  role: string;
-};
+import { Navbar } from "~/components/shared/navbar";
+import { Toaster } from "~/components/ui/toaster"
+import { UserProfile } from "~/lib/profile-http-request";
 
 export function AppLayout({
   children,
-  cookie,
-  user
+  user,
+  token
 }: {
   children: React.ReactNode;
-  cookie: CookiesType | null;
-  user: User | null;
+  user: Partial<UserProfile> | null;
+  token:string|null
 }) {
   return (
     <>
-      <Navbar cookie={cookie} user={user} />
+      <Navbar  user={user}
+          token={token}
+          />
       {children}
       <Footer />
+      <Toaster />
     </>
   );
 }

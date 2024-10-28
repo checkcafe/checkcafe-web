@@ -17,12 +17,11 @@ import {
 
 import React from "react";
 import "./tailwind.css";
-import { AppLayout, CookiesType } from "./components/shared/app-layout";
-
-import { createCustomCookie } from "./lib/access-token";
+import { AppLayout } from "./components/shared/app-layout";
 
 import "./tailwind.css";
-import { auth, User } from "./lib/auth";
+import { auth } from "./lib/auth";
+import { getCookie } from "./lib/cookie";
 
 export const meta: MetaFunction = () => {
   return [
@@ -60,73 +59,27 @@ export const links: LinksFunction = () => [
   },
 ];
 
-export async function action({ request }: ActionFunctionArgs) {
-  const formData = await request.formData();
-  const cookieHeader = request.headers.get("Cookie");
-  const createRefreshTokenCookie = createCustomCookie("refreshToken");
-  const refreshTokenCookie = createRefreshTokenCookie.parse(cookieHeader);
-  const refreshToken = await refreshTokenCookie;
-  const action = formData.get("action");
-  console.log(action, "act");
-  if (action === "logout") {
-    const logout = await auth.logout(refreshToken);
-    if (logout?.ok) {
-      const cookieAccessToken = createCustomCookie("accessToken");
-      const cookieRefreshToken = createCustomCookie("refreshToken");
-      const cookieRole = createCustomCookie("role");
-
-      const headers = new Headers();
-      headers.append(
-        "Set-Cookie",
-        await cookieAccessToken.serialize("", { maxAge: 1 })
-      );
-      headers.append(
-        "Set-Cookie",
-        await cookieRefreshToken.serialize("", { maxAge: 1 })
-      );
-      headers.append(
-        "Set-Cookie",
-        await cookieRole.serialize("", { maxAge: 1 })
-      );
-
-      return redirect("/login", {
-        headers,
-      });
-    }
-  }
-  return null;
-}
+// export async function action({ request }: ActionFunctionArgs) {
+ 
+//   return null;
+// }
 
 export async function loader({ request }: LoaderFunctionArgs) {
-  const cookieHeader = request.headers.get("Cookie");
-  const createAccessTokenCookie = createCustomCookie("accessToken");
-  const createRefreshTokenCookie = createCustomCookie("refreshToken");
-  const createRoleCookie = createCustomCookie("role");
-  const accessTokenCookie = createAccessTokenCookie.parse(cookieHeader);
-  const refreshTokenCookie = createRefreshTokenCookie.parse(cookieHeader);
-  const roleCookie = createRoleCookie.parse(cookieHeader);
-
-  const cookie = {
-    accessToken: await accessTokenCookie,
-    refreshToken: await refreshTokenCookie,
-    role: await roleCookie,
-  };
-  if (!accessTokenCookie) return redirect("/login");
-
-  const user = await auth.checkUser(cookie.accessToken);
-  // if(!user){
-  //   return redirect("/login");
-  // }
-  console.log(user,'user')
+  const token = getCookie("accessToken");
+  if(!token){
+    console.log('in token')
+     redirect('/login')
+  }
+  const login = await auth.isLoggedIn();
   return json({
-    cookie,
-    user
+    user:login.user,
+    token
   });
 }
 
 export function Layout({ children }: { children: React.ReactNode }) {
   const loaderData = useLoaderData<typeof loader>();
-
+  
   return (
     <html lang="en">
       <head>
@@ -137,8 +90,8 @@ export function Layout({ children }: { children: React.ReactNode }) {
       </head>
       <body>
         <AppLayout
-          cookie={loaderData ? (loaderData.cookie as CookiesType) : null}
-          user={loaderData ? (loaderData.user as User) : null}
+          user={loaderData.user}
+          token={loaderData.token}
         >
           <div className="min-h-screen ">{children}</div>
         </AppLayout>

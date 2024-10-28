@@ -8,10 +8,10 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "../ui/tooltip";
-import { UserIcon } from "lucide-react";
-import { CookiesType } from "./app-layout";
-import { User } from "~/lib/auth";
-export function Navbar({ cookie , user}: { cookie: CookiesType | null, user:User|null }) {
+import { UserProfile } from "~/lib/profile-http-request";
+export function Navbar({  user,token}: { user:Partial<UserProfile>|null,token:string|null }) {
+
+  console.log(token,'token')
   return (
     <nav className="sticky top-0 z-50 m-0 flex w-full justify-between bg-amber-50 p-8">
       <div className="flex-col gap-4 md:flex">
@@ -37,7 +37,7 @@ export function Navbar({ cookie , user}: { cookie: CookiesType | null, user:User
             </Link>
           </li>
           <li>
-          {cookie?.accessToken ? (
+          {user ? (
           <TooltipProvider>
             <Tooltip>
               <TooltipTrigger asChild>
@@ -62,12 +62,13 @@ export function Navbar({ cookie , user}: { cookie: CookiesType | null, user:User
                 >
                   Dashboard
                 </Link> */}
-                <Form method="post">
-                  <input type="hidden" name="action" value="logout" />{" "}
-                  <Button type="submit" className=" self-center text-white w-full">
-                    Logout
+                {/* <Form method="post"> */}
+                  {/* <input type="hidden" name="action" value="logout" />{" "} */}
+                  <Button asChild className=" self-center text-white w-full">
+                    <Link to={'/logout'}>
+                    Logout</Link>
                   </Button>
-                </Form>
+                {/* </Form> */}
               </TooltipContent>
             </Tooltip>
           </TooltipProvider>
