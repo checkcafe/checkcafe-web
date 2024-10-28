@@ -9,6 +9,7 @@ import {
   Link,
   redirect,
   useActionData,
+  useLoaderData,
   useNavigation,
 } from "@remix-run/react";
 import { EyeClosedIcon, EyeIcon } from "lucide-react";
@@ -37,14 +38,17 @@ export const loader: LoaderFunction = async ({ request }) => {
 
   if (isLoggedIn) {
     const referer = request.headers.get("Referer") || "/";
-
     return redirect(referer);
   }
 
-  return null;
+  const url = new URL(request.url);
+  const email = url.searchParams.get("email");
+
+  return json({ email });
 };
 
 export default function Register() {
+  const { email } = useLoaderData<{ email: string }>();
   const [passwordVisibility, setPasswordVisibility] = useState({
     password: false,
     confirmPassword: false,
@@ -126,6 +130,7 @@ export default function Register() {
               name="email"
               id="email"
               placeholder="Enter your email"
+              defaultValue={email}
               className={`mt-1 rounded-md border p-2 ${errors.email ? "border-red-500" : "border-gray-300"}`}
             />
             {errors.email && (

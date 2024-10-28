@@ -11,11 +11,13 @@ export type Address = {
   country: string;
   countryCode: string;
 };
-export type Submitter = {
+
+export type User = {
   name: string;
   username: string;
   avatarUrl: string;
 };
+
 export type PlaceItem = {
   id: string;
   name: string;
@@ -28,13 +30,15 @@ export type PlaceItem = {
   address: Address;
   openingTime: string;
   closingTime: string;
-  submitter: Submitter;
+  thumbnail: string;
+  submitter: User;
 };
 
 export type PlaceFacility = {
   facility: string;
   description: string;
 };
+
 export type Place = {
   id: string;
   name: string;
@@ -48,5 +52,5 @@ export type Place = {
   operatingHours: OperatingHour[];
   placeFacilities: PlaceFacility[];
   photos: string[];
-  submitter: Submitter;
+  submitter: User;
 };
