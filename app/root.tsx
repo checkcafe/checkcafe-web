@@ -1,4 +1,5 @@
 import type {
+  ActionFunctionArgs,
   LinksFunction,
   LoaderFunctionArgs,
   MetaFunction,
@@ -14,10 +15,13 @@ import {
   useLoaderData,
 } from "@remix-run/react";
 
+import React from "react";
+import "./tailwind.css";
 import { AppLayout } from "./components/shared/app-layout";
-import { createCustomCookie } from "./lib/access-token";
 
 import "./tailwind.css";
+import { auth } from "./lib/auth";
+import { getCookie } from "./lib/cookie";
 
 export const meta: MetaFunction = () => {
   return [
@@ -55,19 +59,27 @@ export const links: LinksFunction = () => [
   },
 ];
 
+// export async function action({ request }: ActionFunctionArgs) {
+ 
+//   return null;
+// }
+
 export async function loader({ request }: LoaderFunctionArgs) {
-  const cookieHeader = request.headers.get("Cookie");
-  const accessTokenCookie = createCustomCookie("accessToken");
-  const cookie = accessTokenCookie.parse(cookieHeader);
-
-  if (!cookie) return redirect("/login");
-
-  return json({ accessToken: await cookie });
+  const token = getCookie("accessToken");
+  if(!token){
+    console.log('in token')
+     redirect('/login')
+  }
+  const login = await auth.isLoggedIn();
+  return json({
+    user:login.user,
+    token
+  });
 }
 
 export function Layout({ children }: { children: React.ReactNode }) {
   const loaderData = useLoaderData<typeof loader>();
-
+  
   return (
     <html lang="en">
       <head>
@@ -77,8 +89,11 @@ export function Layout({ children }: { children: React.ReactNode }) {
         <Links />
       </head>
       <body>
-        <AppLayout cookie={loaderData ? loaderData.accessToken : ""}>
-          <div className="min-h-screen">{children}</div>
+        <AppLayout
+          user={loaderData.user}
+          token={loaderData.token}
+        >
+          <div className="min-h-screen ">{children}</div>
         </AppLayout>
 
         <ScrollRestoration />

@@ -33,7 +33,6 @@ const handleRequest = async (
 ): Promise<Response | any> => {
   try {
     const refToken = getCookie("refreshToken");
-
     if (!accToken && !refToken) {
       throw new Error("Access and refresh tokens are missing.");
     }
@@ -92,8 +91,7 @@ const apiFetch = async (
   onError?: (error: Error) => any,
 ): Promise<Response | any> => {
   const { method = "GET", payload } = options;
-  const accessToken = getCookie("accessToken") as string;
-
+  const accessToken = getCookie("accessToken") as string; 
   return handleRequest(
     accessToken,
     async () => {
