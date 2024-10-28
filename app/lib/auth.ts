@@ -160,7 +160,8 @@ export const auth: Auth = {
       return{
         isLoggedIn:false,
         user:null
-      }}
+      }
+    }
     const result = await response.json();
     console.log(result,'res')
     const user: Partial<UserProfile> = {

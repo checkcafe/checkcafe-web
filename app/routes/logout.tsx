@@ -27,5 +27,5 @@ export const loader: LoaderFunction = async () => {
     clearCookies();
   }
 
-  return redirect("/login");
+  return redirect("/");
 };

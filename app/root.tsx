@@ -66,11 +66,9 @@ export const links: LinksFunction = () => [
 
 export async function loader({ request }: LoaderFunctionArgs) {
   const token = getCookie("accessToken");
-  if(!token){
-    console.log('in token')
-     redirect('/login')
-  }
+ 
   const login = await auth.isLoggedIn();
+
   return json({
     user:login.user,
     token
@@ -79,7 +77,6 @@ export async function loader({ request }: LoaderFunctionArgs) {
 
 export function Layout({ children }: { children: React.ReactNode }) {
   const loaderData = useLoaderData<typeof loader>();
-  
   return (
     <html lang="en">
       <head>
