@@ -1,4 +1,4 @@
-import { apiFetch } from "./api";
+import fetchAPI from "./api";
 
 export type Profile = {
     getProfileUser(username:string): Promise<Partial<UserProfile> | null>;
@@ -34,7 +34,7 @@ export type Profile = {
     //     }
     //   },
       async getProfileUser(username:string): Promise<Partial<UserProfile>|null> {
-        const response = await apiFetch(`/users/${username}`);
+        const response = await fetchAPI(`/users/${username}`);
         const result:UserProfile = await response.json();
         const user: Partial<UserProfile> = {
           id:result.id,
