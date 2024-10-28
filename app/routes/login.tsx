@@ -138,12 +138,7 @@ export default function Login() {
             type="submit"
             className="rounded-md bg-blue-600 py-2 font-semibold text-white transition duration-200 hover:bg-blue-700"
           >
-            {navigation.state === "loading" ||
-            navigation.state === "submitting" ? (
-              <LoadingSpinner />
-            ) : (
-              "Login"
-            )}
+            {navigation.state === "submitting" ? <LoadingSpinner /> : "Login"}
           </Button>
         </Form>
 
