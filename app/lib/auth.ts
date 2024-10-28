@@ -1,13 +1,11 @@
 import { z } from "zod";
 
 import { LoginSchema, RegisterSchema } from "~/schemas/auth";
-
-import { apiFetch } from "./api";
-import { BACKEND_API_URL } from "./env";
 import { isLoggedInResponse, LoginResponse, RegisterResponse, TokenResponse } from "~/types/auth";
+
+import fetchAPI from "./api";
+import { BACKEND_API_URL } from "./env";
 import { UserProfile } from "./profile-http-request";
-
-
 
 export type Auth = {
   register(
@@ -111,6 +109,7 @@ export const auth: Auth = {
   //       body: JSON.stringify(userLogin),
   //     });
 
+ 
   //     const result = await response.json();
 
   //     if (!response.ok) {
@@ -156,7 +155,7 @@ export const auth: Auth = {
   // },
 
   async isLoggedIn(): Promise<isLoggedInResponse> {
-    const response = await apiFetch("/auth/me");
+    const response = await fetchAPI("/auth/me");
     if(!response){
       return{
         isLoggedIn:false,

@@ -23,8 +23,6 @@ export const loader: LoaderFunction = async () => {
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ refreshToken }),
     });
-  } catch (error) {
-    console.error("Error during logout:", error);
   } finally {
     clearCookies();
   }
