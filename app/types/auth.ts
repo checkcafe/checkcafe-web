@@ -16,7 +16,7 @@ export type ActionData = {
 };
 
 export type User = {
-  id:string
+  id: string;
   name: string;
   username: string;
   email: string;
@@ -57,8 +57,6 @@ export type LoginResponse = {
   };
 };
 
-
 export type isLoggedInResponse = {
-isLoggedIn:boolean;
-user:Partial<UserProfile>|null;
-}
+  user: Partial<UserProfile> | null;
+};

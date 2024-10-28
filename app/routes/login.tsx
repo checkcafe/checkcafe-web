@@ -36,7 +36,8 @@ export const meta: MetaFunction = () => {
 
 export const loader: LoaderFunction = async ({ request }) => {
   const login = await auth.isLoggedIn();
-  if (login.isLoggedIn) {
+
+  if (login) {
     const referer = request.headers.get("Referer") || "/";
 
     return redirect(referer);

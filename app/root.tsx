@@ -1,27 +1,23 @@
-import type {
-  ActionFunctionArgs,
-  LinksFunction,
-  LoaderFunctionArgs,
-  MetaFunction,
-} from "@remix-run/node";
+import type { LinksFunction, MetaFunction } from "@remix-run/node";
 import {
   json,
   Links,
   Meta,
   Outlet,
-  redirect,
   Scripts,
   ScrollRestoration,
   useLoaderData,
 } from "@remix-run/react";
-
 import React from "react";
-import "./tailwind.css";
-import { AppLayout } from "./components/shared/app-layout";
 
-import "./tailwind.css";
+import { Footer } from "~/components/shared/footer";
+import { Navbar } from "~/components/shared/navbar";
+import { Toaster } from "~/components/ui/toaster";
+
 import { auth } from "./lib/auth";
 import { getCookie } from "./lib/cookie";
+
+import "./tailwind.css";
 
 export const meta: MetaFunction = () => {
   return [
@@ -59,24 +55,29 @@ export const links: LinksFunction = () => [
   },
 ];
 
-// export async function action({ request }: ActionFunctionArgs) {
- 
-//   return null;
-// }
-
-export async function loader({ request }: LoaderFunctionArgs) {
+export async function loader() {
   const token = getCookie("accessToken");
- 
-  const login = await auth.isLoggedIn();
 
-  return json({
-    user:login.user,
-    token
-  });
+  if (!token) {
+    return json({});
+  }
+
+  try {
+    const user = await auth.isLoggedIn();
+
+    if (!user) {
+      return json({});
+    }
+
+    return json(user);
+  } catch {
+    return json({});
+  }
 }
 
 export function Layout({ children }: { children: React.ReactNode }) {
-  const loaderData = useLoaderData<typeof loader>();
+  const user = useLoaderData<typeof loader>();
+
   return (
     <html lang="en">
       <head>
@@ -86,13 +87,10 @@ export function Layout({ children }: { children: React.ReactNode }) {
         <Links />
       </head>
       <body>
-        <AppLayout
-          user={loaderData.user}
-          token={loaderData.token}
-        >
-          <div className="min-h-screen ">{children}</div>
-        </AppLayout>
-
+        <Navbar user={user} />
+        <div className="min-h-screen">{children}</div>
+        <Footer />
+        <Toaster />
         <ScrollRestoration />
         <Scripts />
       </body>

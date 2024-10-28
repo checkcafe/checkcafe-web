@@ -1,6 +1,5 @@
-import { Form, Link } from "@remix-run/react";
-// import { ProfileIcon } from "../icons/icons";
-import { Searchbar } from "./searchbar";
+import { Link } from "@remix-run/react";
+
 import { Button } from "../ui/button";
 import {
   Tooltip,
@@ -8,16 +7,15 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "../ui/tooltip";
-import { UserProfile } from "~/lib/profile-http-request";
-export function Navbar({  user,token}: { user:Partial<UserProfile>|null,token:string|null }) {
+import { Searchbar } from "./searchbar";
 
-  console.log(token,'token')
+export function Navbar({ user }: { user: any }) {
   return (
     <nav className="sticky top-0 z-50 m-0 flex w-full justify-between bg-amber-50 p-8">
       <div className="flex-col gap-4 md:flex">
         <Link to={"/"}>
           <h2 className="font-brand text-3xl tracking-tight text-gray-900">
-            ☕CheckCafe
+            ☕ CheckCafe
           </h2>
         </Link>
       </div>
@@ -37,51 +35,45 @@ export function Navbar({  user,token}: { user:Partial<UserProfile>|null,token:st
             </Link>
           </li>
           <li>
-          {user ? (
-          <TooltipProvider>
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <span className="bg-background rounded-full p-1 flex items-center justify-center cursor-pointer">
-                  {/* <UserIcon className=" w-8 h-8 text-white" /> */}
-                  <img src={user?.avatarUrl} alt={user?.name} className="w-8 h-8 rounded-full" />
-                </span>
-              </TooltipTrigger>
-              <TooltipContent className="flex flex-col gap-4 bg-amber-50">
-                <Link
-                  to={`${user?.username}`}
-                  className=" flex gap-2 text-primary self-center hover:transform hover:scale-110 "
-                >
-                  <img src={user?.avatarUrl} alt={user?.name} className="w-8 h-8 rounded-full" />
-                  <p className="self-center">
-                     {user?.name}
-                    </p>
+            {user && user.name ? (
+              <TooltipProvider>
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <span className="flex cursor-pointer items-center justify-center rounded-full bg-background p-1">
+                      <img
+                        src={user.avatarUrl}
+                        alt={user.name}
+                        className="h-8 w-8 rounded-full"
+                      />
+                    </span>
+                  </TooltipTrigger>
+                  <TooltipContent className="flex flex-col gap-4 bg-amber-50">
+                    <Link
+                      to={`/${user.username}`}
+                      className="flex gap-2 self-center text-primary hover:scale-110 hover:transform"
+                    >
+                      <img
+                        src={user.avatarUrl}
+                        alt={user.name}
+                        className="h-8 w-8 rounded-full"
+                      />
+                      <p className="self-center">{user.name}</p>
+                    </Link>
+                    <Button asChild className="w-full self-center text-white">
+                      <Link to={"/logout"}>Logout</Link>
+                    </Button>
+                  </TooltipContent>
+                </Tooltip>
+              </TooltipProvider>
+            ) : (
+              <Button asChild>
+                <Link to={"/login"} className="self-center text-primary">
+                  Login
                 </Link>
-                {/* <Link
-                  to={"/dashboard"}
-                  className="text-primary self-center  hover:transform hover:scale-110 "
-                >
-                  Dashboard
-                </Link> */}
-                {/* <Form method="post"> */}
-                  {/* <input type="hidden" name="action" value="logout" />{" "} */}
-                  <Button asChild className=" self-center text-white w-full">
-                    <Link to={'/logout'}>
-                    Logout</Link>
-                  </Button>
-                {/* </Form> */}
-              </TooltipContent>
-            </Tooltip>
-          </TooltipProvider>
-        ) : (
-          <Button asChild>
-            <Link to={"/login"} className="text-primary self-center">
-              Login
-            </Link>
-          </Button>
-        )}
+              </Button>
+            )}
           </li>
         </ul>
-      
       </div>
     </nav>
   );
