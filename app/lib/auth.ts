@@ -1,11 +1,10 @@
 import { z } from "zod";
 
 import { LoginSchema, RegisterSchema } from "~/schemas/auth";
-
-import { apiFetch } from "./api";
-import { BACKEND_API_URL } from "./env";
 import { LoginResponse, RegisterResponse, TokenResponse } from "~/types/auth";
 
+import fetchAPI from "./api";
+import { BACKEND_API_URL } from "./env";
 
 export type Auth = {
   register(
@@ -103,8 +102,12 @@ export const auth: Auth = {
   },
 
   async isLoggedIn(): Promise<boolean> {
-    const response = await apiFetch("/auth/me");
+    try {
+      await fetchAPI("/auth/me");
 
-    return response ? true : false;
+      return true;
+    } catch (error) {
+      return false;
+    }
   },
 };
