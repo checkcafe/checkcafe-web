@@ -2,130 +2,109 @@ import { z } from "zod";
 
 import { LoginSchema, RegisterSchema } from "~/schemas/auth";
 
+import { apiFetch } from "./api";
 import { BACKEND_API_URL } from "./env";
-import { redirect } from "@remix-run/react";
+import { LoginResponse, RegisterResponse, TokenResponse } from "~/types/auth";
 
 
-export type LoginResponse = {
-  accessToken?: string;
-  refreshToken?: string;
-  role?: string;
-};
-export type LogoutResponse = {
-  ok: boolean;
-  error?: string;
-};
 export type Auth = {
-  // getToken: () => string | null;
-  register(userRegister: z.infer<typeof RegisterSchema>): Promise<void | null>;
-  login(userLogin: z.infer<typeof LoginSchema>): Promise<LoginResponse | null>;
-  checkUser(token: string): Promise<User | undefined>;
-  logout(token: string): Promise<LogoutResponse | null>;
-};  
-
-export type User = {
-  id: string;
-  name: string;
-  email: string;
-  username: string;
-  password: string;
-  avatarUrl: string;
-  roleId: string;
-  createdAt: string; // ISO date string format
-  updatedAt: string; // ISO date string format
-  role: {
-    id: string;
-    name: string;
-    parentId: string | null;
-    createdAt: string; // ISO date string format
-    updatedAt: string; // ISO date string format
-  };
+  register(
+    userRegister: z.infer<typeof RegisterSchema>,
+  ): Promise<RegisterResponse>;
+  login(userLogin: z.infer<typeof LoginSchema>): Promise<LoginResponse>;
+  isLoggedIn(): Promise<boolean>;
 };
 
 export const auth: Auth = {
-  // getToken() {
-  //   // const getToken = getAccessToken();
-
-  //   if (!getToken) {
-  //     return null;
-  //   }
-  //   return getToken;
-  // },
-
-  async register(userRegister: z.infer<typeof RegisterSchema>) {
+  async register(
+    userRegister: z.infer<typeof RegisterSchema>,
+  ): Promise<RegisterResponse> {
     try {
       const response = await fetch(`${BACKEND_API_URL}/auth/register`, {
+        headers: { "Content-Type": "application/json" },
         method: "POST",
         body: JSON.stringify(userRegister),
-        headers: { "Content-Type": "application/json" },
       });
 
-      const user = await response.json();
-      console.log(user.error.issues, user, "userss");
-      if (!user) return null;
-      return user;
-    } catch (error) {
-      console.log(error);
-      return error;
+      const result = await response.json();
+
+      if (!response.ok) {
+        return {
+          success: false,
+          error: {
+            message: result.error || "Registration failed: Unknown error",
+            status: response.status,
+          },
+        };
+      }
+
+      return { success: true };
+    } catch (error: unknown) {
+      return {
+        success: false,
+        error: {
+          message: "An unexpected error occurred. Please try again later.",
+          status: 500,
+        },
+      };
     }
   },
 
-  async login(userLogin: z.infer<typeof LoginSchema>) {
+  async login(userLogin: z.infer<typeof LoginSchema>): Promise<LoginResponse> {
     try {
       const response = await fetch(`${BACKEND_API_URL}/auth/login`, {
+        headers: { "Content-Type": "application/json" },
         method: "POST",
         body: JSON.stringify(userLogin),
-        headers: { "Content-Type": "application/json" },
       });
+
       const result = await response.json();
-      const { accessToken, refreshToken, role } = result as LoginResponse;
-      if (!accessToken || !refreshToken) {
-        return null;
+
+      if (!response.ok) {
+        return {
+          success: false,
+          error: {
+            message: result.error || "Login failed: Unknown error",
+            status: response.status,
+          },
+        };
       }
+
+      const { accessToken, refreshToken, role } = result as TokenResponse;
+
+      if (!accessToken || !refreshToken || !role) {
+        return {
+          success: false,
+          error: {
+            message:
+              "Invalid credentials: Missing required authentication tokens",
+            status: 401,
+          },
+        };
+      }
+
       return {
-        accessToken,
-        refreshToken,
-        role,
+        success: true,
+        data: {
+          accessToken,
+          refreshToken,
+          role,
+        },
       };
     } catch (error: unknown) {
-      console.error(error, "error");
       return {
-        accessToken: "",
-        refreshToken: "",
-        role: "",
+        success: false,
+        error: {
+          message: "An unexpected error occurred. Please try again later.",
+          status: 500,
+        },
       };
     }
   },
 
-  async checkUser(token:string) {
-    if (token) {
-      try {
-        const response = await fetch(`${BACKEND_API_URL}/auth/me`, {
-          headers: { Authorization: `Bearer ${token}` },
-        });
-        const result = await response.json();
-        return result;
-      } catch (error) {
-        console.error(error);
-      }
-    }
-  },
+  async isLoggedIn(): Promise<boolean> {
+    const response = await apiFetch("/auth/me");
 
-  async logout(token: string) {
-    if (!token) return redirect("/login");
-    const logout = await fetch(`${BACKEND_API_URL}/auth/logout`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ refreshToken: token }),
-    });
-
-    const result = await logout.json();
-    console.log(result, result.ok, "logout");
-    if (result.error) {
-      return redirect("/");
-    }
-    return {
-      ok: true,
-    };
+    return response ? true : false;
   },
 };

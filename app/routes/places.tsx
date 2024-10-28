@@ -1,4 +1,4 @@
-import { Badge } from "components/ui/badge";
+import { Badge } from "~/components/ui/badge";
 import { useRef } from "react";
 
 import { DollarIcon, LoveIcon, PinIcon } from "~/components/icons/icons";
