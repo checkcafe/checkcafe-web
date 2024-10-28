@@ -8,7 +8,6 @@ import {
   type GeoJSONSource,
   type MapRef,
 } from "react-map-gl";
-import { useNavigate } from "react-router-dom";
 
 import "mapbox-gl/dist/mapbox-gl.css";
 
@@ -17,6 +16,7 @@ import {
   clusterLayer,
   unclusteredPointLayer,
 } from "~/configs/layer";
+import { PlaceItem } from "~/types";
 
 const MAPBOX_TOKEN =
   "pk.eyJ1IjoiaWttYWw5NiIsImEiOiJjbTJqN3BpcGgwMnU3MmpvcW96NTRtb2RoIn0.jxkI7uKnc3mvMqWgIMKuhg";
@@ -30,15 +30,21 @@ type FeatureProperties = {
 
 export function MapboxView({
   places,
-  initialViewState = {
-    latitude: -0.4752106,
-    longitude: 116.6995672,
-    zoom: 4,
-  },
+  initialViewState = places.length > 0
+    ? {
+        latitude: places[0].latitude,
+        longitude: places[0].longitude,
+        zoom: 12,
+      }
+    : {
+        latitude: -0.4752106,
+        longitude: 116.6995672,
+        zoom: 4,
+      },
   onPlaceClick,
   height,
 }: {
-  places: any;
+  places: PlaceItem[];
   initialViewState?: {
     latitude: number;
     longitude: number;
@@ -47,12 +53,11 @@ export function MapboxView({
   onPlaceClick: (placeId: string) => void;
   height?: string;
 }) {
-  const navigate = useNavigate();
   const mapRef = useRef<MapRef>(null);
 
   const geojson: FeatureCollection = {
     type: "FeatureCollection",
-    features: places.map((place: any) => ({
+    features: places.map((place: PlaceItem) => ({
       type: "Feature",
       properties: {
         type: "Place",
