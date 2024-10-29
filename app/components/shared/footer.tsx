@@ -2,36 +2,44 @@ import { Link } from "@remix-run/react";
 
 export function Footer() {
   return (
-    <footer className="m-0 flex justify-between bg-white p-8">
-      <div className="flex-col gap-4 md:flex">
-        <h2 className="font-brand text-3xl tracking-tight text-gray-900">
-          ☕CheckCafe
+    <footer className="flex flex-col items-center justify-between bg-white p-4 md:flex-row md:p-8">
+      <div className="flex flex-col items-center gap-2 md:items-start">
+        <h2 className="font-brand text-2xl tracking-tight text-gray-900 md:text-3xl">
+          ☕ CheckCafe
         </h2>
-        <p className="text-sm">The guide to various cafes and great vibes</p>
+        <p className="text-center text-sm md:text-left">
+          The guide to various cafes and great vibes
+        </p>
       </div>
 
-      <div className="mt-12 flex gap-4 md:mt-0">
-        <div className="text-sm">
-          <h2 className="font-medium tracking-tight text-gray-900">Help</h2>
-          <ul className="mt-4">
+      <div className="mt-6 flex flex-col gap-4 md:mt-0 md:flex-row md:gap-8">
+        <div className="flex-1 text-sm">
+          <h2 className="font-bold tracking-tight text-gray-900">Help</h2>
+          <ul className="mt-2 space-y-1">
             <li>
-              <Link to="/">About</Link>
+              <Link to="/" className="text-primary hover:underline">
+                About
+              </Link>
             </li>
             <li>
-              <Link to="/">Support</Link>
+              <Link to="/" className="text-primary hover:underline">
+                Support
+              </Link>
             </li>
           </ul>
         </div>
-        <div className="text-sm">
-          <h2 className="font-medium tracking-tight text-gray-900">
-            Contact Us
-          </h2>
-          <ul className="mt-4">
+        <div className="flex-1 text-sm">
+          <h2 className="font-bold tracking-tight text-gray-900">Contact</h2>
+          <ul className="mt-2 space-y-1">
             <li>
-              <Link to="/">Instagram</Link>
+              <Link to="/" className="text-primary hover:underline">
+                Instagram
+              </Link>
             </li>
             <li>
-              <Link to="/">Telegram</Link>
+              <Link to="/" className="text-primary hover:underline">
+                Telegram
+              </Link>
             </li>
           </ul>
         </div>
