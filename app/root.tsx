@@ -1,21 +1,21 @@
-import type {
-  LinksFunction,
-  LoaderFunctionArgs,
-  MetaFunction,
-} from "@remix-run/node";
+import type { LinksFunction, MetaFunction } from "@remix-run/node";
 import {
   json,
   Links,
   Meta,
   Outlet,
-  redirect,
   Scripts,
   ScrollRestoration,
   useLoaderData,
 } from "@remix-run/react";
+import React from "react";
 
-import { AppLayout } from "./components/shared/app-layout";
-import { createCustomCookie } from "./lib/access-token";
+import { Footer } from "~/components/shared/footer";
+import { Navbar } from "~/components/shared/navbar";
+import { Toaster } from "~/components/ui/toaster";
+
+import { auth } from "./lib/auth";
+import { getCookie } from "./lib/cookie";
 
 import "./tailwind.css";
 
@@ -55,18 +55,28 @@ export const links: LinksFunction = () => [
   },
 ];
 
-export async function loader({ request }: LoaderFunctionArgs) {
-  const cookieHeader = request.headers.get("Cookie");
-  const accessTokenCookie = createCustomCookie("accessToken");
-  const cookie = accessTokenCookie.parse(cookieHeader);
+export async function loader() {
+  const token = getCookie("accessToken");
 
-  if (!cookie) return redirect("/login");
+  if (!token) {
+    return json({});
+  }
 
-  return json({ accessToken: await cookie });
+  try {
+    const user = await auth.isLoggedIn();
+
+    if (!user) {
+      return json({});
+    }
+
+    return json(user);
+  } catch {
+    return json({});
+  }
 }
 
 export function Layout({ children }: { children: React.ReactNode }) {
-  const loaderData = useLoaderData<typeof loader>();
+  const user = useLoaderData<typeof loader>();
 
   return (
     <html lang="en">
@@ -77,10 +87,10 @@ export function Layout({ children }: { children: React.ReactNode }) {
         <Links />
       </head>
       <body>
-        <AppLayout cookie={loaderData ? loaderData.accessToken : ""}>
-          <div className="min-h-screen">{children}</div>
-        </AppLayout>
-
+        <Navbar user={user} />
+        <div className="min-h-screen">{children}</div>
+        <Footer />
+        <Toaster />
         <ScrollRestoration />
         <Scripts />
       </body>
