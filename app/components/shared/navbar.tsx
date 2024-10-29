@@ -8,6 +8,8 @@ import {
   TooltipTrigger,
 } from "../ui/tooltip";
 import { Searchbar } from "./searchbar";
+import { Popover, PopoverContent, PopoverTrigger } from "../ui/popover";
+import { Separator } from "../ui/separator";
 
 export function Navbar({ user }: { user: any }) {
   return (
@@ -30,41 +32,56 @@ export function Navbar({ user }: { user: any }) {
             </Link>
           </li>
           <li>
+            <Link to={`/${user.username}`}
+            className="text-primary">
+              Profile
+            </Link>
+          </li>
+          <li>
             <Link to={"/about"} className="text-primary">
               About
             </Link>
           </li>
           <li>
+         
             {user && user.name ? (
-              <TooltipProvider>
-                <Tooltip>
-                  <TooltipTrigger asChild>
-                    <span className="flex cursor-pointer items-center justify-center rounded-full bg-background p-1">
+              <>
+              
+              <Popover >
+                <PopoverTrigger asChild>
+                <span className="flex cursor-pointer items-center justify-center rounded-full bg-primary p-1">
                       <img
                         src={user.avatarUrl}
                         alt={user.name}
                         className="h-8 w-8 rounded-full"
                       />
                     </span>
-                  </TooltipTrigger>
-                  <TooltipContent className="flex flex-col gap-4 bg-amber-50">
-                    <Link
-                      to={`/${user.username}`}
-                      className="flex gap-2 self-center text-primary hover:scale-110 hover:transform"
+              </PopoverTrigger>
+              <PopoverContent className="w-80 bg-amber-50">
+                <div className="grid gap-4 font-semibold">
+                    <span
+                      className="flex gap-2 self-center text-primary justify-center "
                     >
                       <img
                         src={user.avatarUrl}
                         alt={user.name}
                         className="h-8 w-8 rounded-full"
                       />
-                      <p className="self-center">{user.name}</p>
-                    </Link>
+                      <p className="self-center ">{user.name}</p>
+                    </span>
+                    <Separator orientation="horizontal"/>
+                    <Link to={`${user.username}`}
+                    className="text-primary hover:bg-slate-100 p-2 rounded-md">
+                      Profile
+                      </Link>
                     <Button asChild className="w-full self-center text-white">
                       <Link to={"/logout"}>Logout</Link>
                     </Button>
-                  </TooltipContent>
-                </Tooltip>
-              </TooltipProvider>
+        </div>
+      </PopoverContent>
+    </Popover>
+              
+              </>
             ) : (
               <Button asChild>
                 <Link to={"/login"} className="self-center text-primary">
