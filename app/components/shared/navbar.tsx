@@ -31,12 +31,7 @@ export function Navbar({ user }: { user: any }) {
               Places
             </Link>
           </li>
-          <li>
-            <Link to={`/${user.username}`}
-            className="text-primary">
-              Profile
-            </Link>
-          </li>
+         
           <li>
             <Link to={"/about"} className="text-primary">
               About
