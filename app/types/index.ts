@@ -54,3 +54,14 @@ export type Place = {
   photos: string[];
   submitter: User;
 };
+
+export type FavoritePlace = {
+  favoriteId: string;
+  name: string;
+  slug: string;
+  description?: string;
+  streetAddress: Address;
+  priceRange: string;
+  latitude: number;
+  longitude: number;
+};

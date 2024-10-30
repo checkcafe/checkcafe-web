@@ -4,23 +4,25 @@ import {
   LoaderFunctionArgs,
   redirect,
 } from "@remix-run/node";
-import { Link, useActionData, useLoaderData } from "@remix-run/react";
+import { useLoaderData } from "@remix-run/react";
 import { useRef } from "react";
 
 import AllPlaceCard from "~/components/shared/all-places/all-place-card";
 import PlaceFilter from "~/components/shared/all-places/filter-places";
 import { MapboxView } from "~/components/ui/mapbox-view";
-import { toast } from "~/hooks/use-toast";
 import { getCookie } from "~/lib/cookie";
 import { BACKEND_API_URL } from "~/lib/env";
-import { addFavoritePlace, getFavoritePlaces } from "~/lib/favorite-place";
-import { PlaceItem } from "~/types";
+import {
+  addFavoritePlace,
+  getFavoritePlaces,
+  unfavoritePlace,
+} from "~/lib/favorite-place";
+import { FavoritePlace, PlaceItem } from "~/types";
 import { Filter } from "~/types/filter";
 
 export async function loader({ request }: LoaderFunctionArgs) {
   const url = new URL(request.url);
-  const favorite = await getFavoritePlaces();
-  const favoriteSlugs = favorite.map((place: PlaceItem) => place.slug);
+  const favorites = await getFavoritePlaces();
 
   const filter: Filter = {};
 
@@ -58,19 +60,23 @@ export async function loader({ request }: LoaderFunctionArgs) {
     const response = await fetch(apiUrl.toString());
 
     if (!response.ok) {
-      return { places: [], favoriteSlugs, hasCityParam: Boolean(city) };
+      return { places: [], favorites: [], hasCityParam: Boolean(city) };
     }
     const places: PlaceItem[] = await response.json();
 
-    return { places, favoriteSlugs, hasCityParam: Boolean(city) };
+    return { places, favorites, hasCityParam: Boolean(city) };
   } catch (error) {
-    return { places: [], favoriteSlugs: [], hasCityParam: false };
+    return { places: [], favorites: [], hasCityParam: false };
   }
 }
 
 export default function Places() {
-  const { places, hasCityParam, favoriteSlugs } =
-    useLoaderData<typeof loader>();
+  const { places, hasCityParam, favorites } = useLoaderData<typeof loader>();
+
+  const favoriteMap = new Map();
+  favorites.forEach((favorite: FavoritePlace) => {
+    favoriteMap.set(favorite.slug, favorite.favoriteId);
+  });
 
   const cardRefs = useRef<(HTMLDivElement | null)[]>([]);
 
@@ -97,15 +103,23 @@ export default function Places() {
           <>
             <main className={`${hasCityParam ? "w-1/2" : "w-full"}`}>
               <ul className="flex w-full flex-col gap-7">
-                {places.map((place: PlaceItem, index: number) => (
-                  <div key={place.id}>
-                    <AllPlaceCard
-                      place={place}
-                      ref={el => (cardRefs.current[index] = el)}
-                      isFavorite={favoriteSlugs.includes(place.slug)}
-                    />
-                  </div>
-                ))}
+                {places.map((place, index) => {
+                  const isFavorite = favoriteMap.has(place.slug);
+                  const favoriteId = isFavorite
+                    ? favoriteMap.get(place.slug)
+                    : null;
+
+                  return (
+                    <div key={place.id}>
+                      <AllPlaceCard
+                        place={place}
+                        ref={el => (cardRefs.current[index] = el)}
+                        isFavorite={isFavorite}
+                        favoriteId={favoriteId}
+                      />
+                    </div>
+                  );
+                })}
               </ul>
             </main>
 
@@ -130,16 +144,28 @@ export async function action({ request }: ActionFunctionArgs) {
 
   const formData = await request.formData();
   const placeId = formData.get("placeId")?.toString();
+  const favoriteId = formData.get("favoriteId")?.toString();
+  const method = request.method;
 
   if (!placeId) {
     return json({ error: "Place ID is required" });
   }
 
   try {
-    await addFavoritePlace(placeId);
+    if (method === "POST") {
+      await addFavoritePlace(placeId);
+    } else if (method === "DELETE") {
+      if (!favoriteId) {
+        return json({ error: "Favorite ID is required" });
+      }
+      await unfavoritePlace(favoriteId);
+    } else {
+      return json({ error: "Invalid action type" });
+    }
+
     return redirect("/places");
   } catch (error) {
-    console.error("Error adding favorite place:", error);
-    return json({ error: "Failed to add favorite place" }, { status: 500 });
+    console.error("Error processing favorite place action:", error);
+    return json({ error: "Failed to process favorite place" }, { status: 500 });
   }
 }

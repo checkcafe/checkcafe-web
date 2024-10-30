@@ -1,9 +1,10 @@
 import { type FeatureCollection } from "geojson";
 import { MapMouseEvent, type GeoJSONFeature } from "mapbox-gl";
-import { useRef } from "react";
+import { useRef, useState } from "react";
 import {
   Layer,
   Map,
+  Popup,
   Source,
   type GeoJSONSource,
   type MapRef,
@@ -26,6 +27,8 @@ type FeatureProperties = {
   id: string;
   title: string;
   slug: string;
+  name: string;
+  thumbnail: string;
 };
 
 export function MapboxView({
@@ -54,6 +57,12 @@ export function MapboxView({
   height?: string;
 }) {
   const mapRef = useRef<MapRef>(null);
+  const [popupInfo, setPopupInfo] = useState<{
+    longitude: number;
+    latitude: number;
+    name: string;
+    thumbnail?: string;
+  } | null>(null);
 
   const geojson: FeatureCollection = {
     type: "FeatureCollection",
@@ -63,6 +72,7 @@ export function MapboxView({
         type: "Place",
         id: place.id,
         name: place.name,
+        thumbnail: place.thumbnail,
         active: false,
       },
       geometry: {
@@ -148,9 +158,22 @@ export function MapboxView({
   const onMouseEnter = (event: MapMouseEvent) => {
     const features = event.features as GeoJSONFeature[];
     if (features.length) {
-      const canvas = mapRef.current?.getCanvas();
-      if (canvas) {
-        canvas.style.cursor = "pointer";
+      const feature = features[0];
+      const featureProperties = feature.properties as FeatureProperties;
+
+      if (
+        feature.geometry.type === "Point" &&
+        featureProperties.type === "Place"
+      ) {
+        const coordinates = feature.geometry.coordinates as [number, number];
+        const [longitude, latitude] = coordinates;
+
+        setPopupInfo({
+          longitude,
+          latitude,
+          name: featureProperties.name,
+          thumbnail: featureProperties.thumbnail,
+        });
       }
     }
   };
@@ -160,6 +183,7 @@ export function MapboxView({
     if (canvas) {
       canvas.style.cursor = "";
     }
+    setPopupInfo(null);
   };
 
   return (
@@ -189,6 +213,26 @@ export function MapboxView({
         <Layer {...clusterCountLayer} />
         <Layer {...unclusteredPointLayer} />
       </Source>
+
+      {popupInfo && popupInfo.thumbnail && (
+        <Popup
+          longitude={popupInfo.longitude}
+          latitude={popupInfo.latitude}
+          closeButton={false}
+          closeOnClick={false}
+          onClose={() => setPopupInfo(null)}
+          anchor="top"
+          className="rounded-lg bg-white p-4 shadow-lg"
+        >
+          <img
+            src={popupInfo.thumbnail}
+            alt={popupInfo.name}
+            className="mb-2 h-32 w-32 rounded-md object-cover"
+          />
+
+          <div className="font-semibold text-gray-800">{popupInfo.name}</div>
+        </Popup>
+      )}
     </Map>
   );
 }

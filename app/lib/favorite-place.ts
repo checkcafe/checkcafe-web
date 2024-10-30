@@ -1,9 +1,5 @@
-import { toast } from "~/hooks/use-toast";
-
 import fetchAPI from "./api";
 import { auth } from "./auth";
-import { getCookie } from "./cookie";
-import { BACKEND_API_URL } from "./env";
 
 export async function getFavoritePlaces() {
   let favorites = [];
@@ -15,7 +11,7 @@ export async function getFavoritePlaces() {
 
     try {
       const response = await fetchAPI(favoritesUrl);
-      favorites = response.place_favorites;
+      favorites = response.placeFavorites;
     } catch (error) {
       console.error("Error fetching favorite places");
     }
@@ -25,31 +21,40 @@ export async function getFavoritePlaces() {
 }
 
 export async function addFavoritePlace(placeId: string) {
-  const token = getCookie("accessToken");
   const user = await auth.isLoggedIn();
   if (!user || typeof user === "boolean") {
     throw new Error("User is not logged in");
   }
 
   const username = user.username;
-  const favoritesUrl = `${BACKEND_API_URL}/users/${username}/favorites`;
+  const favoritesUrl = `/users/${username}/favorites`;
+
+  const payload = {
+    id: placeId,
+  };
 
   try {
-    // const response = await fetchAPI(favoritesUrl, "POST", { placeId });
-
-    const response = await fetch(favoritesUrl, {
-      method: "POST",
-      body: JSON.stringify({
-        id: placeId,
-      }),
-      headers: {
-        Authorization: `Bearer ${token}`,
-        "Content-Type": "application/json",
-      },
-    });
+    const response = await fetchAPI(favoritesUrl, "POST", payload);
 
     return response;
   } catch (error) {
     console.error("Error adding favorite place", error);
+  }
+}
+
+export async function unfavoritePlace(favoriteId: string) {
+  const user = await auth.isLoggedIn();
+  if (!user || typeof user === "boolean") {
+    throw new Error("User is not logged in");
+  }
+
+  const username = user.username;
+  const unfavoriteUrl = `/users/${username}/favorites/${favoriteId}`;
+
+  try {
+    const response = await fetchAPI(unfavoriteUrl, "DELETE");
+    return response;
+  } catch (error) {
+    console.error("Error removing favorite place", error);
   }
 }
