@@ -7,22 +7,16 @@ import { ImageCarousel } from "~/components/shared/places/image-carousel";
 import { OperatingHourItem } from "~/components/shared/places/operating-hour";
 import { MapboxView } from "~/components/ui/mapbox-view";
 import { BACKEND_API_URL } from "~/lib/env";
-import { type Place } from "~/types";
+import { type Place, type PlaceItem } from "~/types";
 import { formatPrice } from "~/utils/formatter";
 
-/**
- * Loader for get place
- *
- * @param param -  LoaderFunctionArgs
- * @returns place loader
- */
 export async function loader({ params }: LoaderFunctionArgs) {
   const { slug } = params;
   if (!slug) return redirect("/places");
 
   const url = `${BACKEND_API_URL}/places/${slug}`;
   const responsePlace = await fetch(url);
-  const place: Place = await responsePlace.json();
+  const place: Place & PlaceItem = await responsePlace.json();
 
   if (!place) {
     throw new Response(null, { status: 404, statusText: "Place Not Found" });
@@ -72,10 +66,9 @@ export default function PlaceSlug() {
           <MapboxView
             places={[
               {
-                id: place.id,
-                name: place.name,
-                longitude: place.longitude,
-                latitude: place.latitude,
+                ...place,
+                longitude: Number(place.longitude),
+                latitude: Number(place.latitude),
               },
             ]}
             initialViewState={{
