@@ -33,7 +33,7 @@ export function Navbar({ user }: { user: any }) {
         <span className="flex h-10 w-full rounded-md bg-white shadow-lg">
           <Input
             type="search"
-            name="search"
+            name="q"
             placeholder="Search..."
             className="border-none focus-visible:ring-0 focus-visible:ring-offset-0"
           />

@@ -7,15 +7,14 @@ import {
 } from "~/components/ui/select";
 
 interface SelectHourProps {
-  openTimeRef: React.RefObject<HTMLSelectElement>;
-  closeTimeRef: React.RefObject<HTMLSelectElement>;
+  defaultOpenTime: string;
+  defaultCloseTime: string;
 }
 
 export default function SelectHour({
-  openTimeRef,
-  closeTimeRef,
+  defaultOpenTime,
+  defaultCloseTime,
 }: SelectHourProps) {
-  // Generate time options in 30-minute intervals
   const generateTimeOptions = () => {
     const options = [];
     for (let hour = 0; hour < 24; hour++) {
@@ -31,19 +30,14 @@ export default function SelectHour({
 
   return (
     <div className="flex gap-6">
-      {/* Select for Opening Time (From) */}
       <div className="w-full">
         <label>From</label>
-        <Select
-          onValueChange={value => {
-            if (openTimeRef.current) openTimeRef.current.value = value;
-          }}
-          name="OpenTime"
-        >
+        <Select defaultValue={defaultOpenTime} name="openTime">
           <SelectTrigger className="w-full">
-            <SelectValue placeholder="09:00" ref={openTimeRef} />
+            <SelectValue placeholder="09:00" />
           </SelectTrigger>
           <SelectContent>
+            <SelectItem value="none" className="hidden"></SelectItem>
             {timeOptions.map(time => (
               <SelectItem key={time} value={time}>
                 {time}
@@ -53,19 +47,14 @@ export default function SelectHour({
         </Select>
       </div>
 
-      {/* Select for Closing Time (To) */}
       <div className="w-full">
         <label>To</label>
-        <Select
-          onValueChange={value => {
-            if (closeTimeRef.current) closeTimeRef.current.value = value;
-          }}
-          name="CloseTime"
-        >
+        <Select defaultValue={defaultCloseTime} name="closeTime">
           <SelectTrigger className="w-full">
-            <SelectValue placeholder="22:00" ref={closeTimeRef} />
+            <SelectValue placeholder="22:00" />
           </SelectTrigger>
           <SelectContent>
+            <SelectItem value="none" className="hidden"></SelectItem>
             {timeOptions.map(time => (
               <SelectItem key={time} value={time}>
                 {time}

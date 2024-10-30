@@ -1,16 +1,26 @@
-import { LoaderFunctionArgs } from "@remix-run/node";
-import { Link, useLoaderData } from "@remix-run/react";
+import {
+  ActionFunctionArgs,
+  json,
+  LoaderFunctionArgs,
+  redirect,
+} from "@remix-run/node";
+import { Link, useActionData, useLoaderData } from "@remix-run/react";
 import { useRef } from "react";
 
 import AllPlaceCard from "~/components/shared/all-places/all-place-card";
 import PlaceFilter from "~/components/shared/all-places/filter-places";
 import { MapboxView } from "~/components/ui/mapbox-view";
+import { toast } from "~/hooks/use-toast";
+import { getCookie } from "~/lib/cookie";
 import { BACKEND_API_URL } from "~/lib/env";
+import { addFavoritePlace, getFavoritePlaces } from "~/lib/favorite-place";
 import { PlaceItem } from "~/types";
 import { Filter } from "~/types/filter";
 
 export async function loader({ request }: LoaderFunctionArgs) {
   const url = new URL(request.url);
+  const favorite = await getFavoritePlaces();
+  const favoriteSlugs = favorite.map((place: PlaceItem) => place.slug);
 
   const filter: Filter = {};
 
@@ -46,19 +56,21 @@ export async function loader({ request }: LoaderFunctionArgs) {
 
   try {
     const response = await fetch(apiUrl.toString());
+
     if (!response.ok) {
-      return { places: [], hasCityParam: Boolean(city) };
+      return { places: [], favoriteSlugs, hasCityParam: Boolean(city) };
     }
     const places: PlaceItem[] = await response.json();
 
-    return { places, hasCityParam: Boolean(city) };
+    return { places, favoriteSlugs, hasCityParam: Boolean(city) };
   } catch (error) {
-    return { places: [], hasCityParam: false };
+    return { places: [], favoriteSlugs: [], hasCityParam: false };
   }
 }
 
 export default function Places() {
-  const { places, hasCityParam } = useLoaderData<typeof loader>();
+  const { places, hasCityParam, favoriteSlugs } =
+    useLoaderData<typeof loader>();
 
   const cardRefs = useRef<(HTMLDivElement | null)[]>([]);
 
@@ -86,12 +98,13 @@ export default function Places() {
             <main className={`${hasCityParam ? "w-1/2" : "w-full"}`}>
               <ul className="flex w-full flex-col gap-7">
                 {places.map((place: PlaceItem, index: number) => (
-                  <Link to={`/place/${place.slug}`} key={place.id}>
+                  <div key={place.id}>
                     <AllPlaceCard
                       place={place}
                       ref={el => (cardRefs.current[index] = el)}
+                      isFavorite={favoriteSlugs.includes(place.slug)}
                     />
-                  </Link>
+                  </div>
                 ))}
               </ul>
             </main>
@@ -106,4 +119,27 @@ export default function Places() {
       </div>
     </div>
   );
+}
+
+export async function action({ request }: ActionFunctionArgs) {
+  const token = getCookie("accessToken");
+
+  if (!token) {
+    return redirect("/login");
+  }
+
+  const formData = await request.formData();
+  const placeId = formData.get("placeId")?.toString();
+
+  if (!placeId) {
+    return json({ error: "Place ID is required" });
+  }
+
+  try {
+    await addFavoritePlace(placeId);
+    return redirect("/places");
+  } catch (error) {
+    console.error("Error adding favorite place:", error);
+    return json({ error: "Failed to add favorite place" }, { status: 500 });
+  }
 }

@@ -1,3 +1,4 @@
+import { Form } from "@remix-run/react";
 import { Clock3 } from "lucide-react";
 import React, { forwardRef } from "react";
 
@@ -9,10 +10,11 @@ import { formatPrice } from "~/utils/formatter";
 interface PlaceCardProps {
   place: PlaceItem;
   ref: React.Ref<HTMLDivElement>;
+  isFavorite: boolean;
 }
 
 const AllPlaceCard = forwardRef<HTMLDivElement, PlaceCardProps>(
-  ({ place }, ref) => (
+  ({ place, isFavorite }, ref) => (
     <Card
       ref={ref}
       key={place.id}
@@ -29,10 +31,17 @@ const AllPlaceCard = forwardRef<HTMLDivElement, PlaceCardProps>(
             <h4 className="text-2xl font-semibold">{place.name}</h4>
             <span className="flex gap-2 text-sm text-slate-400">
               <PinIcon className="h-4 w-4" />
-              <p className="self-center text-sm">{place.address.city}</p>
+              <p className="self-center text-sm">
+                {place.address.street}, {place.address.city}
+              </p>
             </span>
           </span>
-          <LoveIcon />
+          <Form method="post" action="/places">
+            <input type="hidden" name="placeId" value={place.id} />
+            <button type="submit" className="cursor-pointer">
+              <LoveIcon fills={isFavorite ? "red" : "#372816"} />
+            </button>
+          </Form>
         </CardTitle>
         <CardContent className="items-end p-0">
           <p className="font-bold">{place.description}</p>
