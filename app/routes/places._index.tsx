@@ -86,7 +86,7 @@ export default function Places() {
             <main className={`${hasCityParam ? "w-1/2" : "w-full"}`}>
               <ul className="flex w-full flex-col gap-7">
                 {places.map((place: PlaceItem, index: number) => (
-                  <Link to={`/place/${place.slug}`} key={place.id}>
+                  <Link to={`/places/${place.slug}`} key={place.id}>
                     <AllPlaceCard
                       place={place}
                       ref={el => (cardRefs.current[index] = el)}

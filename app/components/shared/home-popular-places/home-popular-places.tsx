@@ -27,7 +27,7 @@ export const HomePopularPlaces = ({ places }: { places: PlaceItem[] }) => {
                 closingTime,
               }) => {
                 return (
-                  <Link to={`/place/${slug}`} key={id}>
+                  <Link to={`/places/${slug}`} key={id}>
                     <PlaceCard
                       name={<span className="truncate">{name}</span>}
                       image={thumbnail}
