@@ -1,7 +1,6 @@
 import { LoaderFunctionArgs } from "@remix-run/node";
-import { json, redirect, useLoaderData } from "@remix-run/react";
+import { json, useLoaderData } from "@remix-run/react";
 
-import { createCustomCookie } from "~/lib/access-token";
 import { profile } from "~/lib/profile-http-request";
 
 export async function loader({ params, request }: LoaderFunctionArgs) {
@@ -15,19 +14,19 @@ export async function loader({ params, request }: LoaderFunctionArgs) {
 }
 
 export default function Profile() {
-  const loaderData = useLoaderData<typeof loader>();
+  const {user} = useLoaderData<typeof loader>();
   return (
     <div className=" ">
       <main className="flex translate-y-1/4 flex-col gap-16 p-20">
         <section className="flex gap-4">
           <img
-            src={loaderData.user?.avatarUrl}
-            alt={loaderData.user?.name}
+            src={user?.avatarUrl}
+            alt={user?.name}
             className="rounded-full"
           />
           <span>
-            <h1 className="text-2xl font-bold">{loaderData.user?.name}</h1>
-            <p className="text-slate-500">{loaderData.user?.username}</p>
+            <h1 className="text-2xl font-bold">{user?.name}</h1>
+            <p className="text-slate-500">{user?.username}</p>
           </span>
         </section>
       </main>
