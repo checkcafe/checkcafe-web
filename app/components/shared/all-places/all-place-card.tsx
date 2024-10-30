@@ -1,4 +1,4 @@
-import { Form } from "@remix-run/react";
+import { Form, Link } from "@remix-run/react";
 import { Clock3 } from "lucide-react";
 import React, { forwardRef } from "react";
 
@@ -31,15 +31,17 @@ const AllPlaceCard = forwardRef<HTMLDivElement, PlaceCardProps>(
         />
         <div className="flex w-full flex-col justify-between p-3">
           <CardTitle className="flex justify-between">
-            <span>
-              <h4 className="text-2xl font-semibold">{place.name}</h4>
-              <span className="flex gap-2 text-sm text-slate-400">
-                <PinIcon className="h-4 w-4" />
-                <p className="self-center text-sm">
-                  {place.address.street}, {place.address.city}
-                </p>
+            <Link to={`/places/${place.slug}`}>
+              <span>
+                <h4 className="text-2xl font-semibold">{place.name}</h4>
+                <span className="flex gap-2 text-sm text-slate-400">
+                  <PinIcon className="h-4 w-4" />
+                  <p className="self-center text-sm">
+                    {place.address.street}, {place.address.city}
+                  </p>
+                </span>
               </span>
-            </span>
+            </Link>
             <Form method={method} action="/places" preventScrollReset={true}>
               <input type="hidden" name="placeId" value={place.id} />
               <input type="hidden" name="favoriteId" value={favoriteId || ""} />
