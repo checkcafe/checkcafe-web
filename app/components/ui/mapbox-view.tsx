@@ -99,7 +99,7 @@ export function MapboxView({
 
       const source = map.getSource("places-source") as GeoJSONSource;
 
-      source.getClusterExpansionZoom(clusterId, (err, zoom) => {
+      source.getClusterExpansionZoom(clusterId, err => {
         if (err) return;
 
         if (feature.geometry.type === "Point") {
