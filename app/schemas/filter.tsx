@@ -22,12 +22,4 @@ export const filterSchema = z
           "The maximum price must be greater than or equal to the minimum price",
       });
     }
-
-    if (data.openTime && data.closeTime && data.closeTime <= data.openTime) {
-      ctx.addIssue({
-        code: "custom",
-        path: ["closeTime"],
-        message: "Close time must be after open time",
-      });
-    }
   });
