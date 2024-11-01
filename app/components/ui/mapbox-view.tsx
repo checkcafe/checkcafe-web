@@ -1,9 +1,10 @@
 import { type FeatureCollection } from "geojson";
 import { MapMouseEvent, type GeoJSONFeature } from "mapbox-gl";
-import { useRef } from "react";
+import { useRef, useState } from "react";
 import {
   Layer,
   Map,
+  Popup,
   Source,
   type GeoJSONSource,
   type MapRef,
@@ -26,6 +27,8 @@ type FeatureProperties = {
   id: string;
   title: string;
   slug: string;
+  name: string;
+  thumbnailUrl: string;
 };
 
 export function MapboxView({
@@ -34,7 +37,7 @@ export function MapboxView({
     ? {
         latitude: places[0].latitude,
         longitude: places[0].longitude,
-        zoom: 12,
+        zoom: 11,
       }
     : {
         latitude: -0.4752106,
@@ -54,15 +57,22 @@ export function MapboxView({
   height?: string;
 }) {
   const mapRef = useRef<MapRef>(null);
+  const [popupInfo, setPopupInfo] = useState<{
+    longitude: number;
+    latitude: number;
+    name: string;
+    thumbnailUrl?: string;
+  } | null>(null);
 
   const geojson: FeatureCollection = {
     type: "FeatureCollection",
-    features: places.map((place: PlaceItem) => ({
+    features: places.map((place: any) => ({
       type: "Feature",
       properties: {
         type: "Place",
         id: place.id,
         name: place.name,
+        thumbnailUrl: place.thumbnailUrl,
         active: false,
       },
       geometry: {
@@ -148,9 +158,22 @@ export function MapboxView({
   const onMouseEnter = (event: MapMouseEvent) => {
     const features = event.features as GeoJSONFeature[];
     if (features.length) {
-      const canvas = mapRef.current?.getCanvas();
-      if (canvas) {
-        canvas.style.cursor = "pointer";
+      const feature = features[0];
+      const featureProperties = feature.properties as FeatureProperties;
+
+      if (
+        feature.geometry.type === "Point" &&
+        featureProperties.type === "Place"
+      ) {
+        const coordinates = feature.geometry.coordinates as [number, number];
+        const [longitude, latitude] = coordinates;
+
+        setPopupInfo({
+          longitude,
+          latitude,
+          name: featureProperties.name,
+          thumbnailUrl: featureProperties.thumbnailUrl,
+        });
       }
     }
   };
@@ -160,6 +183,7 @@ export function MapboxView({
     if (canvas) {
       canvas.style.cursor = "";
     }
+    setPopupInfo(null);
   };
 
   return (
@@ -189,6 +213,28 @@ export function MapboxView({
         <Layer {...clusterCountLayer} />
         <Layer {...unclusteredPointLayer} />
       </Source>
+
+      {popupInfo && popupInfo.thumbnailUrl && (
+        <Popup
+          longitude={popupInfo.longitude}
+          latitude={popupInfo.latitude}
+          closeButton={false}
+          closeOnClick={false}
+          onClose={() => setPopupInfo(null)}
+          anchor="top"
+          className="rounded-lg"
+        >
+          <img
+            src={popupInfo.thumbnailUrl}
+            alt={popupInfo.name}
+            className="mb-2 h-40 w-40 rounded-md object-cover"
+          />
+
+          <p className="text-center text-xs font-semibold text-gray-800">
+            {popupInfo.name}
+          </p>
+        </Popup>
+      )}
     </Map>
   );
 }

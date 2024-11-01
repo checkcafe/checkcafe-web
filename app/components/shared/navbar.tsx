@@ -9,6 +9,8 @@ import { Avatar, AvatarFallback, AvatarImage } from "../ui/avatar";
 import { Button } from "../ui/button";
 import { Input } from "../ui/input";
 import { Popover, PopoverContent, PopoverTrigger } from "../ui/popover";
+import { Searchbar } from "./searchbar";
+import { SearchbarMobile } from "./searchbar-mobile";
 
 export function Navbar({ user }: { user: any }) {
   const { setUser } = useUser();
@@ -57,24 +59,7 @@ export function Navbar({ user }: { user: any }) {
         </Link>
       </div>
 
-      <Form
-        method="get"
-        action="/places"
-        className="hidden w-[40%] gap-2 md:flex"
-      >
-        <span className="flex h-10 w-full rounded-md bg-white shadow-lg">
-          <Input
-            type="search"
-            name="q"
-            placeholder="Search..."
-            className="border-none focus-visible:ring-0 focus-visible:ring-offset-0"
-            required
-          />
-        </span>
-        <Button type="submit" className="h-10">
-          <SearchIcon className="h-6 w-6" />
-        </Button>
-      </Form>
+      <Searchbar />
 
       <div className="flex items-center gap-4 md:hidden">
         <button onClick={handleHamburgerClick} className="text-primary">
@@ -161,22 +146,7 @@ export function Navbar({ user }: { user: any }) {
       {/* Dropdown Menu untuk Mobile */}
       {menuState.isHamburgerOpen && (
         <div className="absolute left-0 top-16 w-full bg-amber-50 p-4 shadow-lg lg:hidden">
-          <Form
-            method="get"
-            action="/places"
-            className="mb-4 flex w-full gap-2"
-          >
-            <Input
-              type="search"
-              name="q"
-              placeholder="Search..."
-              className="border-none focus-visible:ring-0 focus-visible:ring-offset-0"
-              required
-            />
-            <Button type="submit" className="h-10">
-              <SearchIcon className="h-6 w-6" />
-            </Button>
-          </Form>
+          <SearchbarMobile />
 
           <div className="flex w-full flex-col gap-1 text-primary">
             <Link

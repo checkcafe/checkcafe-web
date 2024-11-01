@@ -59,3 +59,14 @@ export type Place = {
   thumbnailUrl: string;
   submitter: User;
 };
+
+export type FavoritePlace = {
+  favoriteId: string;
+  name: string;
+  slug: string;
+  description?: string;
+  streetAddress: Address;
+  priceRange: string;
+  latitude: number;
+  longitude: number;
+};
