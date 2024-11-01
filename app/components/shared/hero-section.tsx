@@ -19,9 +19,17 @@ export function HomeHeroSection() {
             CheckCafe is the guide to various cafes and great vibes
           </p>
 
-          <Button size="cta">
-            <Link to="/places">Explore Places</Link>
-          </Button>
+          <span className="flex gap-4">
+            <Button size="lg">
+              <Link to="/places">Explore Places</Link>
+            </Button>
+            <Button
+              size="lg"
+              className="border-2 border-slate-700 bg-transparent text-slate-700 hover:bg-transparent"
+            >
+              <Link to="/new">Add Places</Link>
+            </Button>
+          </span>
         </div>
 
         <div className="relative px-6 md:px-0">
@@ -30,7 +38,8 @@ export function HomeHeroSection() {
             width={500}
             height={500}
             className="rounded-md"
-          ></img>
+            alt="hero-image"
+          />
           <FloatingCard
             title="Price: $-$$$"
             className="left-[-10px] top-14 md:left-[-80px] md:top-24"

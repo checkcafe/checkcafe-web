@@ -62,34 +62,39 @@ export function Navbar({ user }: { user: any }) {
         </Link>
 
         {user && user.name ? (
-          <Popover>
-            <PopoverTrigger asChild>
-              <span className="flex cursor-pointer items-center justify-center rounded-full bg-primary p-1">
-                <img
-                  src={user.avatarUrl}
-                  alt={user.name}
-                  className="h-8 w-8 rounded-full"
-                />
-              </span>
-            </PopoverTrigger>
-            <PopoverContent
-              align="end"
-              side="bottom"
-              className="w-48 bg-amber-50 shadow-lg"
-            >
-              <div className="grid gap-2 font-semibold">
-                <Link
-                  to={`/${user.username}`}
-                  className="p-2 text-primary hover:rounded-md hover:bg-slate-100"
-                >
-                  Profile
-                </Link>
-                <Button asChild className="w-full text-white">
-                  <Link to="/logout">Logout</Link>
-                </Button>
-              </div>
-            </PopoverContent>
-          </Popover>
+          <>
+            <Button className="border-2 border-slate-700 bg-transparent text-slate-700 hover:bg-transparent">
+              <Link to="/new">Add Places</Link>
+            </Button>{" "}
+            <Popover>
+              <PopoverTrigger asChild>
+                <span className="flex cursor-pointer items-center justify-center rounded-full bg-primary p-1">
+                  <img
+                    src={user.avatarUrl}
+                    alt={user.name}
+                    className="h-8 w-8 rounded-full"
+                  />
+                </span>
+              </PopoverTrigger>
+              <PopoverContent
+                align="end"
+                side="bottom"
+                className="w-48 bg-amber-50 shadow-lg"
+              >
+                <div className="grid gap-2 font-semibold">
+                  <Link
+                    to={`/${user.username}`}
+                    className="p-2 text-primary hover:rounded-md hover:bg-slate-100"
+                  >
+                    Profile
+                  </Link>
+                  <Button asChild className="w-full text-white">
+                    <Link to="/logout">Logout</Link>
+                  </Button>
+                </div>
+              </PopoverContent>
+            </Popover>
+          </>
         ) : (
           <Button asChild>
             <Link to="/login" className="text-primary">
