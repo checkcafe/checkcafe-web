@@ -8,6 +8,7 @@ import { FaHeart } from "react-icons/fa6";
 import { Facility } from "~/components/shared/places/facility";
 import { ImageCarousel } from "~/components/shared/places/image-carousel";
 import { OperatingHourItem } from "~/components/shared/places/operating-hour";
+import ShareButton from "~/components/shared/shared-button";
 import { MapboxView } from "~/components/ui/mapbox-view";
 import { BACKEND_API_URL } from "~/lib/env";
 import { type Place, type PlaceItem } from "~/types";
@@ -61,16 +62,19 @@ export default function PlaceSlug() {
             <h1 className="text-3xl font-semibold text-amber-900">
               {place.name}
             </h1>
-            <button
-              onClick={handleFavoriteClicked}
-              className="hover:cursor-pointer hover:opacity-50"
-            >
-              {isFavorited ? (
-                <FaHeart className="h-8 w-8" color="#FF9129" />
-              ) : (
-                <BiHeart className="h-8 w-8" />
-              )}
-            </button>
+            <div className="flex flex-row items-center justify-center gap-1">
+              <button
+                onClick={handleFavoriteClicked}
+                className="hover:cursor-pointer hover:opacity-50"
+              >
+                {isFavorited ? (
+                  <FaHeart className="h-8 w-8" color="#FF9129" />
+                ) : (
+                  <BiHeart className="h-8 w-8" />
+                )}
+              </button>
+              <ShareButton url={window.location.href} />
+            </div>
           </div>
           <p className="mb-8 text-base font-normal">{place.description}</p>
           <span className="flex flex-row gap-2">
