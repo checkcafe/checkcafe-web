@@ -19,8 +19,9 @@ export function Searchbar() {
     const city = String(formData.get("city"));
 
     if (query) searchParams.set("q", query);
-    if (city && city !== "none") searchParams.set("city", city);
-
+    if (city && city !== "null" && city !== "none") {
+      searchParams.set("city", city);
+    }
     navigate(`/places?${searchParams.toString()}`);
   };
   return (

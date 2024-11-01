@@ -106,7 +106,10 @@ export default function About() {
                 {member.role}
               </p>
               <div className="mt-1 flex items-center justify-center gap-1 text-sm">
-                <FaLinkedinIn className="h-5 w-5 cursor-pointer hover:opacity-50" />
+                <FaLinkedinIn
+                  className="h-5 w-5 cursor-pointer hover:opacity-50"
+                  color="#0A66C2"
+                />
                 <span>|</span>
                 <FaGithub className="h-5 w-5 cursor-pointer hover:opacity-50" />
               </div>

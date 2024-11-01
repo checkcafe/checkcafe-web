@@ -1,9 +1,10 @@
 import { Form, Link, useFetcher, useSearchParams } from "@remix-run/react";
 import { Clock3 } from "lucide-react";
 import React, { forwardRef } from "react";
-import { FaDollarSign } from "react-icons/fa6";
+import { BiHeart } from "react-icons/bi";
+import { FaDollarSign, FaHeart } from "react-icons/fa6";
 
-import { HeartFillIcon, LoveIcon, PinIcon } from "~/components/icons/icons";
+import { LoveIcon, PinIcon, PriceTagIcon } from "~/components/icons/icons";
 import { Card, CardContent, CardTitle } from "~/components/ui/card";
 import { PlaceItem } from "~/types";
 import { formatPrice, formatTime } from "~/utils/formatter";
@@ -64,9 +65,9 @@ const AllPlaceCard = forwardRef<HTMLDivElement, PlaceCardProps>(
                 className="cursor-pointer"
               >
                 {favorite ? (
-                  <HeartFillIcon className="h-8 w-8" />
+                  <FaHeart className="h-8 w-8" color="#FF9129" />
                 ) : (
-                  <LoveIcon className="h-8 w-8" />
+                  <BiHeart className="h-8 w-8" />
                 )}
               </button>
             </fetcher.Form>

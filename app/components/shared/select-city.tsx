@@ -14,7 +14,7 @@ import {
 export function SelectCity() {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
-  const [value, setValue] = useState(searchParams.get("city") || undefined);
+  const [value, setValue] = useState(searchParams.get("city") || "");
 
   useEffect(() => {
     setValue(searchParams.get("city") || "");
