@@ -51,7 +51,13 @@ export default function PlaceSlug() {
   return (
     <div className="px-32 py-20">
       <section className="flex flex-row gap-28">
-        {place.photos?.length > 0 && <ImageCarousel images={place.photos} />}
+        {place.photos?.length > 0 ? (
+          <ImageCarousel images={place.photos.map(photo => photo.url)} />
+        ) : (
+          <ImageCarousel
+            images={["https://placehold.co/150?text=No%20Image"]}
+          />
+        )}
 
         <header className="w-2/5">
           <div className="flex flex-row justify-between">

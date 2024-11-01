@@ -52,6 +52,10 @@ export type Place = {
   priceRange: string;
   operatingHours: OperatingHour[];
   placeFacilities: PlaceFacility[];
-  photos: string[];
+  photos: {
+    url: string;
+    order: number;
+  }[];
+  thumbnailUrl: string;
   submitter: User;
 };
