@@ -9,7 +9,7 @@ export function Facility({ facility }: { facility: PlaceFacility }) {
       <p className="text-md font-normal text-amber-950">
         * {facility.facility} -
       </p>
-      <p className="text-md font-normal text-amber-950">
+      <p className="text-md font-semibold text-amber-950">
         {"     "}
         {facility.description}
       </p>
