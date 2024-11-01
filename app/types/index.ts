@@ -1,7 +1,7 @@
 export type OperatingHour = {
   day: string;
-  start: string;
-  end: string;
+  openingTime: string;
+  closingTime: string;
 };
 
 export type Address = {

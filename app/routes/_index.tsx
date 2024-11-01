@@ -1,17 +1,14 @@
 import { json, type MetaFunction } from "@remix-run/node";
 import { Form, Link, useLoaderData } from "@remix-run/react";
 import { Armchair, Wifi } from "lucide-react";
-import { FaClock, FaDollarSign } from "react-icons/fa6";
 import { IoSend } from "react-icons/io5";
 
 import { FloatingCard } from "~/components/shared/floating-card";
+import PopularPlaces from "~/components/shared/home/popular-places";
 import { Button } from "~/components/ui/button";
-import { Card, CardContent } from "~/components/ui/card";
 import { Input } from "~/components/ui/input";
-import { ScrollArea, ScrollBar } from "~/components/ui/scroll-area";
 import { BACKEND_API_URL } from "~/lib/env";
 import { type PlaceItem } from "~/types";
-import { formatPrice, formatTime } from "~/utils/formatter";
 
 export const meta: MetaFunction = () => {
   return [
@@ -26,7 +23,7 @@ export const meta: MetaFunction = () => {
 
 export async function loader() {
   try {
-    const response = await fetch(`${BACKEND_API_URL}/places?limit=9`);
+    const response = await fetch(`${BACKEND_API_URL}/places?limit=6`);
 
     if (!response.ok) {
       throw new Error(response.statusText || "Failed to fetch places");
@@ -42,16 +39,6 @@ export async function loader() {
 
 export default function Index() {
   const { places } = useLoaderData<typeof loader>();
-
-  const formatPriceRange = (min: string | null, max: string | null): string => {
-    const formattedMin = min ? formatPrice(parseInt(min)) : null;
-    const formattedMax = max ? formatPrice(parseInt(max)) : null;
-
-    if (formattedMin && formattedMax) {
-      return `${formattedMin} - ${formattedMax}`;
-    }
-    return formattedMin || formattedMax || "-";
-  };
 
   return (
     <div className="flex flex-col justify-center">
@@ -101,76 +88,7 @@ export default function Index() {
       </section>
 
       {/* Popular places */}
-      {places.length > 0 && (
-        <div className="mt-12 px-4 md:px-[139px]">
-          <div className="mb-5 flex flex-row items-center justify-between">
-            <p className="text-xl font-medium text-[#372816]">Popular Places</p>
-          </div>
-          <ScrollArea className="w-full overflow-hidden pb-1">
-            <div className="mb-4 flex space-x-4 overflow-x-auto overflow-y-hidden md:space-x-6">
-              {places.map(
-                ({
-                  id,
-                  slug,
-                  thumbnailUrl,
-                  name,
-                  address: { city },
-                  currency,
-                  priceRangeMin,
-                  priceRangeMax,
-                  openingTime,
-                  closingTime,
-                }) => (
-                  <Link to={`/places/${slug}`} key={id}>
-                    <Card className="h-80 w-56 shadow-lg hover:cursor-pointer hover:opacity-50">
-                      <CardContent className="flex flex-col px-5 py-5">
-                        <img
-                          src={
-                            thumbnailUrl ||
-                            "https://placehold.co/150?text=No%20Image"
-                          }
-                          alt="cafe-image"
-                          className="h-40 w-full rounded-md rounded-b-none object-cover"
-                        />
-                        <div className="mt-2 flex flex-col justify-between gap-4">
-                          <div className="flex flex-col">
-                            <p className="max-w-full truncate text-base font-medium text-[#372816]">
-                              {name}
-                            </p>
-                            <p className="text-sm font-normal text-[#9BA0A7]">
-                              {city}
-                            </p>
-                          </div>
-                          <div className="flex flex-col gap-1">
-                            {currency && (priceRangeMin || priceRangeMax) && (
-                              <div className="flex items-center gap-2">
-                                <FaDollarSign
-                                  size={16}
-                                  className="text-[#372816]"
-                                />
-                                <p className="text-xs font-normal text-[#372816]">
-                                  {`${currency} ${formatPriceRange(priceRangeMin, priceRangeMax)}`}
-                                </p>
-                              </div>
-                            )}
-                            <div className="flex items-center gap-2">
-                              <FaClock size={16} className="text-[#372816]" />
-                              <p className="text-xs font-normal text-[#372816]">
-                                {`${formatTime(openingTime)} - ${formatTime(closingTime)}`}
-                              </p>
-                            </div>
-                          </div>
-                        </div>
-                      </CardContent>
-                    </Card>
-                  </Link>
-                ),
-              )}
-            </div>
-            <ScrollBar orientation="horizontal" />
-          </ScrollArea>
-        </div>
-      )}
+      {places.length > 0 && <PopularPlaces places={places} />}
 
       {/* Join our community */}
       <div className="mb-12 mt-16 px-4 sm:px-6 lg:px-[139px]">

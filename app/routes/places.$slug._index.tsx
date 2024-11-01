@@ -9,7 +9,7 @@ import { OperatingHourItem } from "~/components/shared/places/operating-hour";
 import { MapboxView } from "~/components/ui/mapbox-view";
 import { BACKEND_API_URL } from "~/lib/env";
 import { type Place, type PlaceItem } from "~/types";
-import { formatPrice } from "~/utils/formatter";
+import { formatPriceRange } from "~/utils/formatter";
 
 export async function loader({ params }: LoaderFunctionArgs) {
   const { slug } = params;
@@ -65,7 +65,8 @@ export default function PlaceSlug() {
           <span className="mt-2 flex flex-row items-center gap-2">
             <Receipt size={24} />
             <p className="text-sm font-medium text-amber-950">
-              {place.currency} {formatPrice(parseInt(place.priceRange))}
+              {place.currency}{" "}
+              {formatPriceRange(place.priceRangeMin, place.priceRangeMax)}
             </p>
           </span>
           <p className="mt-16 text-base font-semibold text-lime-600">
