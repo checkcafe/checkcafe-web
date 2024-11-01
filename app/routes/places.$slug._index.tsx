@@ -1,8 +1,9 @@
 import { json, LoaderFunctionArgs } from "@remix-run/node";
 import { redirect, useLoaderData } from "@remix-run/react";
 import { MapPin, Receipt } from "lucide-react";
+import { useState } from "react";
 
-import { LoveIcon } from "~/components/icons/icons";
+import { HeartFillIcon, LoveIcon } from "~/components/icons/icons";
 import { Facility } from "~/components/shared/places/facility";
 import { ImageCarousel } from "~/components/shared/places/image-carousel";
 import { OperatingHourItem } from "~/components/shared/places/operating-hour";
@@ -28,6 +29,7 @@ export async function loader({ params }: LoaderFunctionArgs) {
 
 export default function PlaceSlug() {
   const { place } = useLoaderData<typeof loader>();
+  const [isFavorited, setIsFavorited] = useState<boolean>(false);
 
   const placesOnMap = [
     {
@@ -42,6 +44,10 @@ export default function PlaceSlug() {
     zoom: 14,
   };
 
+  const handleFavoriteClicked = () => {
+    setIsFavorited(!isFavorited);
+  };
+
   return (
     <div className="px-32 py-20">
       <section className="flex flex-row gap-28">
@@ -52,7 +58,16 @@ export default function PlaceSlug() {
             <h1 className="text-3xl font-semibold text-amber-900">
               {place.name}
             </h1>
-            <LoveIcon className="h-8 w-8" />
+            <button
+              onClick={handleFavoriteClicked}
+              className="hover:cursor-pointer hover:opacity-50"
+            >
+              {isFavorited ? (
+                <HeartFillIcon className="h-8 w-8" />
+              ) : (
+                <LoveIcon className="h-8 w-8" />
+              )}
+            </button>
           </div>
           <p className="mb-8 text-base font-normal">{place.description}</p>
           <span className="flex flex-row gap-2">
