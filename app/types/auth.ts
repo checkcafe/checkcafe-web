@@ -1,5 +1,3 @@
-import { UserProfile } from "~/lib/profile-http-request";
-
 export type Issue = {
   code: string;
   message: string;
@@ -21,6 +19,17 @@ export type User = {
   username: string;
   email: string;
   avatarUrl: string;
+};
+
+export type UserProfile = {
+  id: string;
+  name: string;
+  username: string;
+  avatarUrl: string;
+  placesUrl: string;
+  favoritesUrl: string;
+  role: string;
+  email?: string;
 };
 
 export type RegisterResponse = {

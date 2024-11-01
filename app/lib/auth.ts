@@ -1,11 +1,15 @@
 import { z } from "zod";
 
 import { LoginSchema, RegisterSchema } from "~/schemas/auth";
-import { LoginResponse, RegisterResponse, TokenResponse } from "~/types/auth";
+import {
+  LoginResponse,
+  RegisterResponse,
+  TokenResponse,
+  UserProfile,
+} from "~/types/auth";
 
 import fetchAPI from "./api";
 import { BACKEND_API_URL } from "./env";
-import { UserProfile } from "./profile-http-request";
 
 export type Auth = {
   register(

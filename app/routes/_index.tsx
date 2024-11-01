@@ -11,7 +11,7 @@ import { Input } from "~/components/ui/input";
 import { ScrollArea, ScrollBar } from "~/components/ui/scroll-area";
 import { BACKEND_API_URL } from "~/lib/env";
 import { type PlaceItem } from "~/types";
-import { formatPrice } from "~/utils/formatter";
+import { formatPrice, formatTime } from "~/utils/formatter";
 
 export const meta: MetaFunction = () => {
   return [
@@ -42,11 +42,6 @@ export async function loader() {
 
 export default function Index() {
   const { places } = useLoaderData<typeof loader>();
-
-  const formatTime = (time: string): string => {
-    const date = new Date(time);
-    return date.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
-  };
 
   const formatPriceRange = (min: string | null, max: string | null): string => {
     const formattedMin = min ? formatPrice(parseInt(min)) : null;

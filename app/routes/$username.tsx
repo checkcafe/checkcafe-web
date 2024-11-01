@@ -2,17 +2,8 @@ import { LoaderFunctionArgs } from "@remix-run/node";
 import { json, useLoaderData } from "@remix-run/react";
 
 import { BACKEND_API_URL } from "~/lib/env";
+import { UserProfile } from "~/types/auth";
 
-type UserProfile = {
-  id: string;
-  name: string;
-  username: string;
-  avatarUrl: string;
-  placesUrl: string;
-  favoritesUrl: string;
-  role: string;
-  email?: string;
-};
 
 export async function loader({ params }: LoaderFunctionArgs) {
   const { username } = params;
