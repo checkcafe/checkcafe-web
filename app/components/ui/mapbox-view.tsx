@@ -28,7 +28,7 @@ type FeatureProperties = {
   title: string;
   slug: string;
   name: string;
-  thumbnail: string;
+  thumbnailUrl: string;
 };
 
 export function MapboxView({
@@ -37,7 +37,7 @@ export function MapboxView({
     ? {
         latitude: places[0].latitude,
         longitude: places[0].longitude,
-        zoom: 12,
+        zoom: 11,
       }
     : {
         latitude: -0.4752106,
@@ -61,18 +61,18 @@ export function MapboxView({
     longitude: number;
     latitude: number;
     name: string;
-    thumbnail?: string;
+    thumbnailUrl?: string;
   } | null>(null);
 
   const geojson: FeatureCollection = {
     type: "FeatureCollection",
-    features: places.map((place: PlaceItem) => ({
+    features: places.map((place: any) => ({
       type: "Feature",
       properties: {
         type: "Place",
         id: place.id,
         name: place.name,
-        thumbnail: place.thumbnail,
+        thumbnailUrl: place.thumbnailUrl,
         active: false,
       },
       geometry: {
@@ -172,7 +172,7 @@ export function MapboxView({
           longitude,
           latitude,
           name: featureProperties.name,
-          thumbnail: featureProperties.thumbnail,
+          thumbnailUrl: featureProperties.thumbnailUrl,
         });
       }
     }
@@ -214,7 +214,7 @@ export function MapboxView({
         <Layer {...unclusteredPointLayer} />
       </Source>
 
-      {popupInfo && popupInfo.thumbnail && (
+      {popupInfo && popupInfo.thumbnailUrl && (
         <Popup
           longitude={popupInfo.longitude}
           latitude={popupInfo.latitude}
@@ -222,15 +222,17 @@ export function MapboxView({
           closeOnClick={false}
           onClose={() => setPopupInfo(null)}
           anchor="top"
-          className="rounded-lg bg-white p-4 shadow-lg"
+          className="rounded-lg"
         >
           <img
-            src={popupInfo.thumbnail}
+            src={popupInfo.thumbnailUrl}
             alt={popupInfo.name}
-            className="mb-2 h-32 w-32 rounded-md object-cover"
+            className="mb-2 h-40 w-40 rounded-md object-cover"
           />
 
-          <div className="font-semibold text-gray-800">{popupInfo.name}</div>
+          <p className="text-center text-xs font-semibold text-gray-800">
+            {popupInfo.name}
+          </p>
         </Popup>
       )}
     </Map>

@@ -8,7 +8,7 @@ import { PlaceItem } from "~/types";
 import { formatPrice } from "~/utils/formatter";
 
 interface PlaceCardProps {
-  place: PlaceItem;
+  place: any;
   ref: React.Ref<HTMLDivElement>;
   isFavorite: boolean;
   favoriteId: string | null;
@@ -25,7 +25,7 @@ const AllPlaceCard = forwardRef<HTMLDivElement, PlaceCardProps>(
         className="flex h-[30vh] w-full border border-[#F9D9AA]"
       >
         <img
-          src={place.thumbnail || "https://placehold.co/150?text=No%20Image"}
+          src={place.thumbnailUrl || "https://placehold.co/150?text=No%20Image"}
           alt={place.name}
           className="w-full min-w-96 max-w-96 rounded-l-lg object-cover"
         />
@@ -54,7 +54,7 @@ const AllPlaceCard = forwardRef<HTMLDivElement, PlaceCardProps>(
             <p className="font-bold">{place.description}</p>
             <span className="mb-2 flex items-center gap-4 font-bold">
               <PriceTagIcon className="h-4 w-4" />
-              <p className="text-sm">{`${place.currency} ${formatPrice(parseInt(place.priceRange))}`}</p>
+              <p className="text-sm">{`${formatPrice(parseInt(place.priceRangeMin))}`}</p>
             </span>
             <span className="mb-2 flex items-center gap-4 font-bold">
               <Clock3 className="h-4 w-4" />

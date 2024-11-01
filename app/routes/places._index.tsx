@@ -101,7 +101,7 @@ export default function Places() {
           <p className="w-full text-center text-gray-500">Not Found</p>
         ) : (
           <>
-            <main className={`${hasCityParam ? "w-1/2" : "w-full"}`}>
+            <main className={`${hasCityParam ? "w-2/3" : "w-full"}`}>
               <ul className="flex w-full flex-col gap-7">
                 {places.map((place, index) => {
                   const isFavorite = favoriteMap.has(place.slug);
@@ -124,7 +124,7 @@ export default function Places() {
             </main>
 
             {hasCityParam && places.length > 0 && (
-              <aside className="sticky top-0 h-full w-1/2">
+              <aside className="sticky top-0 h-full w-1/3">
                 <MapboxView places={places} onPlaceClick={handleScrollToCard} />
               </aside>
             )}
