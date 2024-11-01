@@ -2,6 +2,7 @@ import { json, LoaderFunctionArgs } from "@remix-run/node";
 import { redirect, useLoaderData } from "@remix-run/react";
 import { MapPin, Receipt } from "lucide-react";
 
+import { LoveIcon } from "~/components/icons/icons";
 import { Facility } from "~/components/shared/places/facility";
 import { ImageCarousel } from "~/components/shared/places/image-carousel";
 import { OperatingHourItem } from "~/components/shared/places/operating-hour";
@@ -28,24 +29,42 @@ export async function loader({ params }: LoaderFunctionArgs) {
 export default function PlaceSlug() {
   const { place } = useLoaderData<typeof loader>();
 
+  const placesOnMap = [
+    {
+      ...place,
+      longitude: Number(place.longitude),
+      latitude: Number(place.latitude),
+    },
+  ];
+  const initialViewMap = {
+    longitude: place.longitude || 0,
+    latitude: place.latitude || 0,
+    zoom: 14,
+  };
+
   return (
     <div className="px-32 py-20">
       <section className="flex flex-row gap-28">
         {place.photos?.length > 0 && <ImageCarousel images={place.photos} />}
 
-        <header className="text-amber-900">
-          <h1 className="text-3xl font-semibold">{place.name}</h1>
+        <header className="w-2/5">
+          <div className="flex flex-row justify-between">
+            <h1 className="text-3xl font-semibold text-amber-900">
+              {place.name}
+            </h1>
+            <LoveIcon className="h-8 w-8" />
+          </div>
           <p className="mb-8 text-base font-normal">{place.description}</p>
           <span className="flex flex-row gap-2">
             <MapPin size={24} />
-            <p className="mb-2 text-sm font-medium">
+            <p className="mb-2 text-sm font-medium text-amber-950">
               {place.address.street}, {place.address.state},{" "}
               {place.address.country}
             </p>
           </span>
           <span className="mt-2 flex flex-row items-center gap-2">
             <Receipt size={24} />
-            <p className="text-sm font-medium">
+            <p className="text-sm font-medium text-amber-950">
               {place.currency} {formatPrice(parseInt(place.priceRange))}
             </p>
           </span>
@@ -64,25 +83,15 @@ export default function PlaceSlug() {
       <section className="mt-20 flex flex-row gap-28">
         <aside className="h-96 w-1/2">
           <MapboxView
-            places={[
-              {
-                ...place,
-                longitude: Number(place.longitude),
-                latitude: Number(place.latitude),
-              },
-            ]}
-            initialViewState={{
-              longitude: place.longitude || 0,
-              latitude: place.latitude || 0,
-              zoom: 14,
-            }}
+            places={placesOnMap}
+            initialViewState={initialViewMap}
             onPlaceClick={() => {}}
             height="50vh"
           />
         </aside>
 
         <div className="flex flex-col">
-          <h1 className="mb-12 mt-4 text-2xl font-semibold text-amber-900">
+          <h1 className="mb-9 mt-2 text-2xl font-semibold text-amber-950">
             Facility
           </h1>
           {place.placeFacilities?.length > 0 &&

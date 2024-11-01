@@ -11,7 +11,7 @@ export function OperatingHourItem({
   return (
     <div className="flex w-60 flex-row justify-between">
       <p>{operatingHour.day}</p>
-      <div className="flex flex-row">
+      <div className="flex w-60 flex-row justify-between text-amber-950">
         <p>{operatingHour.start} - </p>
         <p>{operatingHour.end}</p>
       </div>
