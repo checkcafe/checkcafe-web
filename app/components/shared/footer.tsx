@@ -12,12 +12,12 @@ export function Footer() {
         </p>
       </div>
 
-      <div className="mt-6 flex flex-col gap-4 md:mt-0 md:flex-row md:gap-8">
-        <div className="flex-1 text-sm">
+      <div className="mt-6 flex flex-wrap justify-center gap-4 md:mt-0 md:flex-row md:gap-8">
+        <div className="min-w-[120px] flex-1 text-sm">
           <h2 className="font-bold tracking-tight text-gray-900">Help</h2>
           <ul className="mt-2 space-y-1">
             <li>
-              <Link to="/" className="text-primary hover:underline">
+              <Link to="/about" className="text-primary hover:underline">
                 About
               </Link>
             </li>
@@ -28,8 +28,8 @@ export function Footer() {
             </li>
           </ul>
         </div>
-        <div className="flex-1 text-sm">
-          <h2 className="font-bold tracking-tight text-gray-900">Contact</h2>
+        <div className="min-w-[120px] flex-1 text-sm">
+          <h2 className="font-bold tracking-tight text-gray-900">Contact Us</h2>
           <ul className="mt-2 space-y-1">
             <li>
               <Link to="/" className="text-primary hover:underline">

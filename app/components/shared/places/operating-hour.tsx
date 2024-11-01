@@ -1,4 +1,5 @@
 import type { OperatingHour } from "~/types";
+import { formatTime } from "~/utils/formatter";
 
 /**
  * Show operating hour item
@@ -9,11 +10,11 @@ export function OperatingHourItem({
   operatingHour: OperatingHour;
 }) {
   return (
-    <div className="flex w-60 flex-row justify-between">
+    <div className="flex w-72 flex-row justify-between text-amber-950">
       <p>{operatingHour.day}</p>
       <div className="flex flex-row">
-        <p>{operatingHour.start} - </p>
-        <p>{operatingHour.end}</p>
+        <p>{formatTime(operatingHour.openingTime)} - </p>
+        <p>{formatTime(operatingHour.closingTime)}</p>
       </div>
     </div>
   );

@@ -1,7 +1,7 @@
 export type OperatingHour = {
   day: string;
-  start: string;
-  end: string;
+  openingTime: string;
+  closingTime: string;
 };
 
 export type Address = {
@@ -24,13 +24,14 @@ export type PlaceItem = {
   slug: string;
   description?: string;
   currency: string;
-  priceRange: string;
+  priceRangeMin: string;
+  priceRangeMax: string;
   latitude: number;
   longitude: number;
   address: Address;
   openingTime: string;
   closingTime: string;
-  thumbnail: string;
+  thumbnailUrl: string;
   submitter: User;
 };
 
@@ -51,7 +52,11 @@ export type Place = {
   priceRange: string;
   operatingHours: OperatingHour[];
   placeFacilities: PlaceFacility[];
-  photos: string[];
+  photos: {
+    url: string;
+    order: number;
+  }[];
+  thumbnailUrl: string;
   submitter: User;
 };
 

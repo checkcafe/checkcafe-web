@@ -2,7 +2,6 @@ import { useNavigate, useSearchParams } from "@remix-run/react";
 import { FormEvent, useEffect } from "react";
 
 import { Input } from "~/components/ui/input";
-import { toast } from "~/hooks/use-toast";
 import { filterSchema } from "~/schemas/filter";
 
 import SelectHour from "./select-hour";
@@ -37,13 +36,13 @@ export default function PlaceFilter() {
 
     const result = filterSchema.safeParse(filterData);
     if (!result.success) {
-      result.error.errors.forEach(error => {
-        toast({
-          variant: "destructive",
-          title: `${error.message}`,
-        });
-      });
-      return;
+      // result.error.errors.forEach(error => {
+      //   Toaster({
+      //     variant: "destructive",
+      //     title: `${error.message}`,
+      //   });
+      // });
+      return null;
     }
 
     if (priceFrom) searchParams.set("priceFrom", String(priceFrom));
