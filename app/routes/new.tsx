@@ -11,8 +11,8 @@ export const loader: LoaderFunction = async () => {
   }
 
   try {
-    const response = await fetchAPI("/places", "POST");
-    return redirect(`/place/${response.id}/edit`);
+    const place = await fetchAPI("/places", "POST");
+    return redirect(`/places/${place.id}/edit`);
   } catch (error: Error | any) {
     throw new Error(error.message || "Failed to create new place");
   }
