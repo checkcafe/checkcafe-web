@@ -15,14 +15,13 @@ import { FaHouse } from "react-icons/fa6";
 
 import { Footer } from "~/components/shared/footer";
 import { Navbar } from "~/components/shared/navbar";
-import { Toaster } from "~/components/ui/toaster";
+import { Toaster } from "~/components/ui/sonner";
 
 import { Button } from "./components/ui/button";
-
-import "./tailwind.css";
-
 import { UserProvider } from "./contexts/UserContext";
 import { auth } from "./lib/auth";
+
+import "./tailwind.css";
 
 export const meta: MetaFunction = () => [
   { title: "CheckCafe" },

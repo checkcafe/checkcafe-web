@@ -10,17 +10,18 @@ import {
   redirect,
   useActionData,
   useLoaderData,
+  useNavigate,
   useNavigation,
 } from "@remix-run/react";
 import { EyeClosedIcon, EyeIcon } from "lucide-react";
 import { useEffect, useState } from "react";
+import { toast } from "sonner";
 import { z } from "zod";
 
 import LoadingSpinner from "~/components/shared/loader-spinner";
 import { Button } from "~/components/ui/button";
 import { Input } from "~/components/ui/input";
 import { Label } from "~/components/ui/label";
-import { useToast } from "~/hooks/use-toast";
 import { auth } from "~/lib/auth";
 import { getPageTitle } from "~/lib/get-page-title";
 import { RegisterSchema } from "~/schemas/auth";
@@ -55,7 +56,7 @@ export default function Register() {
   });
   const actionData = useActionData<ActionData>();
   const navigation = useNavigation();
-  const { toast } = useToast();
+  const navigate = useNavigate();
 
   const togglePasswordVisibility = (field: "password" | "confirmPassword") => {
     setPasswordVisibility(prevState => ({
@@ -77,21 +78,14 @@ export default function Register() {
 
   useEffect(() => {
     if (actionData?.success) {
-      toast({
-        title: "Registration Successful",
-        description: "You have successfully registered. Please log in.",
-        action: <Link to="/login">Login</Link>,
-      });
+      toast((actionData as { message: string }).message);
+      navigate("/login");
     } else if (actionData?.error) {
       if (typeof actionData?.error === "string") {
-        toast({
-          title: "Error",
-          description: actionData.error,
-          variant: "destructive",
-        });
+        toast(actionData.error);
       }
     }
-  }, [actionData, toast]);
+  }, [actionData, navigate]);
 
   return (
     <div className="flex min-h-screen items-center justify-center bg-gray-50">
@@ -266,7 +260,10 @@ export const action = async ({ request }: ActionFunctionArgs) => {
       );
     }
 
-    return json({ success: true });
+    return json({
+      success: true,
+      message: "You have successfully registered. Please log in.",
+    });
   } catch (error) {
     if (error instanceof z.ZodError) {
       const issues = error.errors.map(err => ({

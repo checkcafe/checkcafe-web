@@ -13,13 +13,13 @@ import {
 } from "@remix-run/react";
 import { EyeClosedIcon, EyeIcon } from "lucide-react";
 import { useEffect, useState } from "react";
+import { toast } from "sonner";
 import { z } from "zod";
 
 import LoadingSpinner from "~/components/shared/loader-spinner";
 import { Button } from "~/components/ui/button";
 import { Input } from "~/components/ui/input";
 import { Label } from "~/components/ui/label";
-import { useToast } from "~/hooks/use-toast";
 import { auth } from "~/lib/auth";
 import { setCookie } from "~/lib/cookie";
 import { getPageTitle } from "~/lib/get-page-title";
@@ -50,7 +50,6 @@ export default function Login() {
   const [showPassword, setShowPassword] = useState(false);
   const actionData = useActionData<ActionData>();
   const navigation = useNavigation();
-  const { toast } = useToast();
 
   const togglePasswordVisibility = () => {
     setShowPassword(!showPassword);
@@ -69,13 +68,9 @@ export default function Login() {
 
   useEffect(() => {
     if (typeof actionData?.error === "string") {
-      toast({
-        title: "Error",
-        description: actionData.error,
-        variant: "destructive",
-      });
+      toast(actionData.error);
     }
-  }, [actionData, toast]);
+  }, [actionData]);
 
   return (
     <div className="flex min-h-screen items-center justify-center bg-gray-50">
