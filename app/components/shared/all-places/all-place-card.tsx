@@ -1,14 +1,15 @@
-import { Form, Link } from "@remix-run/react";
+import { Form, Link, useFetcher, useSearchParams } from "@remix-run/react";
 import { Clock3 } from "lucide-react";
 import React, { forwardRef } from "react";
+import { FaDollarSign } from "react-icons/fa6";
 
-import { LoveIcon, PinIcon, PriceTagIcon } from "~/components/icons/icons";
+import { HeartFillIcon, LoveIcon, PinIcon } from "~/components/icons/icons";
 import { Card, CardContent, CardTitle } from "~/components/ui/card";
 import { PlaceItem } from "~/types";
-import { formatPrice } from "~/utils/formatter";
+import { formatPrice, formatTime } from "~/utils/formatter";
 
 interface PlaceCardProps {
-  place: any;
+  place: PlaceItem;
   ref: React.Ref<HTMLDivElement>;
   isFavorite: boolean;
   favoriteId: string | null;
@@ -16,6 +17,13 @@ interface PlaceCardProps {
 
 const AllPlaceCard = forwardRef<HTMLDivElement, PlaceCardProps>(
   ({ place, isFavorite, favoriteId }, ref) => {
+    const fetcher = useFetcher();
+    const [searchParams] = useSearchParams();
+
+    const favorite = fetcher.formData
+      ? fetcher.formData.get("favorite") === "true"
+      : isFavorite;
+
     const method = isFavorite ? "delete" : "post";
 
     return (
@@ -42,24 +50,37 @@ const AllPlaceCard = forwardRef<HTMLDivElement, PlaceCardProps>(
                 </span>
               </span>
             </Link>
-            <Form method={method} action="/places" preventScrollReset={true}>
+            <fetcher.Form
+              method={method}
+              action={`/places?${searchParams.toString()}`}
+              preventScrollReset={true}
+            >
               <input type="hidden" name="placeId" value={place.id} />
               <input type="hidden" name="favoriteId" value={favoriteId || ""} />
-              <button type="submit" className="cursor-pointer">
-                <LoveIcon fills={isFavorite ? "red" : "#372816"} />
+              <button
+                type="submit"
+                name="favorite"
+                value={favorite ? "false" : "true"}
+                className="cursor-pointer"
+              >
+                {favorite ? (
+                  <HeartFillIcon className="h-8 w-8" />
+                ) : (
+                  <LoveIcon className="h-8 w-8" />
+                )}
               </button>
-            </Form>
+            </fetcher.Form>
           </CardTitle>
           <CardContent className="items-end p-0">
             <p className="font-bold">{place.description}</p>
             <span className="mb-2 flex items-center gap-4 font-bold">
-              <PriceTagIcon className="h-4 w-4" />
-              <p className="text-sm">{`${formatPrice(parseInt(place.priceRangeMin))}`}</p>
+              <FaDollarSign className="h-4 w-4" />
+              <p className="text-sm">{`${place.currency} ${formatPrice(parseInt(place.priceRangeMin))}`}</p>
             </span>
             <span className="mb-2 flex items-center gap-4 font-bold">
               <Clock3 className="h-4 w-4" />
               <p className="text-sm">
-                {place.openingTime} - {place.closingTime}
+                {`${formatTime(place.openingTime)} - ${formatTime(place.closingTime)}`}
               </p>
             </span>
           </CardContent>

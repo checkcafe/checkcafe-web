@@ -1,5 +1,6 @@
 import { useNavigate, useSearchParams } from "@remix-run/react";
 import { FormEvent, useEffect } from "react";
+import { toast } from "sonner";
 
 import { Input } from "~/components/ui/input";
 import { filterSchema } from "~/schemas/filter";
@@ -36,12 +37,9 @@ export default function PlaceFilter() {
 
     const result = filterSchema.safeParse(filterData);
     if (!result.success) {
-      // result.error.errors.forEach(error => {
-      //   Toaster({
-      //     variant: "destructive",
-      //     title: `${error.message}`,
-      //   });
-      // });
+      result.error.errors.forEach(error => {
+        toast(error.message);
+      });
       return null;
     }
 

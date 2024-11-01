@@ -40,7 +40,6 @@ export function SelectCity() {
             <SelectItem value="none" className="hidden"></SelectItem>
             <SelectItem value="jakarta">Jakarta</SelectItem>
             <SelectItem value="bandung">Bandung</SelectItem>
-            <SelectItem value="surabaya">Surabaya</SelectItem>
             <SelectItem value="pontianak">Pontianak</SelectItem>
           </SelectGroup>
         </SelectContent>

@@ -4,8 +4,9 @@ import {
   LoaderFunctionArgs,
   redirect,
 } from "@remix-run/node";
-import { useLoaderData } from "@remix-run/react";
-import { useRef } from "react";
+import { useActionData, useLoaderData } from "@remix-run/react";
+import { useEffect, useRef } from "react";
+import { toast } from "sonner";
 
 import AllPlaceCard from "~/components/shared/all-places/all-place-card";
 import PlaceFilter from "~/components/shared/all-places/filter-places";
@@ -18,6 +19,7 @@ import {
   unfavoritePlace,
 } from "~/lib/favorite-place";
 import { FavoritePlace, PlaceItem } from "~/types";
+import { ActionData } from "~/types/auth";
 import { Filter } from "~/types/filter";
 
 export async function loader({ request }: LoaderFunctionArgs) {
@@ -72,6 +74,7 @@ export async function loader({ request }: LoaderFunctionArgs) {
 
 export default function Places() {
   const { places, hasCityParam, favorites } = useLoaderData<typeof loader>();
+  const actionData = useActionData<ActionData>();
 
   const favoriteMap = new Map();
   favorites.forEach((favorite: FavoritePlace) => {
@@ -98,7 +101,13 @@ export default function Places() {
 
       <div className="flex w-full gap-2">
         {places.length === 0 ? (
-          <p className="w-full text-center text-gray-500">Not Found</p>
+          hasCityParam ? (
+            <p className="w-full text-center text-gray-500">
+              No cafes have been added for this city yet.
+            </p>
+          ) : (
+            <p className="w-full text-center text-gray-500">Cafe Not Found</p>
+          )
         ) : (
           <>
             <main className={`${hasCityParam ? "w-2/3" : "w-full"}`}>
@@ -137,10 +146,11 @@ export default function Places() {
 
 export async function action({ request }: ActionFunctionArgs) {
   const token = getCookie("accessToken");
-
   if (!token) {
     return redirect("/login");
   }
+
+  const url = new URL(request.url);
 
   const formData = await request.formData();
   const placeId = formData.get("placeId")?.toString();
@@ -163,7 +173,12 @@ export async function action({ request }: ActionFunctionArgs) {
       return json({ error: "Invalid action type" });
     }
 
-    return redirect("/places");
+    redirect(`/places${url.search}`);
+
+    return json({
+      success: true,
+      message: "Added to favorites!",
+    });
   } catch (error) {
     console.error("Error processing favorite place action:", error);
     return json({ error: "Failed to process favorite place" }, { status: 500 });
