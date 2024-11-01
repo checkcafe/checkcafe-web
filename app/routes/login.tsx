@@ -9,6 +9,7 @@ import {
   Link,
   redirect,
   useActionData,
+  useNavigate,
   useNavigation,
 } from "@remix-run/react";
 import { EyeClosedIcon, EyeIcon } from "lucide-react";
@@ -50,6 +51,7 @@ export default function Login() {
   const [showPassword, setShowPassword] = useState(false);
   const actionData = useActionData<ActionData>();
   const navigation = useNavigation();
+  const navigate = useNavigate();
 
   const togglePasswordVisibility = () => {
     setShowPassword(!showPassword);
@@ -67,10 +69,15 @@ export default function Login() {
       : {};
 
   useEffect(() => {
-    if (typeof actionData?.error === "string") {
-      toast(actionData.error);
+    if (actionData?.success) {
+      toast((actionData as { message: string }).message);
+      navigate("/");
+    } else if (actionData?.error) {
+      if (typeof actionData?.error === "string") {
+        toast(actionData.error);
+      }
     }
-  }, [actionData]);
+  }, [actionData, navigate]);
 
   return (
     <div className="flex min-h-screen items-center justify-center bg-gray-50">
@@ -162,10 +169,10 @@ export async function action({ request }: ActionFunctionArgs) {
     const loginResponse = await auth.login(validatedLogin);
 
     if (!loginResponse.success) {
-      return json(
-        { error: loginResponse.error?.message || "Login failed" },
-        { status: loginResponse.error?.status || 401 },
-      );
+      return json({
+        success: false,
+        error: loginResponse.error?.message || "Login failed",
+      });
     }
 
     const { accessToken, refreshToken, role } = loginResponse.data || {};
@@ -186,7 +193,10 @@ export async function action({ request }: ActionFunctionArgs) {
     setCookie("refreshToken", refreshToken, refreshTokenExpiration);
     setCookie("role", role, refreshTokenExpiration);
 
-    return redirect("/");
+    return json({
+      success: true,
+      message: "You have successfully logged in.",
+    });
   } catch (error) {
     if (error instanceof z.ZodError) {
       const issues = error.errors.map(err => ({
@@ -195,20 +205,17 @@ export async function action({ request }: ActionFunctionArgs) {
         path: err.path,
       }));
 
-      return json(
-        {
-          success: false,
-          error: {
-            issues,
-          },
+      return json({
+        success: false,
+        error: {
+          issues,
         },
-        { status: 400 },
-      );
+      });
     }
 
-    return json(
-      { error: "An unexpected error occurred. Please try again later." },
-      { status: 500 },
-    );
+    return json({
+      success: false,
+      error: "An unexpected error occurred. Please try again later.",
+    });
   }
 }

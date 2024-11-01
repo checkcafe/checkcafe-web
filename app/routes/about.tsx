@@ -2,6 +2,8 @@ import { json } from "@remix-run/node";
 import { useLoaderData } from "@remix-run/react";
 import { FaGithub, FaLinkedinIn } from "react-icons/fa6";
 
+import { Avatar, AvatarFallback, AvatarImage } from "~/components/ui/avatar";
+
 export function loader() {
   const teamMembers = [
     {
@@ -90,11 +92,13 @@ export default function About() {
         <div className="w-full/2 mt-8 grid grid-cols-1 justify-items-center gap-x-8 gap-y-4 sm:grid-cols-2 md:grid-cols-3 lg:gap-x-10 lg:gap-y-10">
           {teamMembers.map((member, index) => (
             <div key={index} className="flex flex-col items-center">
-              <img
-                src={member.image}
-                alt={member.name}
-                className="h-24 w-24 rounded-full border-4 border-amber-900 bg-white object-cover shadow-xl sm:h-28 sm:w-28 md:h-32 md:w-32 lg:h-36 lg:w-36"
-              />
+              <Avatar className="h-24 w-24 rounded-full border-4 border-amber-900 bg-white object-cover shadow-xl sm:h-28 sm:w-28 md:h-32 md:w-32 lg:h-36 lg:w-36">
+                <AvatarImage src={member.image} alt={member.name} />
+                <AvatarFallback>
+                  {member.name ? member.name.charAt(0).toUpperCase() : "?"}
+                </AvatarFallback>
+              </Avatar>
+
               <p className="sm:text-md mt-1 text-center text-sm font-semibold text-amber-950 md:text-lg">
                 {member.name}
               </p>

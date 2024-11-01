@@ -254,10 +254,10 @@ export const action = async ({ request }: ActionFunctionArgs) => {
     const registerResponse = await auth.register(validatedRegister);
 
     if (!registerResponse.success) {
-      return json(
-        { error: registerResponse.error?.message || "Register failed" },
-        { status: registerResponse.error?.status || 400 },
-      );
+      return json({
+        success: false,
+        error: registerResponse.error?.message || "Register failed",
+      });
     }
 
     return json({
@@ -272,7 +272,7 @@ export const action = async ({ request }: ActionFunctionArgs) => {
         path: err.path,
       }));
 
-      return json({ success: false, error: { issues } }, { status: 400 });
+      return json({ success: false, error: { issues } });
     }
 
     return json(

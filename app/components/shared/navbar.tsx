@@ -5,6 +5,7 @@ import { FaPlus, FaSignOutAlt, FaUser } from "react-icons/fa";
 
 import { useUser } from "~/contexts/UserContext";
 
+import { Avatar, AvatarFallback, AvatarImage } from "../ui/avatar";
 import { Button } from "../ui/button";
 import { Input } from "../ui/input";
 import { Popover, PopoverContent, PopoverTrigger } from "../ui/popover";
@@ -106,11 +107,12 @@ export function Navbar({ user }: { user: any }) {
                 onClick={closeAllMenus}
                 aria-label="Open user menu"
               >
-                <img
-                  src={user.avatarUrl}
-                  alt={user.name}
-                  className="h-8 w-8 rounded-full"
-                />
+                <Avatar>
+                  <AvatarImage src={user.avatarUrl} alt={user.name} />
+                  <AvatarFallback>
+                    {user.name ? user.name.charAt(0).toUpperCase() : "?"}
+                  </AvatarFallback>
+                </Avatar>
               </button>
             </PopoverTrigger>
 
