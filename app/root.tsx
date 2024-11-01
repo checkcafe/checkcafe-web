@@ -1,34 +1,37 @@
 import type { LinksFunction, MetaFunction } from "@remix-run/node";
 import {
+  isRouteErrorResponse,
   json,
+  Link,
   Links,
   Meta,
   Outlet,
   Scripts,
   ScrollRestoration,
   useLoaderData,
+  useRouteError,
 } from "@remix-run/react";
 import React from "react";
+import { FaHouse } from "react-icons/fa6";
 
 import { Footer } from "~/components/shared/footer";
 import { Navbar } from "~/components/shared/navbar";
 import { Toaster } from "~/components/ui/toaster";
 
+import { Button } from "./components/ui/button";
 import { auth } from "./lib/auth";
 import { getCookie } from "./lib/cookie";
 
 import "./tailwind.css";
 
-export const meta: MetaFunction = () => {
-  return [
-    { title: "CheckCafe" },
-    {
-      name: "description",
-      content:
-        "Check the best cafe for social, food, WFC, and comfortable experience",
-    },
-  ];
-};
+export const meta: MetaFunction = () => [
+  { title: "CheckCafe" },
+  {
+    name: "description",
+    content:
+      "Check the best cafe for social, food, WFC, and comfortable experience",
+  },
+];
 
 export const links: LinksFunction = () => [
   {
@@ -95,6 +98,41 @@ export function Layout({ children }: { children: React.ReactNode }) {
         <Scripts />
       </body>
     </html>
+  );
+}
+
+export function ErrorBoundary() {
+  const error = useRouteError();
+
+  return (
+    <div className="flex min-h-screen flex-col items-center justify-center bg-gray-100 p-4 text-center">
+      {isRouteErrorResponse(error) ? (
+        <>
+          <h1 className="text-3xl font-bold">
+            {error.status || "Error"} -{" "}
+            {error.statusText || "An unexpected error occurred."}
+          </h1>
+          <p className="mt-2 text-lg text-gray-700">
+            The server encountered an unexpected error. Please try again later!
+          </p>
+        </>
+      ) : error instanceof Error ? (
+        <>
+          <h1 className="text-3xl font-bold">Oops!</h1>
+          <p className="mt-2 text-lg text-gray-700">{error.message}</p>
+        </>
+      ) : (
+        <h1 className="text-3xl font-bold">Unknown Error!</h1>
+      )}
+      <div className="mt-6">
+        <Link to="/" className="inline-block">
+          <Button className="flex items-center rounded bg-gray-300 px-4 py-2 text-gray-800 transition duration-200 hover:bg-gray-400">
+            <FaHouse className="mr-2" />
+            Back to Home
+          </Button>
+        </Link>
+      </div>
+    </div>
   );
 }
 

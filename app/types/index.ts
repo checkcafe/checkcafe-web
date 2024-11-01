@@ -24,13 +24,14 @@ export type PlaceItem = {
   slug: string;
   description?: string;
   currency: string;
-  priceRange: string;
+  priceRangeMin: string;
+  priceRangeMax: string;
   latitude: number;
   longitude: number;
   address: Address;
   openingTime: string;
   closingTime: string;
-  thumbnail: string;
+  thumbnailUrl: string;
   submitter: User;
 };
 
