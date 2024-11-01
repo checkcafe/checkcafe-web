@@ -21,3 +21,23 @@ export const formatPrice = (amount: number): string => {
     maximumFractionDigits: 0,
   });
 };
+
+/**
+ * Return format price range. ex: 50.000 - 200.000
+ *
+ * @param min - min price
+ * @param max - max price
+ * @returns - fixed value
+ */
+export const formatPriceRange = (
+  min: string | null,
+  max: string | null,
+): string => {
+  const formattedMin = min ? formatPrice(parseInt(min)) : null;
+  const formattedMax = max ? formatPrice(parseInt(max)) : null;
+
+  if (formattedMin && formattedMax) {
+    return `${formattedMin} - ${formattedMax}`;
+  }
+  return formattedMin || formattedMax || "-";
+};
