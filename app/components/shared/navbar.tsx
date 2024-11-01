@@ -2,18 +2,24 @@ import { Form, Link, useLocation } from "@remix-run/react";
 import { MenuIcon, SearchIcon, XIcon } from "lucide-react";
 import { useEffect, useState } from "react";
 
+import { useUser } from "~/contexts/UserContext";
+
 import { Button } from "../ui/button";
 import { Input } from "../ui/input";
 import { Popover, PopoverContent, PopoverTrigger } from "../ui/popover";
 
 export function Navbar({ user }: { user: any }) {
+  const { setUser } = useUser();
   const [isOpen, setIsOpen] = useState(false);
   const location = useLocation();
 
   useEffect(() => {
     if (isOpen) setIsOpen(false);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [location.pathname]);
+  }, [isOpen, location.pathname]);
+
+  useEffect(() => {
+    setUser(user);
+  }, [user, setUser]);
 
   return (
     <nav className="sticky top-0 z-50 flex w-full items-center justify-between bg-amber-50 p-4 md:p-8">

@@ -11,7 +11,6 @@ import {
   useLoaderData,
   useRouteError,
 } from "@remix-run/react";
-import React from "react";
 import { FaHouse } from "react-icons/fa6";
 
 import { Footer } from "~/components/shared/footer";
@@ -19,10 +18,11 @@ import { Navbar } from "~/components/shared/navbar";
 import { Toaster } from "~/components/ui/toaster";
 
 import { Button } from "./components/ui/button";
-import { auth } from "./lib/auth";
-import { getCookie } from "./lib/cookie";
 
 import "./tailwind.css";
+
+import { UserProvider } from "./contexts/UserContext";
+import { auth } from "./lib/auth";
 
 export const meta: MetaFunction = () => [
   { title: "CheckCafe" },
@@ -58,28 +58,14 @@ export const links: LinksFunction = () => [
   },
 ];
 
-export async function loader() {
-  const token = getCookie("accessToken");
+export const loader = async () => {
+  const loggedInUser = await auth.isLoggedIn();
 
-  if (!token) {
-    return json({});
-  }
-
-  try {
-    const user = await auth.isLoggedIn();
-
-    if (!user) {
-      return json({});
-    }
-
-    return json(user);
-  } catch {
-    return json({});
-  }
-}
+  return json({ user: loggedInUser || null });
+};
 
 export function Layout({ children }: { children: React.ReactNode }) {
-  const user = useLoaderData<typeof loader>();
+  const { user } = useLoaderData<typeof loader>() || {};
 
   return (
     <html lang="en">
@@ -90,9 +76,11 @@ export function Layout({ children }: { children: React.ReactNode }) {
         <Links />
       </head>
       <body>
-        <Navbar user={user} />
-        <div className="min-h-screen">{children}</div>
-        <Footer />
+        <UserProvider>
+          <Navbar user={user} />
+          <div className="min-h-screen">{children}</div>
+          <Footer />
+        </UserProvider>
         <Toaster />
         <ScrollRestoration />
         <Scripts />

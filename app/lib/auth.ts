@@ -9,6 +9,7 @@ import {
 } from "~/types/auth";
 
 import fetchAPI from "./api";
+import { getCookie } from "./cookie";
 import { BACKEND_API_URL } from "./env";
 
 export type Auth = {
@@ -16,7 +17,7 @@ export type Auth = {
     userRegister: z.infer<typeof RegisterSchema>,
   ): Promise<RegisterResponse>;
   login(userLogin: z.infer<typeof LoginSchema>): Promise<LoginResponse>;
-  isLoggedIn(): Promise<UserProfile | boolean>;
+  isLoggedIn(): Promise<UserProfile | null>;
 };
 
 export const auth: Auth = {
@@ -106,13 +107,17 @@ export const auth: Auth = {
     }
   },
 
-  async isLoggedIn(): Promise<UserProfile | boolean> {
-    try {
-      const request = await fetchAPI("/auth/me");
+  async isLoggedIn(): Promise<UserProfile | null> {
+    const token = getCookie("accessToken");
 
-      return request;
-    } catch (error) {
-      return false;
+    if (!token) {
+      return null;
+    }
+
+    try {
+      return await fetchAPI("/auth/me");
+    } catch {
+      return null;
     }
   },
 };

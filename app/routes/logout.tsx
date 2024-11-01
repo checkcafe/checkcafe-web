@@ -1,5 +1,7 @@
 import { LoaderFunction, redirect } from "@remix-run/node";
+import { useEffect } from "react";
 
+import { useUser } from "~/contexts/UserContext";
 import { deleteCookie, getCookie } from "~/lib/cookie";
 import { BACKEND_API_URL } from "~/lib/env";
 
@@ -17,15 +19,31 @@ export const loader: LoaderFunction = async () => {
     return redirect("/login");
   }
 
+  const timeoutPromise = new Promise((_, reject) =>
+    setTimeout(() => reject(new Error("Timeout")), 3000),
+  );
+
   try {
-    await fetch(`${BACKEND_API_URL}/auth/logout`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ refreshToken }),
-    });
+    await Promise.race([
+      fetch(`${BACKEND_API_URL}/auth/logout`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ refreshToken }),
+      }),
+      timeoutPromise,
+    ]);
   } finally {
     clearCookies();
   }
 
-  return redirect("/");
+  return null;
 };
+
+export default function Logout() {
+  const { setUser } = useUser();
+
+  useEffect(() => {
+    setUser(null);
+    window.location.href = "/login";
+  }, [setUser]);
+}
