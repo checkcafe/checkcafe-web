@@ -12,7 +12,11 @@ import {
   CarouselPrevious,
 } from "~/components/ui/carousel";
 
-export function ImageCarousel({ images }: { images: string[] }) {
+export function ImageCarousel({
+  images,
+}: {
+  images: { url: string; order: number }[];
+}) {
   const [api, setApi] = useState<CarouselApi>();
   const [current, setCurrent] = useState(0);
 
@@ -33,12 +37,15 @@ export function ImageCarousel({ images }: { images: string[] }) {
       <CardContent className="p-0">
         <Carousel setApi={setApi} className="h-full w-full">
           <CarouselContent>
-            {images.map((image, index) => (
+            {images.map((item, index) => (
               <CarouselItem key={index}>
-                <div className="relative aspect-[3/2] w-full rounded-lg">
+                <div
+                  key={item.order}
+                  className="relative aspect-[3/2] w-full rounded-lg"
+                >
                   <img
-                    src={image}
-                    alt="Place Image"
+                    src={item.url}
+                    alt="Place"
                     className="h-full w-full rounded-lg object-cover"
                   />
                 </div>

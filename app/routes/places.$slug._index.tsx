@@ -2,8 +2,9 @@ import { json, LoaderFunctionArgs } from "@remix-run/node";
 import { redirect, useLoaderData } from "@remix-run/react";
 import { MapPin, Receipt } from "lucide-react";
 import { useState } from "react";
+import { BiHeart } from "react-icons/bi";
+import { FaHeart } from "react-icons/fa6";
 
-import { HeartFillIcon, LoveIcon } from "~/components/icons/icons";
 import { Facility } from "~/components/shared/places/facility";
 import { ImageCarousel } from "~/components/shared/places/image-carousel";
 import { OperatingHourItem } from "~/components/shared/places/operating-hour";
@@ -48,16 +49,12 @@ export default function PlaceSlug() {
     setIsFavorited(!isFavorited);
   };
 
+  console.log("places.photos", place.photos);
+
   return (
     <div className="px-32 py-20">
       <section className="flex flex-row gap-28">
-        {place.photos?.length > 0 ? (
-          <ImageCarousel images={place.photos.map(photo => photo.url)} />
-        ) : (
-          <ImageCarousel
-            images={["https://placehold.co/150?text=No%20Image"]}
-          />
-        )}
+        {place.photos?.length > 0 && <ImageCarousel images={place.photos} />}
 
         <header className="w-2/5">
           <div className="flex flex-row justify-between">
@@ -69,9 +66,9 @@ export default function PlaceSlug() {
               className="hover:cursor-pointer hover:opacity-50"
             >
               {isFavorited ? (
-                <HeartFillIcon className="h-8 w-8" />
+                <FaHeart className="h-8 w-8" color="#FF9129" />
               ) : (
-                <LoveIcon className="h-8 w-8" />
+                <BiHeart className="h-8 w-8" />
               )}
             </button>
           </div>

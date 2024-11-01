@@ -322,25 +322,6 @@ export const PriceTagIcon = (props: IconProps) => {
   );
 };
 
-export const HeartFillIcon = (props: IconProps) => {
-  return (
-    <svg
-      width={24}
-      height={24}
-      viewBox="0 0 24 24"
-      fill="none"
-      xmlns="http://www.w3.org/2000/svg"
-      className={props.className}
-      {...props}
-    >
-      <path
-        d="M23.744 10.772C22.4386 17.5093 12 23.3333 12 23.3333C12 23.3333 1.5613 17.5093 0.255965 10.772C-1.0307 4.13335 2.75463 0.666679 6.66663 0.666679C7.71198 0.600094 8.7563 0.811808 9.69318 1.28025C10.6301 1.74869 11.426 2.45712 12 3.33335C12.5739 2.45712 13.3699 1.74869 14.3068 1.28025C15.2436 0.811808 16.288 0.600094 17.3333 0.666679C21.2453 0.666679 25.0306 4.13335 23.744 10.772Z"
-        fill="#FF9129"
-      />
-    </svg>
-  );
-};
-
 export const LinkedInIcon = (props: IconProps) => (
   <svg
     width="800px"
