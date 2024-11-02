@@ -1,5 +1,5 @@
 import { json } from "@remix-run/node";
-import { useLoaderData } from "@remix-run/react";
+import { Link, useLoaderData } from "@remix-run/react";
 import { FaGithub, FaLinkedinIn } from "react-icons/fa6";
 
 import { Avatar, AvatarFallback, AvatarImage } from "~/components/ui/avatar";
@@ -105,12 +105,24 @@ export default function About() {
                 {member.role}
               </p>
               <div className="mt-1 flex items-center justify-center gap-1 text-sm">
-                <FaLinkedinIn
-                  className="h-5 w-5 cursor-pointer hover:opacity-50"
-                  color="#0A66C2"
-                />
+                <Link
+                  to={member.linkedIn}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                >
+                  <FaLinkedinIn
+                    className="h-5 w-5 cursor-pointer hover:opacity-50"
+                    color="#0A66C2"
+                  />
+                </Link>
                 <span>|</span>
-                <FaGithub className="h-5 w-5 cursor-pointer hover:opacity-50" />
+                <Link
+                  to={member.github}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                >
+                  <FaGithub className="h-5 w-5 cursor-pointer hover:opacity-50" />
+                </Link>
               </div>
             </div>
           ))}
