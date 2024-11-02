@@ -1,13 +1,11 @@
 import type {
   ActionFunctionArgs,
-  LoaderFunction,
+  LoaderFunctionArgs,
   MetaFunction,
 } from "@remix-run/node";
 import {
   Form,
-  json,
   Link,
-  redirect,
   useActionData,
   useNavigate,
   useNavigation,
@@ -15,17 +13,13 @@ import {
 import { EyeClosedIcon, EyeIcon } from "lucide-react";
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
-import { z } from "zod";
 
 import LoadingSpinner from "~/components/shared/loader-spinner";
 import { Button } from "~/components/ui/button";
 import { Input } from "~/components/ui/input";
 import { Label } from "~/components/ui/label";
-import { auth } from "~/lib/auth";
-import { setCookie } from "~/lib/cookie";
 import { getPageTitle } from "~/lib/get-page-title";
-import { getExpirationDate } from "~/lib/jwt";
-import { LoginSchema } from "~/schemas/auth";
+import { authenticator } from "~/services/auth.server";
 import { ActionData, Issue } from "~/types/auth";
 
 export const meta: MetaFunction = () => {
@@ -35,19 +29,13 @@ export const meta: MetaFunction = () => {
   ];
 };
 
-export const loader: LoaderFunction = async ({ request }) => {
-  const login = await auth.isLoggedIn();
+export async function loader({ request }: LoaderFunctionArgs) {
+  return await authenticator.isAuthenticated(request, {
+    successRedirect: "/",
+  });
+}
 
-  if (login) {
-    const referer = request.headers.get("Referer") || "/";
-
-    return redirect(referer);
-  }
-
-  return null;
-};
-
-export default function Login() {
+export default function LoginRoute() {
   const [showPassword, setShowPassword] = useState(false);
   const actionData = useActionData<ActionData>();
   const navigation = useNavigation();
@@ -161,61 +149,11 @@ export default function Login() {
 }
 
 export async function action({ request }: ActionFunctionArgs) {
-  const formData = await request.formData();
-  const userLogin = Object.fromEntries(formData);
-
-  try {
-    const validatedLogin = LoginSchema.parse(userLogin);
-    const loginResponse = await auth.login(validatedLogin);
-
-    if (!loginResponse.success) {
-      return json({
-        success: false,
-        error: loginResponse.error?.message || "Login failed",
-      });
-    }
-
-    const { accessToken, refreshToken, role } = loginResponse.data || {};
-
-    if (!accessToken || !refreshToken || !role) {
-      return json(
-        { error: "Login response is missing required tokens." },
-        { status: 500 },
-      );
-    }
-
-    const [accessTokenExpiration, refreshTokenExpiration] = [
-      getExpirationDate(accessToken),
-      getExpirationDate(refreshToken),
-    ];
-
-    setCookie("accessToken", accessToken, accessTokenExpiration);
-    setCookie("refreshToken", refreshToken, refreshTokenExpiration);
-    setCookie("role", role, refreshTokenExpiration);
-
-    return json({
-      success: true,
-      message: "You have successfully logged in.",
-    });
-  } catch (error) {
-    if (error instanceof z.ZodError) {
-      const issues = error.errors.map(err => ({
-        code: "custom",
-        message: err.message,
-        path: err.path,
-      }));
-
-      return json({
-        success: false,
-        error: {
-          issues,
-        },
-      });
-    }
-
-    return json({
-      success: false,
-      error: "An unexpected error occurred. Please try again later.",
-    });
-  }
+  // we call the method with the name of the strategy we want to use and the
+  // request object, optionally we pass an object with the URLs we want the user
+  // to be redirected to after a success or a failure
+  return await authenticator.authenticate("user-pass", request, {
+    successRedirect: "/",
+    failureRedirect: "/login",
+  });
 }

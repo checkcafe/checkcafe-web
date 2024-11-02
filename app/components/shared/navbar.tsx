@@ -9,6 +9,7 @@ import { MenuIcon, SearchIcon, XIcon } from "lucide-react";
 import { FormEvent, useEffect, useState } from "react";
 import { FaPlus, FaSignOutAlt, FaUser } from "react-icons/fa";
 
+import { SelectCity } from "~/components/shared/select-city";
 import { Avatar, AvatarFallback, AvatarImage } from "~/components/ui/avatar";
 import { Button } from "~/components/ui/button";
 import { Input } from "~/components/ui/input";
@@ -17,9 +18,6 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "~/components/ui/popover";
-import { useUser } from "~/contexts/UserContext";
-
-import { SelectCity } from "./select-city";
 
 export function Navbar({ user }: { user: any }) {
   const location = useLocation();
@@ -30,7 +28,6 @@ export function Navbar({ user }: { user: any }) {
     isHamburgerOpen: false,
     isAccountOpen: false,
   });
-  const { setUser } = useUser();
 
   const handleSubmit = (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -45,10 +42,6 @@ export function Navbar({ user }: { user: any }) {
     }
     navigate(`/places?${searchParams.toString()}`);
   };
-
-  useEffect(() => {
-    setUser(user);
-  }, [user, setUser]);
 
   useEffect(() => {
     setMenuState(prev => ({

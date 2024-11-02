@@ -1,7 +1,5 @@
 import { LoaderFunction, redirect } from "@remix-run/node";
-import { useEffect } from "react";
 
-import { useUser } from "~/contexts/UserContext";
 import { deleteCookie, getCookie } from "~/lib/cookie";
 import { BACKEND_API_URL } from "~/lib/env";
 
@@ -36,14 +34,5 @@ export const loader: LoaderFunction = async () => {
     clearCookies();
   }
 
-  return null;
+  return redirect("/");
 };
-
-export default function Logout() {
-  const { setUser } = useUser();
-
-  useEffect(() => {
-    setUser(null);
-    window.location.href = "/login";
-  }, [setUser]);
-}

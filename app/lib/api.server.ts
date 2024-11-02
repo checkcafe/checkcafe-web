@@ -1,4 +1,5 @@
-import { getCookie } from "./cookie";
+import { authenticator } from "~/services/auth.server";
+
 import { BACKEND_API_URL } from "./env";
 
 const makeRequest = async (
@@ -53,17 +54,23 @@ const refreshAccessToken = async (refreshToken: string) => {
 };
 
 const fetchAPI = async (
+  request: Request,
   endpoint: string,
   method: string = "GET",
   payload?: any,
 ) => {
-  const accessToken = getCookie("accessToken");
-  const refreshToken = getCookie("refreshToken");
+  const authResponse = await authenticator.isAuthenticated(request);
+  if (!authResponse?.token) {
+    return null;
+  }
+
+  const { accessToken, refreshToken } = authResponse.token;
 
   try {
-    if (accessToken) {
-      return await makeRequest(endpoint, method, payload, accessToken);
+    if (!accessToken) {
+      throw new Error("No access token");
     }
+    return await makeRequest(endpoint, method, payload, accessToken);
   } catch (error: Error | any) {
     console.warn("Access token request failed:", error.message);
   }

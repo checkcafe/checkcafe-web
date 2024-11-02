@@ -8,7 +8,7 @@ import { FaDollarSign, FaHeart } from "react-icons/fa6";
 
 import { PinIcon } from "~/components/icons/icons";
 import { Card, CardContent, CardTitle } from "~/components/ui/card";
-import { PlaceItem } from "~/types";
+import { PlaceItem } from "~/types/model";
 import { formatPrice, formatTime } from "~/utils/formatter";
 
 interface PlaceCardProps {
