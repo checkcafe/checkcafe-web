@@ -64,9 +64,10 @@ export const links: LinksFunction = () => [
 ];
 
 export const loader = async ({ request }: LoaderFunctionArgs) => {
-  const user = await authenticator.isAuthenticated(request);
+  const authResponse = await authenticator.isAuthenticated(request);
+  if (!authResponse?.user) return null;
 
-  return json({ user });
+  return json({ user: authResponse.user });
 };
 
 export function Layout({ children }: { children: React.ReactNode }) {

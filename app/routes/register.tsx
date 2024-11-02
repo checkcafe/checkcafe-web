@@ -39,7 +39,9 @@ export async function loader({ request }: LoaderFunctionArgs) {
   const url = new URL(request.url);
   const email = url.searchParams.get("email");
 
-  const user = await authenticator.isAuthenticated(request);
+  const authResponse = await authenticator.isAuthenticated(request);
+  if (!authResponse?.user) return null;
+  const { user } = authResponse;
 
   if (!user) {
     return json({ email });
