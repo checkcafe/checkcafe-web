@@ -1,6 +1,12 @@
-import { Form, Link, useLocation } from "@remix-run/react";
+import {
+  Form,
+  Link,
+  useLocation,
+  useNavigate,
+  useSearchParams,
+} from "@remix-run/react";
 import { MenuIcon, SearchIcon, XIcon } from "lucide-react";
-import { useEffect, useState } from "react";
+import { FormEvent, useEffect, useState } from "react";
 import { FaPlus, FaSignOutAlt, FaUser } from "react-icons/fa";
 
 import { useUser } from "~/contexts/UserContext";
@@ -9,36 +15,48 @@ import { Avatar, AvatarFallback, AvatarImage } from "../ui/avatar";
 import { Button } from "../ui/button";
 import { Input } from "../ui/input";
 import { Popover, PopoverContent, PopoverTrigger } from "../ui/popover";
-import { Searchbar } from "./searchbar";
-import { SearchbarMobile } from "./searchbar-mobile";
+import { SelectCity } from "./select-city";
 
 export function Navbar({ user }: { user: any }) {
-  const { setUser } = useUser();
+  const location = useLocation();
+  const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
   const [menuState, setMenuState] = useState({
     isPopoverOpen: false,
     isHamburgerOpen: false,
     isAccountOpen: false,
   });
-  const location = useLocation();
+  const { setUser } = useUser();
+
+  const handleSubmit = (e: FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+
+    const formData = new FormData(e.currentTarget);
+    const query = String(formData.get("q"));
+    const city = String(formData.get("city"));
+
+    if (query) searchParams.set("q", query);
+    if (city && city !== "null" && city !== "none") {
+      searchParams.set("city", city);
+    }
+    navigate(`/places?${searchParams.toString()}`);
+  };
 
   useEffect(() => {
     setUser(user);
   }, [user, setUser]);
 
   useEffect(() => {
-    setMenuState({
+    setMenuState(prev => ({
+      ...prev,
       isPopoverOpen: false,
       isHamburgerOpen: false,
       isAccountOpen: false,
-    });
+    }));
   }, [location.pathname]);
 
   const handleHamburgerClick = () => {
     setMenuState(prev => ({ ...prev, isHamburgerOpen: !prev.isHamburgerOpen }));
-  };
-
-  const toggleAccountDropdown = () => {
-    setMenuState(prev => ({ ...prev, isAccountOpen: !prev.isAccountOpen }));
   };
 
   const closeAllMenus = () => {
@@ -51,16 +69,30 @@ export function Navbar({ user }: { user: any }) {
 
   return (
     <nav className="sticky top-0 z-50 flex w-full items-center justify-between bg-amber-50 p-4 md:p-8">
-      <div className="flex items-center">
-        <Link to="/">
-          <h2 className="p-2 font-brand text-2xl tracking-tight text-gray-900 md:text-3xl">
-            ☕ CheckCafe
-          </h2>
-        </Link>
-      </div>
+      <Link to="/" className="flex items-center">
+        <h2 className="p-2 font-brand text-2xl tracking-tight text-gray-900 md:text-3xl">
+          ☕ CheckCafe
+        </h2>
+      </Link>
 
-      <Searchbar />
+      {/* Search for desktop */}
+      <Form onSubmit={handleSubmit} className="hidden w-[40%] gap-2 md:flex">
+        <span className="flex h-10 w-full overflow-hidden rounded-md bg-white shadow-lg">
+          <Input
+            type="search"
+            name="q"
+            placeholder="Search..."
+            defaultValue={searchParams.get("q") || ""}
+            className="w-full border-none focus-visible:ring-0 focus-visible:ring-offset-0"
+          />
+          <SelectCity />
+        </span>
+        <Button type="submit" className="h-10">
+          <SearchIcon className="h-6 w-6 cursor-pointer" />
+        </Button>
+      </Form>
 
+      {/* Hamburger button for mobile */}
       <div className="flex items-center gap-4 md:hidden">
         <button onClick={handleHamburgerClick} className="text-primary">
           {menuState.isHamburgerOpen ? (
@@ -71,6 +103,7 @@ export function Navbar({ user }: { user: any }) {
         </button>
       </div>
 
+      {/* Links for desktop */}
       <div className="hidden items-center gap-8 text-base font-semibold md:flex">
         <Link to="/places" className="text-primary">
           Places
@@ -89,13 +122,12 @@ export function Navbar({ user }: { user: any }) {
             <PopoverTrigger asChild>
               <button
                 className="flex cursor-pointer items-center justify-center rounded-full bg-primary p-0.5"
-                onClick={closeAllMenus}
                 aria-label="Open user menu"
               >
                 <Avatar>
                   <AvatarImage src={user.avatarUrl} alt={user.name} />
                   <AvatarFallback>
-                    {user.name ? user.name.charAt(0).toUpperCase() : "?"}
+                    {user.name.charAt(0).toUpperCase()}
                   </AvatarFallback>
                 </Avatar>
               </button>
@@ -109,15 +141,15 @@ export function Navbar({ user }: { user: any }) {
               <div className="grid gap-1 text-sm font-semibold text-gray-700">
                 <Link
                   to={`/${user.username}`}
-                  onClick={closeAllMenus}
                   className="flex items-center gap-2 p-2 text-primary transition-colors duration-200 hover:rounded hover:bg-primary hover:text-white"
+                  onClick={closeAllMenus}
                 >
                   <FaUser size={14} /> Profile
                 </Link>
                 <Link
                   to="/new"
-                  onClick={closeAllMenus}
                   className="flex items-center gap-2 p-2 text-primary transition-colors duration-200 hover:rounded hover:bg-primary hover:text-white"
+                  onClick={closeAllMenus}
                 >
                   <FaPlus size={14} /> New Place
                 </Link>
@@ -125,8 +157,8 @@ export function Navbar({ user }: { user: any }) {
                 <Button asChild className="w-full text-left">
                   <Link
                     to="/logout"
-                    onClick={closeAllMenus}
                     className="flex items-center gap-2 p-2 text-primary transition-colors duration-200 hover:rounded hover:bg-red-600 hover:text-white"
+                    onClick={closeAllMenus}
                   >
                     <FaSignOutAlt size={14} /> Logout
                   </Link>
@@ -146,7 +178,24 @@ export function Navbar({ user }: { user: any }) {
       {/* Dropdown Menu untuk Mobile */}
       {menuState.isHamburgerOpen && (
         <div className="absolute left-0 top-16 w-full bg-amber-50 p-4 shadow-lg lg:hidden">
-          <SearchbarMobile />
+          <Form
+            method="get"
+            action="/places"
+            className="mb-4 flex w-full gap-2"
+          >
+            <div className="flex h-10 w-full overflow-hidden rounded-md bg-white shadow-lg">
+              <Input
+                type="search"
+                name="q"
+                placeholder="Search..."
+                className="w-full border-none focus-visible:ring-0 focus-visible:ring-offset-0"
+              />
+              <SelectCity />
+            </div>
+            <Button type="submit" className="h-10">
+              <SearchIcon className="h-6 w-6" />
+            </Button>
+          </Form>
 
           <div className="flex w-full flex-col gap-1 text-primary">
             <Link
@@ -164,11 +213,15 @@ export function Navbar({ user }: { user: any }) {
               Places
             </Link>
 
-            {/* Dropdown untuk My Account */}
             {user && user.name ? (
               <div className="flex flex-col gap-1">
                 <button
-                  onClick={toggleAccountDropdown}
+                  onClick={() =>
+                    setMenuState(prev => ({
+                      ...prev,
+                      isAccountOpen: !prev.isAccountOpen,
+                    }))
+                  }
                   className="w-full rounded-md py-2 pl-4 text-left text-primary hover:bg-slate-100"
                 >
                   My Account

@@ -6,9 +6,9 @@ import { BiHeart } from "react-icons/bi";
 import { FaHeart } from "react-icons/fa6";
 
 import { Facility } from "~/components/shared/places/facility";
-import { ImageCarousel } from "~/components/shared/places/image-carousel";
 import { OperatingHourItem } from "~/components/shared/places/operating-hour";
 import ShareButton from "~/components/shared/shared-button";
+import { Sliders } from "~/components/shared/sliders";
 import { MapboxView } from "~/components/ui/mapbox-view";
 import { BACKEND_API_URL } from "~/lib/env";
 import { type Place, type PlaceItem } from "~/types";
@@ -50,16 +50,19 @@ export default function PlaceSlug() {
     setIsFavorited(!isFavorited);
   };
 
-  console.log("places.photos", place.photos);
-
   return (
-    <div className="px-32 py-20">
-      <section className="flex flex-row gap-28">
-        {place.photos?.length > 0 && <ImageCarousel images={place.photos} />}
-
-        <header className="w-2/5">
-          <div className="flex flex-row justify-between">
-            <h1 className="text-3xl font-semibold text-amber-900">
+    <div className="px-4 py-8 md:px-32 md:py-20">
+      <section className="flex flex-col gap-10 md:flex-row md:gap-28">
+        <div className="h-96 w-full md:w-2/4">
+          <Sliders
+            imageSlides={place.photos.map((photo: { url: string }) => ({
+              imageUrl: photo.url,
+            }))}
+          />
+        </div>
+        <header className="w-full md:w-2/5">
+          <div className="flex flex-col justify-between md:flex-row">
+            <h1 className="text-2xl font-semibold text-amber-900 md:text-3xl">
               {place.name}
             </h1>
             <div className="flex flex-row items-center justify-center gap-1">
@@ -73,7 +76,7 @@ export default function PlaceSlug() {
                   <BiHeart className="h-8 w-8" />
                 )}
               </button>
-              <ShareButton url={window.location.href} />
+              <ShareButton />
             </div>
           </div>
           <p className="mb-8 text-base font-normal">{place.description}</p>
@@ -103,8 +106,8 @@ export default function PlaceSlug() {
         </header>
       </section>
 
-      <section className="mt-20 flex flex-row gap-28">
-        <aside className="h-96 w-1/2">
+      <section className="mt-20 flex flex-col gap-10 md:flex-row md:gap-28">
+        <aside className="h-96 w-full md:w-1/2">
           <MapboxView
             places={placesOnMap}
             initialViewState={initialViewMap}
@@ -114,11 +117,11 @@ export default function PlaceSlug() {
         </aside>
 
         <div className="flex flex-col">
-          <h1 className="mb-9 mt-2 text-2xl font-semibold text-amber-950">
+          <h1 className="mb-9 mt-2 text-xl font-semibold text-amber-950 md:text-2xl">
             Facility
           </h1>
           {place.placeFacilities?.length > 0 &&
-            place.placeFacilities?.map((facility, index) => (
+            place.placeFacilities.map((facility, index) => (
               <Facility facility={facility} key={index} />
             ))}
         </div>

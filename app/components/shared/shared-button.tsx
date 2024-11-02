@@ -1,3 +1,4 @@
+import { memo, useEffect, useState } from "react";
 import {
   FaCopy,
   FaFacebookF,
@@ -6,7 +7,7 @@ import {
   FaWhatsapp,
 } from "react-icons/fa";
 import { FaShareNodes } from "react-icons/fa6";
-import { toast } from "react-toastify";
+import { toast } from "sonner";
 
 import {
   DropdownMenu,
@@ -16,18 +17,52 @@ import {
 } from "~/components/ui/dropdown-menu";
 
 interface ShareButtonProps {
-  url: string;
+  initialUrl?: string;
 }
 
-const ShareButton: React.FC<ShareButtonProps> = ({ url }: ShareButtonProps) => {
-  const handleShare = (shareUrl: string) => {
-    window.open(shareUrl, "_blank", "noopener,noreferrer");
+const ShareButton: React.FC<ShareButtonProps> = ({ initialUrl }) => {
+  const [url, setUrl] = useState<string | null>(null);
+
+  useEffect(() => {
+    setUrl(
+      initialUrl ||
+        (typeof window !== "undefined" ? window.location.href : null),
+    );
+  }, [initialUrl]);
+
+  const getShareUrl = (platform: string) => {
+    if (!url) return "";
+    const encodedUrl = encodeURIComponent(url);
+    const shareUrls: Record<string, string> = {
+      facebook: `https://www.facebook.com/sharer/sharer.php?u=${encodedUrl}`,
+      twitter: `https://twitter.com/intent/tweet?url=${encodedUrl}`,
+      whatsapp: `https://wa.me/?text=${encodedUrl}`,
+      telegram: `https://t.me/share/url?url=${encodedUrl}`,
+    };
+    return shareUrls[platform] || "";
   };
 
-  const handleCopyLink = () => {
-    navigator.clipboard.writeText(url);
-    toast.success("Link copied to clipboard!");
+  const handleShare = (platform: string) => {
+    if (url) {
+      const shareUrl = getShareUrl(platform);
+      window.open(shareUrl, "_blank", "noopener,noreferrer");
+    }
   };
+
+  const handleCopyLink = async () => {
+    if (navigator.clipboard && url) {
+      try {
+        await navigator.clipboard.writeText(url);
+        toast("Link copied to clipboard!");
+      } catch (err) {
+        console.error("Failed to copy link: ", err);
+      }
+    } else {
+      console.warn("Clipboard API not available or URL is not set");
+    }
+  };
+
+  if (!url) return null;
 
   return (
     <DropdownMenu modal={false}>
@@ -37,28 +72,16 @@ const ShareButton: React.FC<ShareButtonProps> = ({ url }: ShareButtonProps) => {
         </span>
       </DropdownMenuTrigger>
       <DropdownMenuContent>
-        <DropdownMenuItem
-          onClick={() =>
-            handleShare(`https://www.facebook.com/sharer/sharer.php?u=${url}`)
-          }
-        >
+        <DropdownMenuItem onClick={() => handleShare("facebook")}>
           <FaFacebookF className="mr-2" /> Facebook
         </DropdownMenuItem>
-        <DropdownMenuItem
-          onClick={() =>
-            handleShare(`https://twitter.com/intent/tweet?url=${url}`)
-          }
-        >
+        <DropdownMenuItem onClick={() => handleShare("twitter")}>
           <FaTwitter className="mr-2" /> Twitter
         </DropdownMenuItem>
-        <DropdownMenuItem
-          onClick={() => handleShare(`https://wa.me/?text=${url}`)}
-        >
+        <DropdownMenuItem onClick={() => handleShare("whatsapp")}>
           <FaWhatsapp className="mr-2" /> WhatsApp
         </DropdownMenuItem>
-        <DropdownMenuItem
-          onClick={() => handleShare(`https://t.me/share/url?url=${url}`)}
-        >
+        <DropdownMenuItem onClick={() => handleShare("telegram")}>
           <FaTelegramPlane className="mr-2" /> Telegram
         </DropdownMenuItem>
         <DropdownMenuItem onClick={handleCopyLink}>
@@ -69,4 +92,4 @@ const ShareButton: React.FC<ShareButtonProps> = ({ url }: ShareButtonProps) => {
   );
 };
 
-export default ShareButton;
+export default memo(ShareButton);

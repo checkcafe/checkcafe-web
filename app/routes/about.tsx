@@ -98,7 +98,6 @@ export default function About() {
                   {member.name ? member.name.charAt(0).toUpperCase() : "?"}
                 </AvatarFallback>
               </Avatar>
-
               <p className="sm:text-md mt-1 text-center text-sm font-semibold text-amber-950 md:text-lg">
                 {member.name}
               </p>

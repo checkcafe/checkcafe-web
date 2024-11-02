@@ -1,6 +1,6 @@
 import { useNavigate, useSearchParams } from "@remix-run/react";
 import { XIcon } from "lucide-react";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 
 import {
   Select,
@@ -14,24 +14,27 @@ import {
 export function SelectCity() {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
-  const [value, setValue] = useState(searchParams.get("city") || "");
+  const initialCityValue = searchParams.get("city") || "";
+  const [value, setValue] = useState(initialCityValue);
 
-  useEffect(() => {
-    setValue(searchParams.get("city") || "");
-  }, [searchParams]);
+  const handleValueChange = (newValue: string) => {
+    setValue(newValue);
+    if (newValue) {
+      searchParams.set("city", newValue);
+    } else {
+      searchParams.delete("city");
+    }
+    navigate(`/places?${searchParams.toString()}`);
+  };
 
   const handleClear = (e: React.MouseEvent) => {
     e.stopPropagation();
-    setValue("");
-    if (searchParams.get("city")) {
-      searchParams.delete("city");
-      navigate(`/places?${searchParams.toString()}`);
-    }
+    handleValueChange("");
   };
 
   return (
     <div className="flex h-full w-full items-center px-1">
-      <Select value={value} onValueChange={setValue} name="city">
+      <Select value={value} onValueChange={handleValueChange} name="city">
         <SelectTrigger className="rounded-none border-0 border-l border-gray-300 bg-white text-gray-700">
           <SelectValue placeholder="Choose location" />
         </SelectTrigger>
@@ -44,10 +47,12 @@ export function SelectCity() {
           </SelectGroup>
         </SelectContent>
       </Select>
-      <XIcon
-        className={`h-4 w-4 cursor-pointer text-gray-500 ${value ? "opacity-100" : "opacity-0"}`}
-        onClick={value ? handleClear : undefined}
-      />
+      {value && (
+        <XIcon
+          className="mr-2 h-4 w-4 cursor-pointer text-gray-500"
+          onClick={handleClear}
+        />
+      )}
     </div>
   );
 }

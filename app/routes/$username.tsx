@@ -218,7 +218,9 @@ export default function Profile() {
 
           <TabsContent value="created">
             {isFetchingPlaces ? (
-              <LoadingSpinner size="default" color="text-gray-500" />
+              <p className="mt-20 text-center">
+                <LoadingSpinner size="large" color="text-gray-500" />
+              </p>
             ) : placesCreatedError ? (
               <p className="mt-4 text-center text-lg font-medium">
                 {placesCreatedError.message ||
@@ -235,7 +237,9 @@ export default function Profile() {
 
           <TabsContent value="favorites">
             {isFetchingFavorites ? (
-              <LoadingSpinner size="default" color="text-gray-500" />
+              <p className="mt-20 text-center">
+                <LoadingSpinner size="large" color="text-gray-500" />
+              </p>
             ) : favoritesError ? (
               <p className="mt-4 text-center text-lg font-medium">
                 {favoritesError.message ||
