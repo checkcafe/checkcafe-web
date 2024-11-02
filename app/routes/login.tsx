@@ -5,6 +5,7 @@ import type {
 } from "@remix-run/node";
 import {
   Form,
+  json,
   Link,
   useActionData,
   useNavigate,
@@ -12,6 +13,7 @@ import {
 } from "@remix-run/react";
 import { EyeClosedIcon, EyeIcon } from "lucide-react";
 import { useEffect, useState } from "react";
+import { AuthorizationError } from "remix-auth";
 import { toast } from "sonner";
 
 import LoadingSpinner from "~/components/shared/loader-spinner";
@@ -20,50 +22,51 @@ import { Input } from "~/components/ui/input";
 import { Label } from "~/components/ui/label";
 import { getPageTitle } from "~/lib/get-page-title";
 import { authenticator } from "~/services/auth.server";
-import { ActionData, Issue } from "~/types/auth";
+import { AuthIssue } from "~/types/auth";
 
-export const meta: MetaFunction = () => {
-  return [
-    { title: getPageTitle("Login") },
-    { name: "description", content: "Login to existing account" },
-  ];
-};
+export const meta: MetaFunction = () => [
+  { title: getPageTitle("Login") },
+  { name: "description", content: "Login to existing account" },
+];
 
 export async function loader({ request }: LoaderFunctionArgs) {
-  return await authenticator.isAuthenticated(request, {
-    successRedirect: "/",
-  });
+  return await authenticator.isAuthenticated(request, { successRedirect: "/" });
 }
 
 export default function LoginRoute() {
   const [showPassword, setShowPassword] = useState(false);
-  const actionData = useActionData<ActionData>();
-  const navigation = useNavigation();
+  const actionData = useActionData<typeof action>();
   const navigate = useNavigate();
+  const navigation = useNavigation();
 
-  const togglePasswordVisibility = () => {
-    setShowPassword(!showPassword);
-  };
+  const togglePasswordVisibility = () => setShowPassword(!showPassword);
 
-  const errors =
-    actionData?.error && typeof actionData.error !== "string"
-      ? actionData.error.issues.reduce(
-          (acc: Record<string, string>, issue: Issue) => {
-            acc[issue.path[0]] = issue.message;
-            return acc;
-          },
-          {},
-        )
-      : {};
+  const errors = Array.isArray(actionData?.error)
+    ? actionData.error.reduce(
+        (acc: Record<string, string>, { message, path }: AuthIssue) => {
+          acc[path[0]] = message;
+          return acc;
+        },
+        {},
+      )
+    : {};
 
   useEffect(() => {
     if (actionData?.success) {
-      toast((actionData as { message: string }).message);
+      toast((actionData as { message: string }).message, {
+        action: {
+          label: "Close",
+          onClick: () => {},
+        },
+      });
       navigate("/");
-    } else if (actionData?.error) {
-      if (typeof actionData?.error === "string") {
-        toast(actionData.error);
-      }
+    } else if (actionData?.error && typeof actionData.error === "string") {
+      toast(actionData.error, {
+        action: {
+          label: "Close",
+          onClick: () => {},
+        },
+      });
     }
   }, [actionData, navigate]);
 
@@ -71,7 +74,6 @@ export default function LoginRoute() {
     <div className="flex min-h-screen items-center justify-center bg-gray-50">
       <div className="w-full max-w-sm rounded-lg bg-white p-6 shadow-md">
         <h2 className="mb-4 text-center text-2xl font-semibold">Login</h2>
-
         <Form method="post" className="flex flex-col gap-3">
           <span>
             <Label
@@ -149,11 +151,26 @@ export default function LoginRoute() {
 }
 
 export async function action({ request }: ActionFunctionArgs) {
-  // we call the method with the name of the strategy we want to use and the
-  // request object, optionally we pass an object with the URLs we want the user
-  // to be redirected to after a success or a failure
-  return await authenticator.authenticate("user-pass", request, {
-    successRedirect: "/",
-    failureRedirect: "/login",
-  });
+  try {
+    return await authenticator.authenticate("user-pass", request, {
+      successRedirect: "/",
+      throwOnError: true,
+    });
+  } catch (error: any) {
+    if (error instanceof Response) return error;
+    if (error instanceof AuthorizationError) {
+      let issue;
+      try {
+        issue = JSON.parse(error.message);
+      } catch {
+        issue = error.message;
+      }
+
+      return json(Array.isArray(issue) ? { error: issue } : { error: issue });
+    }
+
+    return json({
+      error: error.message,
+    });
+  }
 }

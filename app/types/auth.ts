@@ -1,21 +1,16 @@
-export type Issue = {
-  code: string;
+export type AuthIssue = {
   message: string;
   path: (string | number)[];
 };
 
-export type ActionData = {
-  success?: boolean;
-  error?:
-    | {
-        issues: Issue[];
-      }
-    | string;
+export type AuthResponse = {
+  token?: AuthToken;
+  user?: AuthUser;
 };
 
-export type AuthResponse = {
-  token: AuthToken;
-  user: AuthUser;
+export type AuthToken = {
+  accessToken: string;
+  refreshToken: string;
 };
 
 export type AuthUser = {
@@ -25,11 +20,6 @@ export type AuthUser = {
   email: string;
   avatarUrl: string;
   role?: string;
-};
-
-export type AuthToken = {
-  accessToken: string;
-  refreshToken: string;
 };
 
 export type UserProfile = {
@@ -55,22 +45,4 @@ export type RegisterResponse = {
       path: string[];
     }>;
   };
-};
-
-export type LoginResponse = {
-  success: boolean;
-  data?: AuthToken;
-  error?: {
-    message: string;
-    status: number;
-    issues?: Array<{
-      code: string;
-      message: string;
-      path: string[];
-    }>;
-  };
-};
-
-export type isLoggedInResponse = {
-  user: Partial<UserProfile> | null;
 };

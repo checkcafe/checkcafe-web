@@ -22,10 +22,10 @@ import { Footer } from "~/components/shared/footer";
 import { Navbar } from "~/components/shared/navbar";
 import { Button } from "~/components/ui/button";
 import { Toaster } from "~/components/ui/sonner";
+import { authenticator } from "~/services/auth.server";
+import { AuthResponse } from "~/types/auth";
 
 import "./tailwind.css";
-
-import { authenticator } from "./services/auth.server";
 
 const queryClient = new QueryClient();
 
@@ -64,9 +64,11 @@ export const links: LinksFunction = () => [
 ];
 
 export const loader = async ({ request }: LoaderFunctionArgs) => {
-  const user = await authenticator.isAuthenticated(request);
+  const authorized = await authenticator.isAuthenticated(request);
 
-  return json({ user });
+  return json({
+    user: (authorized as AuthResponse)?.user || null,
+  });
 };
 
 export function Layout({ children }: { children: React.ReactNode }) {
