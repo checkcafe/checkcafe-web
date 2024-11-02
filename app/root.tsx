@@ -19,8 +19,7 @@ import { Navbar } from "~/components/shared/navbar";
 import { Toaster } from "~/components/ui/sonner";
 
 import { Button } from "./components/ui/button";
-import { UserProvider } from "./contexts/UserContext";
-import { auth } from "./lib/auth";
+import { getAuthUser } from "./lib/auth";
 
 import "./tailwind.css";
 
@@ -59,7 +58,7 @@ export const links: LinksFunction = () => [
 ];
 
 export const loader = async () => {
-  const loggedInUser = await auth.isLoggedIn();
+  const loggedInUser = await getAuthUser();
   return json({ user: loggedInUser || null });
 };
 
@@ -79,11 +78,9 @@ export function Layout({ children }: { children: React.ReactNode }) {
       <body>
         <QueryClientProvider client={queryClient}>
           {" "}
-          <UserProvider>
-            <Navbar user={user} />
-            <div className="min-h-screen">{children}</div>
-            <Footer />
-          </UserProvider>
+          <Navbar user={user} />
+          <div className="min-h-screen">{children}</div>
+          <Footer />
           <Toaster />
           <ScrollRestoration />
           <Scripts />

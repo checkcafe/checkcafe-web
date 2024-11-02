@@ -1,5 +1,5 @@
 import fetchAPI from "./api";
-import { auth } from "./auth";
+import { auth } from "./auth-backup";
 
 export async function getFavoritePlaces() {
   let favorites = [];

@@ -22,7 +22,7 @@ import LoadingSpinner from "~/components/shared/loader-spinner";
 import { Button } from "~/components/ui/button";
 import { Input } from "~/components/ui/input";
 import { Label } from "~/components/ui/label";
-import { auth } from "~/lib/auth";
+import { auth } from "~/lib/auth-backup";
 import { getPageTitle } from "~/lib/get-page-title";
 import { RegisterSchema } from "~/schemas/auth";
 import { ActionData, Issue } from "~/types/auth";

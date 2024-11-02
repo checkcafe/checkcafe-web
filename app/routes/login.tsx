@@ -21,7 +21,7 @@ import LoadingSpinner from "~/components/shared/loader-spinner";
 import { Button } from "~/components/ui/button";
 import { Input } from "~/components/ui/input";
 import { Label } from "~/components/ui/label";
-import { auth } from "~/lib/auth";
+import { checkLoggedIn, login } from "~/lib/auth";
 import { setCookie } from "~/lib/cookie";
 import { getPageTitle } from "~/lib/get-page-title";
 import { getExpirationDate } from "~/lib/jwt";
@@ -36,9 +36,9 @@ export const meta: MetaFunction = () => {
 };
 
 export const loader: LoaderFunction = async ({ request }) => {
-  const login = await auth.isLoggedIn();
+  const isLoggedIn = await checkLoggedIn();
 
-  if (login) {
+  if (isLoggedIn) {
     const referer = request.headers.get("Referer") || "/";
 
     return redirect(referer);
@@ -166,16 +166,21 @@ export async function action({ request }: ActionFunctionArgs) {
 
   try {
     const validatedLogin = LoginSchema.parse(userLogin);
-    const loginResponse = await auth.login(validatedLogin);
+    const response = await login(
+      validatedLogin.username,
+      validatedLogin.password,
+    );
 
-    if (!loginResponse.success) {
+    console.log(response);
+
+    if (response.error) {
       return json({
         success: false,
-        error: loginResponse.error?.message || "Login failed",
+        error: response.error?.message || "Login failed",
       });
     }
 
-    const { accessToken, refreshToken, role } = loginResponse.data || {};
+    const { accessToken, refreshToken, role } = response;
 
     if (!accessToken || !refreshToken || !role) {
       return json(
