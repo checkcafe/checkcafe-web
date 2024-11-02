@@ -2,9 +2,9 @@ import { z } from "zod";
 
 import { LoginSchema, RegisterSchema } from "~/schemas/auth";
 import {
+  AuthToken,
   LoginResponse,
   RegisterResponse,
-  TokenResponse,
   UserProfile,
 } from "~/types/auth";
 
@@ -75,7 +75,7 @@ export const auth: Auth = {
         };
       }
 
-      const { accessToken, refreshToken, role } = result as TokenResponse;
+      const { accessToken, refreshToken, role } = result as AuthToken;
 
       if (!accessToken || !refreshToken || !role) {
         return {

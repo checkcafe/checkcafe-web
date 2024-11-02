@@ -8,7 +8,7 @@ import PopularPlaces from "~/components/shared/home/popular-places";
 import { Button } from "~/components/ui/button";
 import { Input } from "~/components/ui/input";
 import { BACKEND_API_URL } from "~/lib/env";
-import { type PlaceItem } from "~/types";
+import { type PlaceItem } from "~/types/model";
 
 export const meta: MetaFunction = () => {
   return [

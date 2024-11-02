@@ -1,4 +1,4 @@
-import type { PlaceFacility } from "~/types";
+import type { PlaceFacility } from "~/types/model";
 
 /**
  * Show facility item

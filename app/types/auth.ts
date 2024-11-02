@@ -13,12 +13,23 @@ export type ActionData = {
     | string;
 };
 
-export type User = {
+export type AuthResponse = {
+  token: AuthToken;
+  user: AuthUser;
+};
+
+export type AuthUser = {
   id: string;
   name: string;
   username: string;
   email: string;
   avatarUrl: string;
+  role?: string;
+};
+
+export type AuthToken = {
+  accessToken: string;
+  refreshToken: string;
 };
 
 export type UserProfile = {
@@ -34,7 +45,7 @@ export type UserProfile = {
 
 export type RegisterResponse = {
   success: boolean;
-  data?: User;
+  data?: AuthUser;
   error?: {
     message: string;
     status: number;
@@ -46,15 +57,9 @@ export type RegisterResponse = {
   };
 };
 
-export type TokenResponse = {
-  accessToken: string;
-  refreshToken: string;
-  role?: string;
-};
-
 export type LoginResponse = {
   success: boolean;
-  data?: TokenResponse;
+  data?: AuthToken;
   error?: {
     message: string;
     status: number;

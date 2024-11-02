@@ -18,9 +18,9 @@ import {
   getFavoritePlaces,
   unfavoritePlace,
 } from "~/lib/favorite-place";
-import { FavoritePlace, PlaceItem } from "~/types";
 import { ActionData } from "~/types/auth";
 import { Filter } from "~/types/filter";
+import { FavoritePlace, PlaceItem } from "~/types/model";
 
 export async function loader({ request }: LoaderFunctionArgs) {
   const url = new URL(request.url);

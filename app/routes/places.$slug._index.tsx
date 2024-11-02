@@ -11,7 +11,7 @@ import ShareButton from "~/components/shared/shared-button";
 import { Sliders } from "~/components/shared/sliders";
 import { MapboxView } from "~/components/ui/mapbox-view";
 import { BACKEND_API_URL } from "~/lib/env";
-import { type Place, type PlaceItem } from "~/types";
+import { type Place, type PlaceItem } from "~/types/model";
 import { formatPriceRange } from "~/utils/formatter";
 
 export async function loader({ params }: LoaderFunctionArgs) {
