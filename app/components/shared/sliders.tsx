@@ -8,7 +8,7 @@ import {
   CarouselItem,
   CarouselNext,
   CarouselPrevious,
-} from "../ui/carousel";
+} from "~/components/ui/carousel";
 
 interface SliderProps {
   imageSlides: { imageUrl: string; url?: string }[];
@@ -20,7 +20,7 @@ interface SliderProps {
 const DEFAULT_WIDTH = 600;
 const DEFAULT_HEIGHT = 400;
 
-const Sliders = ({
+export const Sliders = ({
   imageSlides,
   autoplayDelay = 0,
   prevButtonText,
@@ -91,5 +91,3 @@ const Sliders = ({
     </div>
   );
 };
-
-export { Sliders };

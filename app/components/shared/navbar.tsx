@@ -9,10 +9,14 @@ import { MenuIcon, SearchIcon, XIcon } from "lucide-react";
 import { FormEvent, useEffect, useState } from "react";
 import { FaPlus, FaSignOutAlt, FaUser } from "react-icons/fa";
 
-import { Avatar, AvatarFallback, AvatarImage } from "../ui/avatar";
-import { Button } from "../ui/button";
-import { Input } from "../ui/input";
-import { Popover, PopoverContent, PopoverTrigger } from "../ui/popover";
+import { Button } from "~/components/ui/button";
+import { Input } from "~/components/ui/input";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "~/components/ui/popover";
+
 import { SelectCity } from "./select-city";
 
 export function Navbar({ user }: { user: any }) {
