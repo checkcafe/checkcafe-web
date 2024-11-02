@@ -1,3 +1,4 @@
+import { Label } from "~/components/ui/label";
 import {
   Select,
   SelectContent,
@@ -31,7 +32,7 @@ export default function SelectHour({
   return (
     <div className="flex gap-6">
       <div className="w-full">
-        <label>From</label>
+        <Label htmlFor="openTime">From</Label>
         <Select defaultValue={defaultOpenTime} name="openTime">
           <SelectTrigger className="w-full">
             <SelectValue placeholder="09:00" />
@@ -48,7 +49,7 @@ export default function SelectHour({
       </div>
 
       <div className="w-full">
-        <label>To</label>
+        <Label htmlFor="closeTime">To</Label>
         <Select defaultValue={defaultCloseTime} name="closeTime">
           <SelectTrigger className="w-full">
             <SelectValue placeholder="22:00" />

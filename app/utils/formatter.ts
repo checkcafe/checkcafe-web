@@ -4,7 +4,7 @@
  * @param time - The time string to be formatted.
  * @returns A formatted time string in "HH:MM" format.
  */
-export const formatTime = (time: string): string => {
+export const formatTime = (time: string) => {
   const date = new Date(time);
   return date.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
 };

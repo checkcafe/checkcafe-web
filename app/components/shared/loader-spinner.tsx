@@ -14,8 +14,8 @@ export default function LoadingSpinner({
   };
 
   return (
-    <div className="flex items-center justify-center">
+    <span className="flex items-center justify-center">
       <Loader2 className={`animate-spin ${sizeClasses[size]} ${color}`} />
-    </div>
+    </span>
   );
 }

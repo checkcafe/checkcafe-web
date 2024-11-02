@@ -1,5 +1,5 @@
 import { useNavigate, useSearchParams } from "@remix-run/react";
-import { FormEvent, useEffect } from "react";
+import { FormEvent } from "react";
 import { toast } from "sonner";
 
 import { Input } from "~/components/ui/input";
