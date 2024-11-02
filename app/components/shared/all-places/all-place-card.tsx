@@ -1,10 +1,12 @@
-import { Form, Link, useFetcher, useSearchParams } from "@remix-run/react";
+/* eslint-disable react/display-name */
+
+import { Link, useFetcher, useSearchParams } from "@remix-run/react";
 import { Clock3 } from "lucide-react";
 import React, { forwardRef } from "react";
 import { BiHeart } from "react-icons/bi";
 import { FaDollarSign, FaHeart } from "react-icons/fa6";
 
-import { LoveIcon, PinIcon, PriceTagIcon } from "~/components/icons/icons";
+import { PinIcon } from "~/components/icons/icons";
 import { Card, CardContent, CardTitle } from "~/components/ui/card";
 import { PlaceItem } from "~/types";
 import { formatPrice, formatTime } from "~/utils/formatter";
