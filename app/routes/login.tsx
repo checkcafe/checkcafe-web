@@ -9,17 +9,18 @@ import {
   Link,
   redirect,
   useActionData,
+  useNavigate,
   useNavigation,
 } from "@remix-run/react";
 import { EyeClosedIcon, EyeIcon } from "lucide-react";
 import { useEffect, useState } from "react";
+import { toast } from "sonner";
 import { z } from "zod";
 
 import LoadingSpinner from "~/components/shared/loader-spinner";
 import { Button } from "~/components/ui/button";
 import { Input } from "~/components/ui/input";
 import { Label } from "~/components/ui/label";
-import { useToast } from "~/hooks/use-toast";
 import { auth } from "~/lib/auth";
 import { setCookie } from "~/lib/cookie";
 import { getPageTitle } from "~/lib/get-page-title";
@@ -50,7 +51,7 @@ export default function Login() {
   const [showPassword, setShowPassword] = useState(false);
   const actionData = useActionData<ActionData>();
   const navigation = useNavigation();
-  const { toast } = useToast();
+  const navigate = useNavigate();
 
   const togglePasswordVisibility = () => {
     setShowPassword(!showPassword);
@@ -68,14 +69,15 @@ export default function Login() {
       : {};
 
   useEffect(() => {
-    if (typeof actionData?.error === "string") {
-      toast({
-        title: "Error",
-        description: actionData.error,
-        variant: "destructive",
-      });
+    if (actionData?.success) {
+      toast((actionData as { message: string }).message);
+      navigate("/");
+    } else if (actionData?.error) {
+      if (typeof actionData?.error === "string") {
+        toast(actionData.error);
+      }
     }
-  }, [actionData, toast]);
+  }, [actionData, navigate]);
 
   return (
     <div className="flex min-h-screen items-center justify-center bg-gray-50">
@@ -167,10 +169,10 @@ export async function action({ request }: ActionFunctionArgs) {
     const loginResponse = await auth.login(validatedLogin);
 
     if (!loginResponse.success) {
-      return json(
-        { error: loginResponse.error?.message || "Login failed" },
-        { status: loginResponse.error?.status || 401 },
-      );
+      return json({
+        success: false,
+        error: loginResponse.error?.message || "Login failed",
+      });
     }
 
     const { accessToken, refreshToken, role } = loginResponse.data || {};
@@ -191,7 +193,10 @@ export async function action({ request }: ActionFunctionArgs) {
     setCookie("refreshToken", refreshToken, refreshTokenExpiration);
     setCookie("role", role, refreshTokenExpiration);
 
-    return redirect("/");
+    return json({
+      success: true,
+      message: "You have successfully logged in.",
+    });
   } catch (error) {
     if (error instanceof z.ZodError) {
       const issues = error.errors.map(err => ({
@@ -200,20 +205,17 @@ export async function action({ request }: ActionFunctionArgs) {
         path: err.path,
       }));
 
-      return json(
-        {
-          success: false,
-          error: {
-            issues,
-          },
+      return json({
+        success: false,
+        error: {
+          issues,
         },
-        { status: 400 },
-      );
+      });
     }
 
-    return json(
-      { error: "An unexpected error occurred. Please try again later." },
-      { status: 500 },
-    );
+    return json({
+      success: false,
+      error: "An unexpected error occurred. Please try again later.",
+    });
   }
 }

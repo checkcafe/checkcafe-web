@@ -1,13 +1,25 @@
 import { z } from "zod";
 
-export const filterSchema = z.object({
-  name: z.string().optional(),
-  priceRange: z.object({ gte: z.string() }).optional(),
-  city: z.string().optional(),
-  operatingHours: z
-    .object({
-      openingTime: z.object({ gte: z.string() }).optional(),
-      closingTime: z.object({ lte: z.string() }).optional(),
-    })
-    .optional(),
-});
+export const filterSchema = z
+  .object({
+    priceFrom: z
+      .number()
+      .min(1, { message: "Price must be greater than 1" })
+      .optional(),
+    priceTo: z
+      .number()
+      .min(1, { message: "Price must be greater than 1" })
+      .optional(),
+    openTime: z.string().optional(),
+    closeTime: z.string().optional(),
+  })
+  .superRefine((data, ctx) => {
+    if (data.priceFrom && data.priceTo && data.priceTo < data.priceFrom) {
+      ctx.addIssue({
+        code: "custom",
+        path: ["priceTo"],
+        message:
+          "The maximum price must be greater than or equal to the minimum price",
+      });
+    }
+  });

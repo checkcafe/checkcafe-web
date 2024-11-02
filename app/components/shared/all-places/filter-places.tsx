@@ -1,43 +1,73 @@
-import { useRef } from "react";
-import { useNavigate, useSearchParams } from "react-router-dom";
+import { useNavigate, useSearchParams } from "@remix-run/react";
+import { FormEvent, useEffect } from "react";
+import { toast } from "sonner";
 
 import { Input } from "~/components/ui/input";
+import { filterSchema } from "~/schemas/filter";
 
 import SelectHour from "./select-hour";
 
 export default function PlaceFilter() {
-  const priceFromRef = useRef<HTMLInputElement | null>(null);
-  const priceToRef = useRef<HTMLInputElement | null>(null);
-  const openTimeRef = useRef<HTMLSelectElement | null>(null);
-  const closeTimeRef = useRef<HTMLSelectElement | null>(null);
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
 
   const hasCityParam = searchParams.has("city");
+  const hasFilters =
+    searchParams.has("priceFrom") ||
+    searchParams.has("priceTo") ||
+    searchParams.has("openTime") ||
+    searchParams.has("closeTime");
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    const priceFrom = priceFromRef.current?.value || "";
-    const priceTo = priceToRef.current?.value || "";
-    const openTime = openTimeRef.current?.value || "";
-    const closeTime = closeTimeRef.current?.value || "";
 
-    const queryParts: string[] = [];
+    const formData = new FormData(e.currentTarget);
 
-    if (priceFrom) queryParts.push(`priceFrom=${priceFrom}`);
-    if (priceTo) queryParts.push(`priceTo=${priceTo}`);
-    if (openTime) queryParts.push(`openTime=${openTime}`);
-    if (closeTime) queryParts.push(`closeTime=${closeTime}`);
+    const priceFrom = String(formData.get("priceFrom"));
+    const priceTo = String(formData.get("priceTo"));
+    const openTime = String(formData.get("openTime"));
+    const closeTime = String(formData.get("closeTime"));
 
-    const queryString = queryParts.join("&");
+    const filterData = {
+      priceFrom: priceFrom ? Number(priceFrom) : undefined,
+      priceTo: priceTo ? Number(priceTo) : undefined,
+      openTime: openTime !== "none" ? openTime : undefined,
+      closeTime: closeTime !== "none" ? closeTime : undefined,
+    };
 
-    navigate(`/places?${queryString}`);
+    const result = filterSchema.safeParse(filterData);
+    if (!result.success) {
+      result.error.errors.forEach(error => {
+        toast(error.message);
+      });
+      return null;
+    }
+
+    if (priceFrom) searchParams.set("priceFrom", String(priceFrom));
+    if (priceTo) searchParams.set("priceTo", String(priceTo));
+    if (openTime && openTime !== "none") searchParams.set("openTime", openTime);
+    if (closeTime && closeTime !== "none")
+      searchParams.set("closeTime", closeTime);
+
+    navigate(`?${searchParams.toString()}`);
   };
+
+  const handleReset = () => {
+    searchParams.delete("priceFrom");
+    searchParams.delete("priceTo");
+    searchParams.delete("openTime");
+    searchParams.delete("closeTime");
+
+    navigate(`?${searchParams.toString()}`);
+  };
+
+  const formKey = searchParams.toString();
 
   return (
     <form
+      key={formKey}
       onSubmit={handleSubmit}
-      className={`flex ${hasCityParam ? "items-end justify-between" : "flex-col gap-4"} pr-[8px]`}
+      className={`flex ${hasCityParam ? "items-end justify-between" : "flex-col gap-4"}`}
     >
       <div className={`flex ${hasCityParam ? "w-1/2" : "flex-col"} gap-4`}>
         {!hasCityParam && <span className="pb-5 font-bold">Filter</span>}
@@ -47,37 +77,52 @@ export default function PlaceFilter() {
             <div className="w-1/2">
               <label htmlFor="from">From</label>
               <Input
-                placeholder="50.000"
+                placeholder="Min"
                 id="from"
-                name="PriceFrom"
+                name="priceFrom"
                 type="number"
-                ref={priceFromRef}
+                defaultValue={searchParams.get("priceFrom") || ""}
               />
             </div>
             <div className="w-1/2">
               <label htmlFor="to">To</label>
               <Input
-                placeholder="100.000"
+                placeholder="Max"
                 id="to"
-                name="PriceTo"
+                name="priceTo"
                 type="number"
-                ref={priceToRef}
+                defaultValue={searchParams.get("priceTo") || ""}
               />
             </div>
           </span>
         </span>
         <span className={`${hasCityParam ? "w-1/2" : ""}`}>
           <p className="font-bold">Open Hour</p>
-          <SelectHour openTimeRef={openTimeRef} closeTimeRef={closeTimeRef} />
+          <SelectHour
+            defaultOpenTime={searchParams.get("openTime") || ""}
+            defaultCloseTime={searchParams.get("closeTime") || ""}
+          />
         </span>
       </div>
 
-      <button
-        type="submit"
-        className="rounded-sm bg-[#372816] px-10 py-2 font-semibold text-white"
-      >
-        Apply
-      </button>
+      <div className={`flex ${hasCityParam ? "" : "justify-between"} gap-5`}>
+        <button
+          type="submit"
+          className="rounded-sm bg-[#372816] px-9 py-2 font-semibold text-white"
+        >
+          Apply Filter
+        </button>
+
+        {hasFilters && (
+          <button
+            type="button"
+            onClick={handleReset}
+            className="rounded-sm bg-[#372816] px-9 py-2 font-semibold text-white"
+          >
+            Reset Filter
+          </button>
+        )}
+      </div>
     </form>
   );
 }
