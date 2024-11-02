@@ -1,4 +1,4 @@
-import type { OperatingHour } from "~/types";
+import type { OperatingHour } from "~/types/model";
 import { formatTime } from "~/utils/formatter";
 
 /**

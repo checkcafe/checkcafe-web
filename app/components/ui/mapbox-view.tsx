@@ -17,7 +17,7 @@ import {
   clusterLayer,
   unclusteredPointLayer,
 } from "~/configs/layer";
-import { PlaceItem } from "~/types";
+import { PlaceItem } from "~/types/model";
 
 const MAPBOX_TOKEN =
   "pk.eyJ1IjoiaWttYWw5NiIsImEiOiJjbTJqN3BpcGgwMnU3MmpvcW96NTRtb2RoIn0.jxkI7uKnc3mvMqWgIMKuhg";

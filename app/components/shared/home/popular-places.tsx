@@ -3,7 +3,7 @@ import { FaClock, FaDollarSign } from "react-icons/fa6";
 
 import { Card, CardContent } from "~/components/ui/card";
 import { ScrollArea, ScrollBar } from "~/components/ui/scroll-area";
-import type { PlaceItem } from "~/types";
+import type { PlaceItem } from "~/types/model";
 import { formatPriceRange, formatTime } from "~/utils/formatter";
 
 type Props = {

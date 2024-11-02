@@ -1,4 +1,8 @@
-import type { LinksFunction, MetaFunction } from "@remix-run/node";
+import type {
+  LinksFunction,
+  LoaderFunctionArgs,
+  MetaFunction,
+} from "@remix-run/node";
 import {
   isRouteErrorResponse,
   json,
@@ -16,13 +20,14 @@ import { FaHouse } from "react-icons/fa6";
 
 import { Footer } from "~/components/shared/footer";
 import { Navbar } from "~/components/shared/navbar";
+import { Button } from "~/components/ui/button";
 import { Toaster } from "~/components/ui/sonner";
 
-import { Button } from "./components/ui/button";
-import { UserProvider } from "./contexts/UserContext";
-import { auth } from "./lib/auth";
-
 import "./tailwind.css";
+
+import { authenticator } from "./services/auth.server";
+
+const queryClient = new QueryClient();
 
 export const meta: MetaFunction = () => [
   { title: "CheckCafe" },
@@ -58,12 +63,11 @@ export const links: LinksFunction = () => [
   },
 ];
 
-export const loader = async () => {
-  const loggedInUser = await auth.isLoggedIn();
-  return json({ user: loggedInUser || null });
-};
+export const loader = async ({ request }: LoaderFunctionArgs) => {
+  const user = await authenticator.isAuthenticated(request);
 
-const queryClient = new QueryClient();
+  return json({ user });
+};
 
 export function Layout({ children }: { children: React.ReactNode }) {
   const { user } = useLoaderData<typeof loader>() || {};
@@ -78,12 +82,9 @@ export function Layout({ children }: { children: React.ReactNode }) {
       </head>
       <body>
         <QueryClientProvider client={queryClient}>
-          {" "}
-          <UserProvider>
-            <Navbar user={user} />
-            <div className="min-h-screen">{children}</div>
-            <Footer />
-          </UserProvider>
+          <Navbar user={user} />
+          <div className="min-h-screen">{children}</div>
+          <Footer />
           <Toaster />
           <ScrollRestoration />
           <Scripts />

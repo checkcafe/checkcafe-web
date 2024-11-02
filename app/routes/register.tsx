@@ -1,6 +1,6 @@
 import type {
   ActionFunctionArgs,
-  LoaderFunction,
+  LoaderFunctionArgs,
   MetaFunction,
 } from "@remix-run/node";
 import {
@@ -22,9 +22,10 @@ import LoadingSpinner from "~/components/shared/loader-spinner";
 import { Button } from "~/components/ui/button";
 import { Input } from "~/components/ui/input";
 import { Label } from "~/components/ui/label";
-import { auth } from "~/lib/auth";
+import { auth } from "~/lib/auth-backup";
 import { getPageTitle } from "~/lib/get-page-title";
 import { RegisterSchema } from "~/schemas/auth";
+import { authenticator } from "~/services/auth.server";
 import { ActionData, Issue } from "~/types/auth";
 
 export const meta: MetaFunction = () => {
@@ -34,19 +35,18 @@ export const meta: MetaFunction = () => {
   ];
 };
 
-export const loader: LoaderFunction = async ({ request }) => {
-  const isLoggedIn = await auth.isLoggedIn();
-
-  if (isLoggedIn) {
-    const referer = request.headers.get("Referer") || "/";
-    return redirect(referer);
-  }
-
+export async function loader({ request }: LoaderFunctionArgs) {
   const url = new URL(request.url);
   const email = url.searchParams.get("email");
 
-  return json({ email });
-};
+  const user = await authenticator.isAuthenticated(request);
+
+  if (!user) {
+    return json({ email });
+  }
+
+  return redirect("/");
+}
 
 export default function Register() {
   const { email } = useLoaderData<{ email: string }>();
