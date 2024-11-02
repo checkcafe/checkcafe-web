@@ -1,7 +1,7 @@
-import fetchAPI from "./api";
+import fetchAPI from "./api.server";
 import { auth } from "./auth-backup";
 
-export async function getFavoritePlaces() {
+export async function getFavoritePlaces(request: Request) {
   let favorites = [];
 
   const user = await auth.isLoggedIn();
@@ -10,7 +10,7 @@ export async function getFavoritePlaces() {
     const favoritesUrl = `/users/${username}/favorites`;
 
     try {
-      const response = await fetchAPI(favoritesUrl);
+      const response = await fetchAPI(request, favoritesUrl);
       favorites = response.placeFavorites;
     } catch (error) {
       console.error("Error fetching favorite places");
@@ -20,7 +20,7 @@ export async function getFavoritePlaces() {
   return favorites;
 }
 
-export async function addFavoritePlace(placeId: string) {
+export async function addFavoritePlace(request: Request, placeId: string) {
   const user = await auth.isLoggedIn();
   if (!user || typeof user === "boolean") {
     throw new Error("User is not logged in");
@@ -34,7 +34,7 @@ export async function addFavoritePlace(placeId: string) {
   };
 
   try {
-    const response = await fetchAPI(favoritesUrl, "POST", payload);
+    const response = await fetchAPI(request, favoritesUrl, "POST", payload);
 
     return response;
   } catch (error) {
@@ -42,7 +42,7 @@ export async function addFavoritePlace(placeId: string) {
   }
 }
 
-export async function unfavoritePlace(favoriteId: string) {
+export async function unfavoritePlace(request: Request, favoriteId: string) {
   const user = await auth.isLoggedIn();
   if (!user || typeof user === "boolean") {
     throw new Error("User is not logged in");
@@ -52,7 +52,7 @@ export async function unfavoritePlace(favoriteId: string) {
   const unfavoriteUrl = `/users/${username}/favorites/${favoriteId}`;
 
   try {
-    const response = await fetchAPI(unfavoriteUrl, "DELETE");
+    const response = await fetchAPI(request, unfavoriteUrl, "DELETE");
     return response;
   } catch (error) {
     console.error("Error removing favorite place", error);

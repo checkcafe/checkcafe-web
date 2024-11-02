@@ -1,6 +1,6 @@
 import { LoaderFunction, redirect } from "@remix-run/node";
 
-import fetchAPI from "~/lib/api";
+import fetchAPI from "~/lib/api.server";
 import { auth } from "~/lib/auth-backup";
 
 export const loader: LoaderFunction = async () => {

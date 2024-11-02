@@ -8,7 +8,7 @@ import {
   UserProfile,
 } from "~/types/auth";
 
-import fetchAPI from "./api";
+import fetchAPI from "./api.server";
 import { getCookie } from "./cookie";
 import { BACKEND_API_URL } from "./env";
 

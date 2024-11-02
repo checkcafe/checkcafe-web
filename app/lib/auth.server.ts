@@ -1,4 +1,4 @@
-import fetchAPI from "~/lib/api";
+import fetchAPI from "~/lib/api.server";
 import { getCookie } from "~/lib/cookie";
 import { BACKEND_API_URL } from "~/lib/env";
 import { AuthResponse } from "~/types/auth";

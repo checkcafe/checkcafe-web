@@ -4,27 +4,25 @@ import {
   LoaderFunctionArgs,
   redirect,
 } from "@remix-run/node";
-import { useActionData, useLoaderData } from "@remix-run/react";
-import { useEffect, useRef } from "react";
-import { toast } from "sonner";
+import { useLoaderData } from "@remix-run/react";
+import { useRef } from "react";
 
 import AllPlaceCard from "~/components/shared/all-places/all-place-card";
 import PlaceFilter from "~/components/shared/all-places/filter-places";
 import { MapboxView } from "~/components/ui/mapbox-view";
-import { getCookie } from "~/lib/cookie";
 import { BACKEND_API_URL } from "~/lib/env";
 import {
   addFavoritePlace,
   getFavoritePlaces,
   unfavoritePlace,
 } from "~/lib/favorite-place";
-import { ActionData } from "~/types/auth";
+import { authenticator } from "~/services/auth.server";
 import { Filter } from "~/types/filter";
 import { FavoritePlace, PlaceItem } from "~/types/model";
 
 export async function loader({ request }: LoaderFunctionArgs) {
   const url = new URL(request.url);
-  const favorites = await getFavoritePlaces();
+  const favorites = await getFavoritePlaces(request);
 
   const filter: Filter = {};
 
@@ -74,7 +72,6 @@ export async function loader({ request }: LoaderFunctionArgs) {
 
 export default function Places() {
   const { places, hasCityParam, favorites } = useLoaderData<typeof loader>();
-  const actionData = useActionData<ActionData>();
 
   const favoriteMap = new Map();
   favorites.forEach((favorite: FavoritePlace) => {
@@ -145,10 +142,11 @@ export default function Places() {
 }
 
 export async function action({ request }: ActionFunctionArgs) {
-  const token = getCookie("accessToken");
-  if (!token) {
-    return redirect("/login");
-  }
+  const { user } = await authenticator.isAuthenticated(request, {
+    failureRedirect: "/login",
+  });
+
+  console.log({ user });
 
   const url = new URL(request.url);
 
@@ -163,12 +161,12 @@ export async function action({ request }: ActionFunctionArgs) {
 
   try {
     if (method === "POST") {
-      await addFavoritePlace(placeId);
+      await addFavoritePlace(request, placeId);
     } else if (method === "DELETE") {
       if (!favoriteId) {
         return json({ error: "Favorite ID is required" });
       }
-      await unfavoritePlace(favoriteId);
+      await unfavoritePlace(request, favoriteId);
     } else {
       return json({ error: "Invalid action type" });
     }

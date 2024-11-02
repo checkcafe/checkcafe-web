@@ -1,13 +1,11 @@
 import type {
   ActionFunctionArgs,
-  LoaderFunction,
+  LoaderFunctionArgs,
   MetaFunction,
 } from "@remix-run/node";
 import {
   Form,
-  json,
   Link,
-  redirect,
   useActionData,
   useNavigate,
   useNavigation,
@@ -15,17 +13,12 @@ import {
 import { EyeClosedIcon, EyeIcon } from "lucide-react";
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
-import { z } from "zod";
 
 import LoadingSpinner from "~/components/shared/loader-spinner";
 import { Button } from "~/components/ui/button";
 import { Input } from "~/components/ui/input";
 import { Label } from "~/components/ui/label";
-import { checkLoggedIn, login } from "~/lib/auth";
-import { setCookie } from "~/lib/cookie";
 import { getPageTitle } from "~/lib/get-page-title";
-import { getExpirationDate } from "~/lib/jwt";
-import { LoginSchema } from "~/schemas/auth";
 import { authenticator } from "~/services/auth.server";
 import { ActionData, Issue } from "~/types/auth";
 
@@ -36,17 +29,11 @@ export const meta: MetaFunction = () => {
   ];
 };
 
-export const loader: LoaderFunction = async ({ request }) => {
-  const isLoggedIn = await checkLoggedIn();
-
-  if (isLoggedIn) {
-    const referer = request.headers.get("Referer") || "/";
-
-    return redirect(referer);
-  }
-
-  return null;
-};
+export async function loader({ request }: LoaderFunctionArgs) {
+  return await authenticator.isAuthenticated(request, {
+    successRedirect: "/",
+  });
+}
 
 export default function LoginRoute() {
   const [showPassword, setShowPassword] = useState(false);
@@ -169,58 +156,4 @@ export async function action({ request }: ActionFunctionArgs) {
     successRedirect: "/",
     failureRedirect: "/login",
   });
-}
-
-export async function actionBackup({ request }: ActionFunctionArgs) {
-  const formData = await request.formData();
-  const loginFormData = LoginSchema.parse(Object.fromEntries(formData));
-
-  try {
-    const response = await login(
-      loginFormData.username,
-      loginFormData.password,
-    );
-
-    const { accessToken, refreshToken } = response.token;
-
-    if (!accessToken || !refreshToken) {
-      return json(
-        { error: "Login response is missing required tokens." },
-        { status: 500 },
-      );
-    }
-
-    const [accessTokenExpiration, refreshTokenExpiration] = [
-      getExpirationDate(accessToken),
-      getExpirationDate(refreshToken),
-    ];
-
-    setCookie("accessToken", accessToken, accessTokenExpiration);
-    setCookie("refreshToken", refreshToken, refreshTokenExpiration);
-
-    return json({
-      success: true,
-      message: "You have successfully logged in.",
-    });
-  } catch (error) {
-    if (error instanceof z.ZodError) {
-      const issues = error.errors.map(err => ({
-        code: "custom",
-        message: err.message,
-        path: err.path,
-      }));
-
-      return json({
-        success: false,
-        error: {
-          issues,
-        },
-      });
-    }
-
-    return json({
-      success: false,
-      error: "An unexpected error occurred. Please try again later.",
-    });
-  }
 }
