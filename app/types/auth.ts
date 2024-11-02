@@ -33,6 +33,15 @@ export type UserProfile = {
   email?: string;
 };
 
+export type RegisterActionData = {
+  success?: boolean;
+  error?:
+    | {
+        issues: AuthIssue[];
+      }
+    | string;
+};
+
 export type RegisterResponse = {
   success: boolean;
   data?: AuthUser;

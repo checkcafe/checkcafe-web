@@ -38,14 +38,15 @@ authenticator.use(
       }),
     });
 
+    const responseData = await response.json();
+
     if (!response.ok) {
-      const errorData = await response.json();
       throw new AuthorizationError(
-        errorData.error || "Username or password is incorrect!",
+        responseData.error || "Username or password is incorrect!",
       );
     }
 
-    return (await response.json()) as AuthResponse;
+    return responseData as AuthResponse;
   }),
   "user-pass",
 );

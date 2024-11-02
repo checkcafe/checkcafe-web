@@ -16,17 +16,17 @@ import {
 import { EyeClosedIcon, EyeIcon } from "lucide-react";
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
-import { z } from "zod";
+import { ZodError } from "zod";
 
 import LoadingSpinner from "~/components/shared/loader-spinner";
 import { Button } from "~/components/ui/button";
 import { Input } from "~/components/ui/input";
 import { Label } from "~/components/ui/label";
-import { auth } from "~/lib/auth-backup";
+import { BACKEND_API_URL } from "~/lib/env";
 import { getPageTitle } from "~/lib/get-page-title";
-import { RegisterSchema } from "~/schemas/auth";
+import { registerSchema } from "~/schemas/auth";
 import { authenticator } from "~/services/auth.server";
-import { ActionData, Issue } from "~/types/auth";
+import { AuthIssue, RegisterActionData } from "~/types/auth";
 
 export const meta: MetaFunction = () => {
   return [
@@ -36,27 +36,25 @@ export const meta: MetaFunction = () => {
 };
 
 export async function loader({ request }: LoaderFunctionArgs) {
-  const url = new URL(request.url);
-  const email = url.searchParams.get("email");
-
   const user = await authenticator.isAuthenticated(request);
-
-  if (!user) {
-    return json({ email });
+  if (user) {
+    return redirect("/");
   }
 
-  return redirect("/");
+  const email = new URL(request.url).searchParams.get("email");
+
+  return json({ email });
 }
 
 export default function Register() {
+  const navigation = useNavigation();
+  const navigate = useNavigate();
+  const actionData = useActionData<RegisterActionData>();
   const { email } = useLoaderData<{ email: string }>();
   const [passwordVisibility, setPasswordVisibility] = useState({
     password: false,
     confirmPassword: false,
   });
-  const actionData = useActionData<ActionData>();
-  const navigation = useNavigation();
-  const navigate = useNavigate();
 
   const togglePasswordVisibility = (field: "password" | "confirmPassword") => {
     setPasswordVisibility(prevState => ({
@@ -68,7 +66,7 @@ export default function Register() {
   const errors =
     actionData?.error && typeof actionData.error !== "string"
       ? actionData.error.issues.reduce(
-          (acc: Record<string, string>, issue: Issue) => {
+          (acc: Record<string, string>, issue: AuthIssue) => {
             acc[issue.path[0]] = issue.message;
             return acc;
           },
@@ -78,11 +76,21 @@ export default function Register() {
 
   useEffect(() => {
     if (actionData?.success) {
-      toast((actionData as { message: string }).message);
+      toast((actionData as { message: string }).message, {
+        action: {
+          label: "Close",
+          onClick: () => {},
+        },
+      });
       navigate("/login");
     } else if (actionData?.error) {
       if (typeof actionData?.error === "string") {
-        toast(actionData.error);
+        toast(actionData.error, {
+          action: {
+            label: "Close",
+            onClick: () => {},
+          },
+        });
       }
     }
   }, [actionData, navigate]);
@@ -247,27 +255,29 @@ export default function Register() {
 
 export const action = async ({ request }: ActionFunctionArgs) => {
   const formData = await request.formData();
-  const userRegister = Object.fromEntries(formData);
 
   try {
-    const validatedRegister = RegisterSchema.parse(userRegister);
-    const registerResponse = await auth.register(validatedRegister);
+    const registerData = registerSchema.parse(Object.fromEntries(formData));
+    const response = await fetch(`${BACKEND_API_URL}/auth/register`, {
+      headers: { "Content-Type": "application/json" },
+      method: "POST",
+      body: JSON.stringify(registerData),
+    });
 
-    if (!registerResponse.success) {
-      return json({
-        success: false,
-        error: registerResponse.error?.message || "Register failed",
-      });
+    const result = await response.json();
+
+    if (!response.ok) {
+      throw new Error(result.error || "Oops. Something went wrong!");
     }
 
     return json({
       success: true,
-      message: "You have successfully registered. Please log in.",
+      message:
+        result.message || "You have successfully registered. Please log in.",
     });
   } catch (error) {
-    if (error instanceof z.ZodError) {
+    if (error instanceof ZodError) {
       const issues = error.errors.map(err => ({
-        code: "custom",
         message: err.message,
         path: err.path,
       }));
@@ -275,12 +285,12 @@ export const action = async ({ request }: ActionFunctionArgs) => {
       return json({ success: false, error: { issues } });
     }
 
-    return json(
-      {
-        success: false,
-        error: "An unexpected error occurred. Please try again later.",
-      },
-      { status: 500 },
-    );
+    return json({
+      success: false,
+      error:
+        error instanceof Error
+          ? error.message
+          : "An unexpected error occurred. Please try again later.",
+    });
   }
 };

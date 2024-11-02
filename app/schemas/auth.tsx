@@ -28,6 +28,7 @@ export const registerSchema = loginSchema
     confirmPassword: passwordSchema,
   })
   .refine(data => data.password === data.confirmPassword, {
-    message: "Passwords do not match",
+    message:
+      "Passwords do not match. Please ensure both passwords are identical.",
     path: ["confirmPassword"],
   });
