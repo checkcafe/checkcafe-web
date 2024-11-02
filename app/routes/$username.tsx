@@ -8,46 +8,19 @@ import { Avatar, AvatarFallback, AvatarImage } from "~/components/ui/avatar";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "~/components/ui/tabs";
 import { BACKEND_API_URL } from "~/lib/env";
 import { UserProfile } from "~/types/auth";
-
-type Place = {
-  name: string;
-  slug: string;
-  description?: string;
-  thumbnailUrl?: string;
-};
-
-type Favorite = {
-  name: string;
-  slug: string;
-  streetAddress: string;
-  thumbnailUrl?: string;
-};
+import { ProfileFavorite, ProfilePlace } from "~/types/profile";
 
 export async function loader({ params }: LoaderFunctionArgs) {
   const { username } = params;
 
-  if (!username) {
-    throw new Error("Username is required");
-  }
-
   try {
-    const userResponse = await fetch(`${BACKEND_API_URL}/users/${username}`);
+    const response = await fetch(`${BACKEND_API_URL}/users/${username}`);
 
-    if (!userResponse.ok) {
+    if (!response.ok) {
       throw new Error(`Error fetching user profile: @${username} not found`);
     }
 
-    const userData = await userResponse.json();
-
-    const user: UserProfile = {
-      id: userData.id,
-      name: userData.name,
-      username: userData.username,
-      avatarUrl: userData.avatarUrl,
-      placesUrl: userData.placesUrl,
-      favoritesUrl: userData.favoritesUrl,
-      role: userData.role,
-    };
+    const user: UserProfile = await response.json();
 
     return json({ user });
   } catch (error) {
@@ -81,7 +54,7 @@ const fetchFavorites = (username: string) =>
   fetchData(`${BACKEND_API_URL}/users/${username}/favorites?limit=10`);
 
 export default function Profile() {
-  const { user } = useLoaderData<typeof loader>() as { user: UserProfile };
+  const { user } = useLoaderData<typeof loader>();
   const { username } = useParams<{ username: string }>();
 
   const {
@@ -110,7 +83,7 @@ export default function Profile() {
     tab === "favorites" ? refetchFavorites() : refetchPlaces();
   };
 
-  const renderPlaces = (places: Place[], isError: boolean) => {
+  const renderPlaces = (places: ProfilePlace[], isError: boolean) => {
     if (isError) {
       return (
         <p className="mt-4 text-center text-lg font-medium">
@@ -146,7 +119,7 @@ export default function Profile() {
     );
   };
 
-  const renderFavorites = (favorites: Favorite[], isError: boolean) => {
+  const renderFavorites = (favorites: ProfileFavorite[], isError: boolean) => {
     if (isError) {
       return (
         <p className="mt-4 text-center text-lg font-medium">
