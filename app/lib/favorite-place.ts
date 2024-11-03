@@ -6,9 +6,9 @@ import { getAccessToken } from "./token";
 export async function getFavoritePlaces(request: Request) {
   const session = await getSession(request.headers.get("Cookie"));
   const { accessToken } = await getAccessToken(request);
-  if (!accessToken) {
-    throw new Error("User is not logged in");
-  }
+  // if (!accessToken) {
+  //   throw new Error("User is not logged in");
+  // }
   //   const user = await auth.isLoggedIn();
   //   if (!user || typeof user === "boolean") {
   //     throw new Error("User is not logged in");
