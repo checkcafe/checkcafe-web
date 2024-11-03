@@ -36,8 +36,8 @@ export const meta: MetaFunction = () => {
 };
 
 export async function loader({ request }: LoaderFunctionArgs) {
-  const user = await authenticator.isAuthenticated(request);
-  if (user) {
+  const authenticated = await authenticator.isAuthenticated(request);
+  if (authenticated) {
     return redirect("/");
   }
 

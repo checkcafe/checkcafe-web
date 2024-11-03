@@ -4,12 +4,14 @@ import { FormStrategy } from "remix-auth-form";
 import { BACKEND_API_URL } from "~/lib/env";
 import { loginSchema } from "~/schemas/auth";
 import { sessionStorage } from "~/services/session.server";
-import { AuthResponse } from "~/types/auth";
+import { AuthToken } from "~/types/auth";
 
 export const authenticator = new Authenticator<
-  AuthResponse | AuthorizationError | Error
->(sessionStorage);
-
+  AuthToken | AuthorizationError | Error
+>(sessionStorage, {
+  sessionKey: "authToken",
+  sessionErrorKey: "authError",
+});
 authenticator.use(
   new FormStrategy(async ({ form }) => {
     const formData = {
@@ -38,15 +40,22 @@ authenticator.use(
       }),
     });
 
-    const responseData = await response.json();
-
     if (!response.ok) {
+      const errorData = await response.json();
       throw new AuthorizationError(
-        responseData.error || "Username or password is incorrect!",
+        errorData.error || "Username or password is incorrect!",
       );
     }
 
-    return responseData as AuthResponse;
+    const { token } = await response.json();
+
+    if (!token) {
+      throw new AuthorizationError(
+        "Invalid credentials: Missing required authentication tokens",
+      );
+    }
+
+    return token as AuthToken;
   }),
   "user-pass",
 );

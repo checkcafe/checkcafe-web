@@ -17,7 +17,7 @@ export async function loader({ params }: LoaderFunctionArgs) {
     const response = await fetch(`${BACKEND_API_URL}/users/${username}`);
 
     if (!response.ok) {
-      throw new Error(`Error fetching user profile: @${username} not found`);
+      throw new Error("Failed to load user profile. Please try again later.");
     }
 
     const user: UserProfile = await response.json();
@@ -25,9 +25,7 @@ export async function loader({ params }: LoaderFunctionArgs) {
     return json({ user });
   } catch (error) {
     throw new Error(
-      error instanceof Error
-        ? error.message
-        : "Failed to load user profile. Please try again later.",
+      error instanceof Error ? error.message : "An unexpected error occurred.",
     );
   }
 }

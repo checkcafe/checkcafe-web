@@ -22,10 +22,12 @@ import { Footer } from "~/components/shared/footer";
 import { Navbar } from "~/components/shared/navbar";
 import { Button } from "~/components/ui/button";
 import { Toaster } from "~/components/ui/sonner";
-import { authenticator } from "~/services/auth.server";
-import { AuthResponse } from "~/types/auth";
+import { getAccessToken } from "~/lib/token";
 
 import "./tailwind.css";
+
+import { BACKEND_API_URL } from "./lib/env";
+import { commitSession, getSession } from "./services/session.server";
 
 const queryClient = new QueryClient();
 
@@ -64,11 +66,35 @@ export const links: LinksFunction = () => [
 ];
 
 export const loader = async ({ request }: LoaderFunctionArgs) => {
-  const authorized = await authenticator.isAuthenticated(request);
+  const session = await getSession(request.headers.get("Cookie"));
+  const user = session.get("userData");
+  if (user) {
+    return json({ user });
+  }
 
-  return json({
-    user: (authorized as AuthResponse)?.user || null,
+  const { accessToken, headers } = await getAccessToken(request);
+  if (!accessToken) {
+    return json({ user: null }, { headers });
+  }
+
+  const response = await fetch(`${BACKEND_API_URL}/auth/me`, {
+    method: "GET",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${accessToken}`,
+    },
   });
+
+  if (response.ok) {
+    const user = await response.json();
+    session.set("userData", user);
+    return json(
+      { user },
+      { headers: { "Set-Cookie": await commitSession(session) } },
+    );
+  }
+
+  return json({ user: null }, { headers });
 };
 
 export function Layout({ children }: { children: React.ReactNode }) {
@@ -87,10 +113,10 @@ export function Layout({ children }: { children: React.ReactNode }) {
           <Navbar user={user} />
           <div className="min-h-screen">{children}</div>
           <Footer />
-          <Toaster />
-          <ScrollRestoration />
-          <Scripts />
         </QueryClientProvider>
+        <ScrollRestoration />
+        <Toaster />
+        <Scripts />
       </body>
     </html>
   );
