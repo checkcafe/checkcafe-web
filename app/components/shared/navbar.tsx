@@ -18,8 +18,9 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "~/components/ui/popover";
+import { AuthUser } from "~/types/auth";
 
-export function Navbar({ user }: { user: any }) {
+export function Navbar({ user }: { user: AuthUser }) {
   const location = useLocation();
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
