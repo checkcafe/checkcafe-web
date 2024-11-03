@@ -47,7 +47,7 @@ authenticator.use(
       );
     }
 
-    const { token } = await response.json();
+    const token = await response.json();
 
     if (!token) {
       throw new AuthorizationError(

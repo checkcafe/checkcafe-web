@@ -7,7 +7,7 @@ import LoadingSpinner from "~/components/shared/loader-spinner";
 import { Avatar, AvatarFallback, AvatarImage } from "~/components/ui/avatar";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "~/components/ui/tabs";
 import { BACKEND_API_URL } from "~/lib/env";
-import { UserProfile } from "~/types/auth";
+import { AuthUser } from "~/types/auth";
 import { ProfileFavorite, ProfilePlace } from "~/types/profile";
 
 export async function loader({ params }: LoaderFunctionArgs) {
@@ -20,7 +20,7 @@ export async function loader({ params }: LoaderFunctionArgs) {
       throw new Error("Failed to load user profile. Please try again later.");
     }
 
-    const user: UserProfile = await response.json();
+    const user: AuthUser = await response.json();
 
     return json({ user });
   } catch (error) {

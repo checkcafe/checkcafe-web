@@ -3,26 +3,12 @@ export type AuthIssue = {
   path: (string | number)[];
 };
 
-export type AuthResponse = {
-  token?: AuthToken;
-  user?: AuthUser;
-};
-
 export type AuthToken = {
   accessToken?: string;
   refreshToken?: string;
 };
 
 export type AuthUser = {
-  id: string;
-  name: string;
-  username: string;
-  email: string;
-  avatarUrl: string;
-  role?: string;
-};
-
-export type UserProfile = {
   id: string;
   name: string;
   username: string;
@@ -40,18 +26,4 @@ export type RegisterActionData = {
         issues: AuthIssue[];
       }
     | string;
-};
-
-export type RegisterResponse = {
-  success: boolean;
-  data?: AuthUser;
-  error?: {
-    message: string;
-    status: number;
-    issues?: Array<{
-      code: string;
-      message: string;
-      path: string[];
-    }>;
-  };
 };
