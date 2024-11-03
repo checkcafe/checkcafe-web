@@ -70,3 +70,10 @@ export type FavoritePlace = {
   latitude: number;
   longitude: number;
 };
+
+export type FavoritePlacesResponse = {
+  name: string;
+  username: string;
+  avatarUrl: string;
+  placeFavorites: FavoritePlace[];
+};
