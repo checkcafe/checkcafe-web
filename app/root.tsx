@@ -99,7 +99,7 @@ export const loader = async ({ request }: LoaderFunctionArgs) => {
 
 export function Layout({ children }: { children: React.ReactNode }) {
   const { user } = useLoaderData<typeof loader>() || {};
-
+  console.log(user, "user");
   return (
     <html lang="en">
       <head>
