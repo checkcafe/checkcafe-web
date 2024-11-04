@@ -63,65 +63,67 @@ export default function PlaceFilter() {
   const formKey = searchParams.toString();
 
   return (
-    <form
-      key={formKey}
-      onSubmit={handleSubmit}
-      className={`sticky top-32 flex flex-col gap-4`}
-    >
-      <div className={`flex flex-col gap-4`}>
-        <span className="pb-5 font-bold">Filter</span>
-        <span className={``}>
-          <p className="font-bold">Price per person</p>
-          <span className="flex gap-6">
-            <div className="w-1/2">
-              <label htmlFor="from">From</label>
-              <Input
-                placeholder="Min"
-                id="from"
-                name="priceFrom"
-                type="number"
-                defaultValue={searchParams.get("priceFrom") || ""}
-              />
-            </div>
-            <div className="w-1/2">
-              <label htmlFor="to">To</label>
-              <Input
-                placeholder="Max"
-                id="to"
-                name="priceTo"
-                type="number"
-                defaultValue={searchParams.get("priceTo") || ""}
-              />
-            </div>
+    <>
+      {/* Filter for desktop */}
+      <form
+        key={formKey}
+        onSubmit={handleSubmit}
+        className={`sticky top-32 hidden flex-col gap-4 md:flex`}
+      >
+        <div className={`flex flex-col gap-4`}>
+          <span className={``}>
+            <p className="font-bold">Price per person</p>
+            <span className="flex gap-6">
+              <div className="w-1/2">
+                <label htmlFor="from">From</label>
+                <Input
+                  placeholder="Min"
+                  id="from"
+                  name="priceFrom"
+                  type="number"
+                  defaultValue={searchParams.get("priceFrom") || ""}
+                />
+              </div>
+              <div className="w-1/2">
+                <label htmlFor="to">To</label>
+                <Input
+                  placeholder="Max"
+                  id="to"
+                  name="priceTo"
+                  type="number"
+                  defaultValue={searchParams.get("priceTo") || ""}
+                />
+              </div>
+            </span>
           </span>
-        </span>
-        <span className={``}>
-          <p className="font-bold">Open Hour</p>
-          <SelectHour
-            defaultOpenTime={searchParams.get("openTime") || ""}
-            defaultCloseTime={searchParams.get("closeTime") || ""}
-          />
-        </span>
-      </div>
+          <span className={``}>
+            <p className="font-bold">Open Hour</p>
+            <SelectHour
+              defaultOpenTime={searchParams.get("openTime") || ""}
+              defaultCloseTime={searchParams.get("closeTime") || ""}
+            />
+          </span>
+        </div>
 
-      <div className={`flex justify-between gap-5`}>
-        <button
-          type="submit"
-          className="rounded-sm bg-[#372816] px-9 py-2 font-semibold text-white"
-        >
-          Apply Filter
-        </button>
-
-        {hasFilters && (
+        <div className={`flex justify-between gap-5`}>
           <button
-            type="button"
-            onClick={handleReset}
+            type="submit"
             className="rounded-sm bg-[#372816] px-9 py-2 font-semibold text-white"
           >
-            Reset Filter
+            Apply Filter
           </button>
-        )}
-      </div>
-    </form>
+
+          {hasFilters && (
+            <button
+              type="button"
+              onClick={handleReset}
+              className="rounded-sm bg-[#372816] px-9 py-2 font-semibold text-white"
+            >
+              Reset Filter
+            </button>
+          )}
+        </div>
+      </form>
+    </>
   );
 }

@@ -95,7 +95,9 @@ export default function Places() {
   };
 
   return (
-    <div className={`container relative mx-auto flex gap-8 px-8 pt-5`}>
+    <div
+      className={`container relative mx-auto flex flex-col gap-2 px-4 pt-5 md:flex-row md:px-8`}
+    >
       <div>
         <PlaceFilter />
       </div>
@@ -111,8 +113,8 @@ export default function Places() {
           )
         ) : (
           <>
-            <main className={`${hasCityParam ? "w-2/3" : "w-full"}`}>
-              <ul className="flex w-full flex-col gap-7">
+            <main className={`w-full md:${hasCityParam ? "w-2/3" : "w-full"}`}>
+              <ul className="flex w-full flex-col gap-4 md:gap-7">
                 {places.map((place, index) => {
                   const isFavorite = favoriteMap.has(place.slug);
                   const favoriteId = isFavorite
@@ -134,7 +136,7 @@ export default function Places() {
             </main>
 
             {hasCityParam && places.length > 0 && (
-              <aside className="sticky top-0 h-full w-1/3">
+              <aside className="sticky top-0 hidden h-full w-1/3 md:flex">
                 <MapboxView places={places} onPlaceClick={handleScrollToCard} />
               </aside>
             )}
