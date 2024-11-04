@@ -140,87 +140,85 @@ export default function PlaceFilter() {
       </form>
 
       {/* Filter for Mobile */}
-      <div className="sticky top-20 z-40 flex w-full gap-2 bg-white py-2 md:hidden">
-        <Sheet key="bottom">
-          <SheetTrigger asChild>
-            <div className="relative">
-              {activeFilterCount > 0 && (
-                <div className="absolute right-[-3px] top-[-3px] flex h-4 w-4 items-center justify-center rounded-full bg-black text-xs text-white">
-                  {activeFilterCount}
-                </div>
-              )}
-              <Button
-                className={`${activeFilterCount ? "border-2 border-black font-semibold" : ""}`}
-                variant="outline"
-              >
-                FILTER
-                <span>
-                  <SlidersHorizontal />
-                </span>
-              </Button>
-            </div>
-          </SheetTrigger>
-          <SheetContent side="bottom" className="h-full">
-            <SheetHeader>
-              <SheetTitle className="text- text-start font-semibold">
-                FILTERS
-              </SheetTitle>
-            </SheetHeader>
-            <form
-              key={formKey}
-              onSubmit={handleSubmit}
-              className={`flex flex-col gap-4`}
+      <Sheet key="bottom">
+        <SheetTrigger asChild>
+          <div className="relative">
+            {activeFilterCount > 0 && (
+              <div className="absolute right-[-3px] top-[-3px] flex h-4 w-4 items-center justify-center rounded-full bg-black text-xs text-white">
+                {activeFilterCount}
+              </div>
+            )}
+            <Button
+              className={`${activeFilterCount ? "border-2 border-black font-semibold" : ""} md:hidden`}
+              variant="outline"
             >
-              <div className={`flex flex-col gap-4`}>
-                <span className={``}>
-                  <p className="font-bold">Price per person</p>
-                  <span className="flex gap-6">
-                    <div className="w-1/2">
-                      <label htmlFor="from">From</label>
-                      <Input
-                        placeholder="Min"
-                        id="from"
-                        name="priceFrom"
-                        type="number"
-                        defaultValue={searchParams.get("priceFrom") || ""}
-                      />
-                    </div>
-                    <div className="w-1/2">
-                      <label htmlFor="to">To</label>
-                      <Input
-                        placeholder="Max"
-                        id="to"
-                        name="priceTo"
-                        type="number"
-                        defaultValue={searchParams.get("priceTo") || ""}
-                      />
-                    </div>
-                  </span>
+              FILTER
+              <span>
+                <SlidersHorizontal />
+              </span>
+            </Button>
+          </div>
+        </SheetTrigger>
+        <SheetContent side="bottom" className="h-full">
+          <SheetHeader>
+            <SheetTitle className="text- text-start font-semibold">
+              FILTERS
+            </SheetTitle>
+          </SheetHeader>
+          <form
+            key={formKey}
+            onSubmit={handleSubmit}
+            className={`flex flex-col gap-4`}
+          >
+            <div className={`flex flex-col gap-4`}>
+              <span className={``}>
+                <p className="font-bold">Price per person</p>
+                <span className="flex gap-6">
+                  <div className="w-1/2">
+                    <label htmlFor="from">From</label>
+                    <Input
+                      placeholder="Min"
+                      id="from"
+                      name="priceFrom"
+                      type="number"
+                      defaultValue={searchParams.get("priceFrom") || ""}
+                    />
+                  </div>
+                  <div className="w-1/2">
+                    <label htmlFor="to">To</label>
+                    <Input
+                      placeholder="Max"
+                      id="to"
+                      name="priceTo"
+                      type="number"
+                      defaultValue={searchParams.get("priceTo") || ""}
+                    />
+                  </div>
                 </span>
-                <span className={``}>
-                  <p className="font-bold">Open Hour</p>
-                  <SelectHour
-                    defaultOpenTime={searchParams.get("openTime") || ""}
-                    defaultCloseTime={searchParams.get("closeTime") || ""}
-                  />
-                </span>
-              </div>
+              </span>
+              <span className={``}>
+                <p className="font-bold">Open Hour</p>
+                <SelectHour
+                  defaultOpenTime={searchParams.get("openTime") || ""}
+                  defaultCloseTime={searchParams.get("closeTime") || ""}
+                />
+              </span>
+            </div>
 
-              <div className={`flex w-full justify-between gap-5`}>
-                <Button className="w-1/2" type="submit">
-                  Apply Filter
+            <div className={`flex w-full justify-between gap-5`}>
+              <Button className="w-1/2" type="submit">
+                Apply Filter
+              </Button>
+
+              {hasFilters && (
+                <Button className="w-1/2" type="button" onClick={handleReset}>
+                  Reset Filter
                 </Button>
-
-                {hasFilters && (
-                  <Button className="w-1/2" type="button" onClick={handleReset}>
-                    Reset Filter
-                  </Button>
-                )}
-              </div>
-            </form>
-          </SheetContent>
-        </Sheet>
-      </div>
+              )}
+            </div>
+          </form>
+        </SheetContent>
+      </Sheet>
     </>
   );
 }
