@@ -96,11 +96,9 @@ export default function Places() {
 
   return (
     <div
-      className={`container relative mx-auto flex flex-col gap-2 px-4 pt-5 md:flex-row md:px-8`}
+      className={`container relative mx-auto flex min-h-screen flex-col gap-2 px-4 pt-5 md:flex-row md:px-8`}
     >
-      <div>
-        <PlaceFilter />
-      </div>
+      <PlaceFilter />
 
       <div className="flex w-full gap-2">
         {places.length === 0 ? (
