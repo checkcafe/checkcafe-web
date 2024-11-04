@@ -27,20 +27,20 @@ import {
 export async function loader({ request }: LoaderFunctionArgs) {
   const url = new URL(request.url);
   const responseFavorites = await getFavoritePlaces(request);
-  const favoritesData: FavoritePlacesResponse = await responseFavorites?.json();
+  const favoritesData: FavoritePlacesResponse = responseFavorites
+    ? await responseFavorites.json()
+    : { placeFavorites: [] };
   const { placeFavorites } = favoritesData;
+
   const filter: Filter = {};
 
   const nameQuery = url.searchParams.get("q");
   if (nameQuery) filter.name = nameQuery;
 
   const priceFrom = url.searchParams.get("priceFrom");
+  if (priceFrom) filter.priceRangeMin = Number(priceFrom);
   const priceTo = url.searchParams.get("priceTo");
-  if (priceFrom || priceTo) {
-    filter.priceRange = {};
-    if (priceFrom) filter.priceRange.gte = priceFrom;
-    if (priceTo) filter.priceRange.lte = priceTo;
-  }
+  if (priceTo) filter.priceRangeMax = Number(priceTo);
 
   const city = url.searchParams.get("city");
   if (city) filter["city.name"] = city;

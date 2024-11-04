@@ -13,8 +13,8 @@ export default function PlaceFilter() {
 
   const hasCityParam = searchParams.has("city");
   const hasFilters =
-    searchParams.has("priceFrom") ||
-    searchParams.has("priceTo") ||
+    searchParams.has("priceRangeMin") ||
+    searchParams.has("priceRangeMax") ||
     searchParams.has("openTime") ||
     searchParams.has("closeTime");
 
@@ -23,14 +23,14 @@ export default function PlaceFilter() {
 
     const formData = new FormData(e.currentTarget);
 
-    const priceFrom = String(formData.get("priceFrom"));
-    const priceTo = String(formData.get("priceTo"));
+    const priceRangeMin = String(formData.get("priceRangeMin"));
+    const priceRangeMax = String(formData.get("priceRangeMax"));
     const openTime = String(formData.get("openTime"));
     const closeTime = String(formData.get("closeTime"));
 
     const filterData = {
-      priceFrom: priceFrom ? Number(priceFrom) : undefined,
-      priceTo: priceTo ? Number(priceTo) : undefined,
+      priceRangeMin: priceRangeMin ? Number(priceRangeMin) : undefined,
+      priceRangeMax: priceRangeMax ? Number(priceRangeMax) : undefined,
       openTime: openTime !== "none" ? openTime : undefined,
       closeTime: closeTime !== "none" ? closeTime : undefined,
     };
@@ -43,8 +43,8 @@ export default function PlaceFilter() {
       return null;
     }
 
-    if (priceFrom) searchParams.set("priceFrom", String(priceFrom));
-    if (priceTo) searchParams.set("priceTo", String(priceTo));
+    if (priceRangeMin) searchParams.set("priceRangeMin", String(priceRangeMin));
+    if (priceRangeMax) searchParams.set("priceRangeMax", String(priceRangeMax));
     if (openTime && openTime !== "none") searchParams.set("openTime", openTime);
     if (closeTime && closeTime !== "none")
       searchParams.set("closeTime", closeTime);
@@ -53,8 +53,8 @@ export default function PlaceFilter() {
   };
 
   const handleReset = () => {
-    searchParams.delete("priceFrom");
-    searchParams.delete("priceTo");
+    searchParams.delete("priceRangeMin");
+    searchParams.delete("priceRangeMax");
     searchParams.delete("openTime");
     searchParams.delete("closeTime");
 
@@ -79,9 +79,9 @@ export default function PlaceFilter() {
               <Input
                 placeholder="Min"
                 id="from"
-                name="priceFrom"
+                name="priceRangeMin"
                 type="number"
-                defaultValue={searchParams.get("priceFrom") || ""}
+                defaultValue={searchParams.get("priceRangeMin") || ""}
               />
             </div>
             <div className="w-1/2">
@@ -89,9 +89,9 @@ export default function PlaceFilter() {
               <Input
                 placeholder="Max"
                 id="to"
-                name="priceTo"
+                name="priceRangeMax"
                 type="number"
-                defaultValue={searchParams.get("priceTo") || ""}
+                defaultValue={searchParams.get("priceRangeMax") || ""}
               />
             </div>
           </span>

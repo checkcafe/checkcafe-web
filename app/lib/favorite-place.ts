@@ -6,16 +6,14 @@ import { getAccessToken } from "./token";
 export async function getFavoritePlaces(request: Request) {
   const session = await getSession(request.headers.get("Cookie"));
   const { accessToken } = await getAccessToken(request);
-  // if (!accessToken) {
-  //   throw new Error("User is not logged in");
-  // }
-  //   const user = await auth.isLoggedIn();
-  //   if (!user || typeof user === "boolean") {
-  //     throw new Error("User is not logged in");
-  //   }
+
   const user = session.get("userData");
+  if (!user || !user.username) {
+    return null;
+  }
 
   const username = user.username;
+
   try {
     const response = await fetch(
       `${BACKEND_API_URL}/users/${username}/favorites`,
@@ -27,11 +25,11 @@ export async function getFavoritePlaces(request: Request) {
         },
       },
     );
-    //   favorites = response.placeFavorites;
+
     return response;
-    //   const response = await fetchAPI(request, favoritesUrl);
   } catch (error) {
     console.error("Error fetching favorite places");
+    return null;
   }
 }
 
