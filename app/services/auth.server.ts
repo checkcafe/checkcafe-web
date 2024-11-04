@@ -1,32 +1,61 @@
-import { Authenticator } from "remix-auth";
+import { Authenticator, AuthorizationError } from "remix-auth";
 import { FormStrategy } from "remix-auth-form";
 
-import { login } from "~/lib/auth.server";
+import { BACKEND_API_URL } from "~/lib/env";
+import { loginSchema } from "~/schemas/auth";
 import { sessionStorage } from "~/services/session.server";
-import { AuthResponse } from "~/types/auth";
+import { AuthToken } from "~/types/auth";
 
-// Create an instance of the authenticator, pass a generic with what
-// strategies will return and will store in the session
-export const authenticator = new Authenticator<AuthResponse>(sessionStorage);
-
-// Tell the Authenticator to use the form strategy
+export const authenticator = new Authenticator<
+  AuthToken | AuthorizationError | Error
+>(sessionStorage, {
+  sessionKey: "authToken",
+  sessionErrorKey: "authError",
+});
 authenticator.use(
   new FormStrategy(async ({ form }) => {
-    const username = String(form.get("username"));
-    const password = String(form.get("password"));
+    const formData = {
+      username: form.get("username"),
+      password: form.get("password"),
+    };
 
-    // console.log({ username, password });
+    const parsedData = loginSchema.safeParse(formData);
+    if (parsedData.success !== true) {
+      const issues = parsedData.error.errors.map(err => ({
+        message: err.message,
+        path: err.path,
+      }));
 
-    const authResponse = await login(username, password);
+      throw new AuthorizationError(JSON.stringify(issues));
+    }
 
-    // console.log({ authResponse });
+    const response = await fetch(`${BACKEND_API_URL}/auth/login`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        username: formData.username,
+        password: formData.password,
+      }),
+    });
 
-    // the type of this user must match the type you pass to the Authenticator
-    // the strategy will automatically inherit the type if you instantiate
-    // directly inside the `use` method
-    return authResponse;
+    if (!response.ok) {
+      const errorData = await response.json();
+      throw new AuthorizationError(
+        errorData.error || "Username or password is incorrect!",
+      );
+    }
+
+    const token = await response.json();
+
+    if (!token) {
+      throw new AuthorizationError(
+        "Invalid credentials: Missing required authentication tokens",
+      );
+    }
+
+    return token as AuthToken;
   }),
-  // each strategy has a name and can be changed to use another one
-  // same strategy multiple times, especially useful for the OAuth2 strategy.
   "user-pass",
 );

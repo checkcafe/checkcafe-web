@@ -16,14 +16,19 @@ import {
   getFavoritePlaces,
   unfavoritePlace,
 } from "~/lib/favorite-place";
-import { authenticator } from "~/services/auth.server";
+import { getAccessToken } from "~/lib/token";
 import { Filter } from "~/types/filter";
-import { FavoritePlace, PlaceItem } from "~/types/model";
+import {
+  FavoritePlace,
+  FavoritePlacesResponse,
+  PlaceItem,
+} from "~/types/model";
 
 export async function loader({ request }: LoaderFunctionArgs) {
   const url = new URL(request.url);
-  const favorites = await getFavoritePlaces(request);
-
+  const responseFavorites = await getFavoritePlaces(request);
+  const favoritesData: FavoritePlacesResponse = await responseFavorites?.json();
+  const { placeFavorites } = favoritesData;
   const filter: Filter = {};
 
   const nameQuery = url.searchParams.get("q");
@@ -58,13 +63,12 @@ export async function loader({ request }: LoaderFunctionArgs) {
 
   try {
     const response = await fetch(apiUrl.toString());
-
     if (!response.ok) {
       return { places: [], favorites: [], hasCityParam: Boolean(city) };
     }
     const places: PlaceItem[] = await response.json();
 
-    return { places, favorites, hasCityParam: Boolean(city) };
+    return { places, favorites: placeFavorites, hasCityParam: Boolean(city) };
   } catch (error) {
     return { places: [], favorites: [], hasCityParam: false };
   }
@@ -142,11 +146,9 @@ export default function Places() {
 }
 
 export async function action({ request }: ActionFunctionArgs) {
-  const { user } = await authenticator.isAuthenticated(request, {
-    failureRedirect: "/login",
-  });
+  const { accessToken } = await getAccessToken(request);
 
-  console.log({ user });
+  if (!accessToken) return redirect("/login");
 
   const url = new URL(request.url);
 
@@ -161,7 +163,8 @@ export async function action({ request }: ActionFunctionArgs) {
 
   try {
     if (method === "POST") {
-      await addFavoritePlace(request, placeId);
+      const response = await addFavoritePlace(request, placeId);
+      console.log(response, "responseadd");
     } else if (method === "DELETE") {
       if (!favoriteId) {
         return json({ error: "Favorite ID is required" });
@@ -171,12 +174,12 @@ export async function action({ request }: ActionFunctionArgs) {
       return json({ error: "Invalid action type" });
     }
 
-    redirect(`/places${url.search}`);
+    return redirect(`/places${url.search}`);
 
-    return json({
-      success: true,
-      message: "Added to favorites!",
-    });
+    // return json({
+    //   success: true,
+    //   message: "Added to favorites!",
+    // });
   } catch (error) {
     console.error("Error processing favorite place action:", error);
     return json({ error: "Failed to process favorite place" }, { status: 500 });
