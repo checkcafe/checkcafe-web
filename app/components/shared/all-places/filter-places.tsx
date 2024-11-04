@@ -11,10 +11,9 @@ export default function PlaceFilter() {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
 
-  const hasCityParam = searchParams.has("city");
   const hasFilters =
-    searchParams.has("priceRangeMin") ||
-    searchParams.has("priceRangeMax") ||
+    searchParams.has("priceFrom") ||
+    searchParams.has("priceTo") ||
     searchParams.has("openTime") ||
     searchParams.has("closeTime");
 
@@ -23,14 +22,14 @@ export default function PlaceFilter() {
 
     const formData = new FormData(e.currentTarget);
 
-    const priceRangeMin = String(formData.get("priceRangeMin"));
-    const priceRangeMax = String(formData.get("priceRangeMax"));
+    const priceFrom = String(formData.get("priceFrom"));
+    const priceTo = String(formData.get("priceTo"));
     const openTime = String(formData.get("openTime"));
     const closeTime = String(formData.get("closeTime"));
 
     const filterData = {
-      priceRangeMin: priceRangeMin ? Number(priceRangeMin) : undefined,
-      priceRangeMax: priceRangeMax ? Number(priceRangeMax) : undefined,
+      priceRangeMin: priceFrom ? Number(priceFrom) : undefined,
+      priceRangeMax: priceTo ? Number(priceTo) : undefined,
       openTime: openTime !== "none" ? openTime : undefined,
       closeTime: closeTime !== "none" ? closeTime : undefined,
     };
@@ -43,8 +42,8 @@ export default function PlaceFilter() {
       return null;
     }
 
-    if (priceRangeMin) searchParams.set("priceRangeMin", String(priceRangeMin));
-    if (priceRangeMax) searchParams.set("priceRangeMax", String(priceRangeMax));
+    if (priceFrom) searchParams.set("priceFrom", String(priceFrom));
+    if (priceTo) searchParams.set("priceTo", String(priceTo));
     if (openTime && openTime !== "none") searchParams.set("openTime", openTime);
     if (closeTime && closeTime !== "none")
       searchParams.set("closeTime", closeTime);
@@ -53,8 +52,8 @@ export default function PlaceFilter() {
   };
 
   const handleReset = () => {
-    searchParams.delete("priceRangeMin");
-    searchParams.delete("priceRangeMax");
+    searchParams.delete("priceFrom");
+    searchParams.delete("priceTo");
     searchParams.delete("openTime");
     searchParams.delete("closeTime");
 
@@ -67,11 +66,11 @@ export default function PlaceFilter() {
     <form
       key={formKey}
       onSubmit={handleSubmit}
-      className={`flex ${hasCityParam ? "items-end justify-between" : "flex-col gap-4"}`}
+      className={`sticky top-32 flex flex-col gap-4`}
     >
-      <div className={`flex ${hasCityParam ? "w-1/2" : "flex-col"} gap-4`}>
-        {!hasCityParam && <span className="pb-5 font-bold">Filter</span>}
-        <span className={`${hasCityParam ? "w-1/2" : ""}`}>
+      <div className={`flex flex-col gap-4`}>
+        <span className="pb-5 font-bold">Filter</span>
+        <span className={``}>
           <p className="font-bold">Price per person</p>
           <span className="flex gap-6">
             <div className="w-1/2">
@@ -79,9 +78,9 @@ export default function PlaceFilter() {
               <Input
                 placeholder="Min"
                 id="from"
-                name="priceRangeMin"
+                name="priceFrom"
                 type="number"
-                defaultValue={searchParams.get("priceRangeMin") || ""}
+                defaultValue={searchParams.get("priceFrom") || ""}
               />
             </div>
             <div className="w-1/2">
@@ -89,14 +88,14 @@ export default function PlaceFilter() {
               <Input
                 placeholder="Max"
                 id="to"
-                name="priceRangeMax"
+                name="priceTo"
                 type="number"
-                defaultValue={searchParams.get("priceRangeMax") || ""}
+                defaultValue={searchParams.get("priceTo") || ""}
               />
             </div>
           </span>
         </span>
-        <span className={`${hasCityParam ? "w-1/2" : ""}`}>
+        <span className={``}>
           <p className="font-bold">Open Hour</p>
           <SelectHour
             defaultOpenTime={searchParams.get("openTime") || ""}
@@ -105,7 +104,7 @@ export default function PlaceFilter() {
         </span>
       </div>
 
-      <div className={`flex ${hasCityParam ? "" : "justify-between"} gap-5`}>
+      <div className={`flex justify-between gap-5`}>
         <button
           type="submit"
           className="rounded-sm bg-[#372816] px-9 py-2 font-semibold text-white"

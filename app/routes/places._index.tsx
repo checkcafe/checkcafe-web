@@ -95,10 +95,10 @@ export default function Places() {
   };
 
   return (
-    <div
-      className={`container mx-auto flex ${hasCityParam ? "flex-col" : ""} gap-8 px-8 pt-5`}
-    >
-      <PlaceFilter />
+    <div className={`container relative mx-auto flex gap-8 px-8 pt-5`}>
+      <div>
+        <PlaceFilter />
+      </div>
 
       <div className="flex w-full gap-2">
         {places.length === 0 ? (
