@@ -100,6 +100,7 @@ export default function Places() {
     <div className="container relative mx-auto flex min-h-screen flex-col gap-2 px-4 pt-5 md:flex-row md:px-8">
       <div className="sticky top-20 z-40 flex justify-between bg-white py-2">
         <PlaceFilter />
+
         <Button
           onClick={() => setShowMap(prev => !prev)}
           variant="outline"
@@ -136,7 +137,7 @@ export default function Places() {
               </ul>
             </main>
 
-            {hasCityParam && (
+            {(showMap || (hasCityParam && !showMap)) && (
               <aside
                 className={`sticky top-0 ${showMap ? "" : "hidden"} h-full w-full md:flex md:w-2/3`}
               >
@@ -144,6 +145,7 @@ export default function Places() {
                   places={places}
                   onPlaceClick={handleScrollToCard}
                   showMap={showMap}
+                  hasCityParam={hasCityParam}
                 />
               </aside>
             )}

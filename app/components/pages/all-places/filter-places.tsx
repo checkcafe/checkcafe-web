@@ -96,8 +96,9 @@ export default function PlaceFilter() {
 
     for (const param of ["priceFrom", "priceTo", "openTime", "closeTime"]) {
       const value = formData.get(param) as string;
-      if (value) {
-        searchParams.set(param, value !== "none" ? value : "");
+
+      if (value && value !== "none") {
+        searchParams.set(param, value);
       } else {
         searchParams.delete(param);
       }
