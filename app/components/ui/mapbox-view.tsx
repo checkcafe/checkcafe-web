@@ -1,6 +1,6 @@
 import { type FeatureCollection } from "geojson";
 import { MapMouseEvent, type GeoJSONFeature } from "mapbox-gl";
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import {
   Layer,
   Map,
@@ -46,6 +46,7 @@ export function MapboxView({
       },
   onPlaceClick,
   height,
+  showMap,
 }: {
   places: PlaceItem[];
   initialViewState?: {
@@ -55,6 +56,7 @@ export function MapboxView({
   };
   onPlaceClick: (placeId: string) => void;
   height?: string;
+  showMap?: any;
 }) {
   const mapRef = useRef<MapRef>(null);
   const [popupInfo, setPopupInfo] = useState<{
@@ -81,6 +83,12 @@ export function MapboxView({
       },
     })),
   };
+
+  useEffect(() => {
+    if (showMap && mapRef.current) {
+      mapRef.current.resize();
+    }
+  }, [showMap]);
 
   const onClick = (event: MapMouseEvent) => {
     const features = event.features as GeoJSONFeature[];

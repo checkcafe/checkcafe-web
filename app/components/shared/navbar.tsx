@@ -91,7 +91,7 @@ export function Navbar({ user }: { user: AuthUser }) {
       </Form>
 
       {/* Hamburger button for mobile */}
-      <div className="flex items-center gap-4 md:hidden">
+      <div className="z-50 flex items-center gap-4 md:hidden">
         <button onClick={handleHamburgerClick} className="text-primary">
           {menuState.isHamburgerOpen ? (
             <XIcon className="h-6 w-6" />

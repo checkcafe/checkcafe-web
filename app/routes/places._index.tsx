@@ -5,10 +5,12 @@ import {
   redirect,
 } from "@remix-run/node";
 import { useLoaderData } from "@remix-run/react";
-import { useRef } from "react";
+import { List, MapIcon } from "lucide-react";
+import { useRef, useState } from "react";
 
 import AllPlaceCard from "~/components/shared/all-places/all-place-card";
 import PlaceFilter from "~/components/shared/all-places/filter-places";
+import { Button } from "~/components/ui/button";
 import { MapboxView } from "~/components/ui/mapbox-view";
 import { BACKEND_API_URL } from "~/lib/env";
 import {
@@ -76,6 +78,7 @@ export async function loader({ request }: LoaderFunctionArgs) {
 
 export default function Places() {
   const { places, hasCityParam, favorites } = useLoaderData<typeof loader>();
+  const [showMap, setShowMap] = useState(false);
 
   const favoriteMap = new Map();
   favorites.forEach((favorite: FavoritePlace) => {
@@ -96,11 +99,37 @@ export default function Places() {
 
   return (
     <div
-      className={`container mx-auto flex ${hasCityParam ? "flex-col" : ""} gap-8 px-8 pt-5`}
+      className={`container relative mx-auto flex min-h-screen flex-col gap-2 px-4 pt-5 md:flex-row md:px-8`}
     >
-      <PlaceFilter />
+      <div className="sticky top-20 z-40 flex justify-between bg-white py-2">
+        <PlaceFilter />
+        {!showMap && hasCityParam && (
+          <Button
+            onClick={() => setShowMap(true)}
+            variant="outline"
+            className="md:hidden"
+          >
+            Show Map
+            <span>
+              <MapIcon />
+            </span>
+          </Button>
+        )}
+        {showMap && (
+          <Button
+            onClick={() => setShowMap(false)}
+            variant="outline"
+            className="md:hidden"
+          >
+            Show List
+            <span>
+              <List />
+            </span>
+          </Button>
+        )}
+      </div>
 
-      <div className="flex w-full gap-2">
+      <div className="flex h-full w-full gap-2">
         {places.length === 0 ? (
           hasCityParam ? (
             <p className="w-full text-center text-gray-500">
@@ -111,8 +140,10 @@ export default function Places() {
           )
         ) : (
           <>
-            <main className={`${hasCityParam ? "w-2/3" : "w-full"}`}>
-              <ul className="flex w-full flex-col gap-7">
+            <main
+              className={`w-full md:${hasCityParam ? "w-3/4" : "w-full"} ${showMap ? "hidden" : ""}`}
+            >
+              <ul className={`flex w-full flex-col gap-4 md:gap-7`}>
                 {places.map((place, index) => {
                   const isFavorite = favoriteMap.has(place.slug);
                   const favoriteId = isFavorite
@@ -134,8 +165,14 @@ export default function Places() {
             </main>
 
             {hasCityParam && places.length > 0 && (
-              <aside className="sticky top-0 h-full w-1/3">
-                <MapboxView places={places} onPlaceClick={handleScrollToCard} />
+              <aside
+                className={`sticky top-0 ${showMap ? "" : "hidden"} h-full w-full md:flex md:w-2/3`}
+              >
+                <MapboxView
+                  places={places}
+                  onPlaceClick={handleScrollToCard}
+                  showMap={showMap}
+                />
               </aside>
             )}
           </>
