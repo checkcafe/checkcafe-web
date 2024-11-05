@@ -5,18 +5,17 @@ import {
   redirect,
 } from "@remix-run/node";
 import { useLoaderData } from "@remix-run/react";
-import { useRef } from "react";
+import { List, MapIcon } from "lucide-react";
+import { useRef, useState } from "react";
 
-import AllPlaceCard from "~/components/shared/all-places/all-place-card";
-import PlaceFilter from "~/components/shared/all-places/filter-places";
+import AllPlaceCard from "~/components/pages/all-places/all-place-card";
+import PlaceFilter from "~/components/pages/all-places/filter-places";
+import { Button } from "~/components/ui/button";
 import { MapboxView } from "~/components/ui/mapbox-view";
 import { BACKEND_API_URL } from "~/lib/env";
-import {
-  addFavoritePlace,
-  getFavoritePlaces,
-  unfavoritePlace,
-} from "~/lib/favorite-place";
 import { getAccessToken } from "~/lib/token";
+import { authenticator } from "~/services/auth.server";
+import { getSession } from "~/services/session.server";
 import { Filter } from "~/types/filter";
 import {
   FavoritePlace,
@@ -24,118 +23,128 @@ import {
   PlaceItem,
 } from "~/types/model";
 
-export async function loader({ request }: LoaderFunctionArgs) {
-  const url = new URL(request.url);
-  const responseFavorites = await getFavoritePlaces(request);
-  const favoritesData: FavoritePlacesResponse = await responseFavorites?.json();
-  const { placeFavorites } = favoritesData;
+async function fetchFavorites(request: Request): Promise<FavoritePlace[]> {
+  const isAuthenticated = await authenticator.isAuthenticated(request);
+  if (!isAuthenticated) return [];
+
+  const session = await getSession(request.headers.get("Cookie"));
+  const username = session.get("userData")?.username;
+
+  const response = await fetch(
+    `${BACKEND_API_URL}/users/${username}/favorites`,
+    { method: "GET", headers: { "Content-Type": "application/json" } },
+  );
+
+  if (!response.ok) return [];
+
+  const { placeFavorites }: FavoritePlacesResponse = await response.json();
+  return placeFavorites || [];
+}
+
+async function fetchPlaces(url: URL): Promise<PlaceItem[]> {
+  const apiUrl = new URL(`${BACKEND_API_URL}/places`);
   const filter: Filter = {};
 
-  const nameQuery = url.searchParams.get("q");
-  if (nameQuery) filter.name = nameQuery;
+  const params: { [key: string]: (value: string) => void } = {
+    q: value => (filter.name = value),
+    priceFrom: value => (filter.priceRangeMin = Number(value)),
+    priceTo: value => (filter.priceRangeMax = Number(value)),
+    city: value => (filter["city.name"] = value),
+    openTime: value => (filter["operatingHours.openingTime"] = { gte: value }),
+    closeTime: value => (filter["operatingHours.closingTime"] = { lte: value }),
+  };
 
-  const priceFrom = url.searchParams.get("priceFrom");
-  const priceTo = url.searchParams.get("priceTo");
-  if (priceFrom || priceTo) {
-    filter.priceRange = {};
-    if (priceFrom) filter.priceRange.gte = priceFrom;
-    if (priceTo) filter.priceRange.lte = priceTo;
-  }
-
-  const city = url.searchParams.get("city");
-  if (city) filter["city.name"] = city;
-
-  const openTime = url.searchParams.get("openTime");
-  if (openTime) {
-    filter["operatingHours.openingTime"] = { gte: openTime };
-  }
-
-  const closingTime = url.searchParams.get("closeTime");
-  if (closingTime) {
-    filter["operatingHours.closingTime"] = { lte: closingTime };
-  }
-
-  const apiUrl = new URL(`${BACKEND_API_URL}/places`);
+  Object.keys(params).forEach(param => {
+    const value = url.searchParams.get(param);
+    if (value) {
+      params[param](value);
+    }
+  });
 
   if (Object.keys(filter).length > 0) {
     apiUrl.searchParams.append("filter", JSON.stringify(filter));
   }
 
-  try {
-    const response = await fetch(apiUrl.toString());
-    if (!response.ok) {
-      return { places: [], favorites: [], hasCityParam: Boolean(city) };
-    }
-    const places: PlaceItem[] = await response.json();
+  const response = await fetch(apiUrl.toString());
+  if (!response.ok) return [];
+  return await response.json();
+}
 
-    return { places, favorites: placeFavorites, hasCityParam: Boolean(city) };
-  } catch (error) {
-    return { places: [], favorites: [], hasCityParam: false };
-  }
+export async function loader({ request }: LoaderFunctionArgs) {
+  const url = new URL(request.url);
+  const [placeFavorites, places] = await Promise.all([
+    fetchFavorites(request),
+    fetchPlaces(url),
+  ]);
+
+  return {
+    places,
+    favorites: placeFavorites,
+    hasCityParam: Boolean(url.searchParams.get("city")),
+  };
 }
 
 export default function Places() {
   const { places, hasCityParam, favorites } = useLoaderData<typeof loader>();
-
-  const favoriteMap = new Map();
-  favorites.forEach((favorite: FavoritePlace) => {
-    favoriteMap.set(favorite.slug, favorite.favoriteId);
-  });
-
+  const favoriteMap = new Map(favorites.map(fav => [fav.slug, fav.favoriteId]));
+  const [showMap, setShowMap] = useState(false);
   const cardRefs = useRef<(HTMLDivElement | null)[]>([]);
 
   const handleScrollToCard = (placeId: string) => {
-    const cardIndex = places.findIndex(
-      (place: PlaceItem) => place.id === placeId,
-    );
+    const cardIndex = places.findIndex(place => place.id === placeId);
     const selectedCard = cardRefs.current[cardIndex];
-    if (selectedCard) {
-      selectedCard.scrollIntoView({ behavior: "smooth", block: "center" });
-    }
+    selectedCard?.scrollIntoView({ behavior: "smooth", block: "center" });
   };
 
   return (
-    <div
-      className={`container mx-auto flex ${hasCityParam ? "flex-col" : ""} gap-8 px-8 pt-5`}
-    >
-      <PlaceFilter />
+    <div className="container relative mx-auto flex min-h-screen flex-col gap-2 px-4 pt-5 md:flex-row md:px-8">
+      <div className="sticky top-20 z-40 flex justify-between bg-white py-2">
+        <PlaceFilter />
+        <Button
+          onClick={() => setShowMap(prev => !prev)}
+          variant="outline"
+          className="md:hidden"
+        >
+          {showMap ? "Show List" : "Show Map"}
+          <span>{showMap ? <List /> : <MapIcon />}</span>
+        </Button>
+      </div>
 
-      <div className="flex w-full gap-2">
+      <div className="flex h-full w-full gap-2">
         {places.length === 0 ? (
-          hasCityParam ? (
-            <p className="w-full text-center text-gray-500">
-              No cafes have been added for this city yet.
-            </p>
-          ) : (
-            <p className="w-full text-center text-gray-500">Cafe Not Found</p>
-          )
+          <p className="w-full text-center text-gray-500">
+            {hasCityParam
+              ? "No cafes have been added for this city yet."
+              : "Cafe Not Found"}
+          </p>
         ) : (
           <>
-            <main className={`${hasCityParam ? "w-2/3" : "w-full"}`}>
-              <ul className="flex w-full flex-col gap-7">
-                {places.map((place, index) => {
-                  const isFavorite = favoriteMap.has(place.slug);
-                  const favoriteId = isFavorite
-                    ? favoriteMap.get(place.slug)
-                    : null;
-
-                  return (
-                    <div key={place.id}>
-                      <AllPlaceCard
-                        place={place}
-                        ref={el => (cardRefs.current[index] = el)}
-                        isFavorite={isFavorite}
-                        favoriteId={favoriteId}
-                      />
-                    </div>
-                  );
-                })}
+            <main
+              className={`w-full md:${hasCityParam ? "w-3/4" : "w-full"} ${showMap ? "hidden" : ""}`}
+            >
+              <ul className="flex w-full flex-col gap-4 md:gap-7">
+                {places.map((place, index) => (
+                  <div key={place.id}>
+                    <AllPlaceCard
+                      place={place}
+                      ref={el => (cardRefs.current[index] = el)}
+                      isFavorite={favoriteMap.has(place.slug)}
+                      favoriteId={favoriteMap.get(place.slug) ?? null}
+                    />
+                  </div>
+                ))}
               </ul>
             </main>
 
-            {hasCityParam && places.length > 0 && (
-              <aside className="sticky top-0 h-full w-1/3">
-                <MapboxView places={places} onPlaceClick={handleScrollToCard} />
+            {hasCityParam && (
+              <aside
+                className={`sticky top-0 ${showMap ? "" : "hidden"} h-full w-full md:flex md:w-2/3`}
+              >
+                <MapboxView
+                  places={places}
+                  onPlaceClick={handleScrollToCard}
+                  showMap={showMap}
+                />
               </aside>
             )}
           </>
@@ -145,43 +154,69 @@ export default function Places() {
   );
 }
 
+async function modifyFavoritePlace(
+  accessToken: string,
+  username: string,
+  placeId?: string,
+  favoriteId?: string,
+) {
+  const method = placeId ? "POST" : "DELETE";
+  const url = placeId
+    ? `${BACKEND_API_URL}/users/${username}/favorites`
+    : `${BACKEND_API_URL}/users/${username}/favorites/${favoriteId}`;
+
+  const body = placeId ? JSON.stringify({ id: placeId }) : undefined;
+
+  const response = await fetch(url, {
+    method,
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${accessToken}`,
+    },
+    body,
+  });
+
+  if (!response.ok) {
+    throw new Error(
+      method === "POST"
+        ? "Failed to add favorite place"
+        : "Failed to unfavorite place",
+    );
+  }
+}
+
 export async function action({ request }: ActionFunctionArgs) {
-  const { accessToken } = await getAccessToken(request);
+  const authenticated = await authenticator.isAuthenticated(request);
+  const { accessToken, headers } = await getAccessToken(request);
 
-  if (!accessToken) return redirect("/login");
+  if (!authenticated || !accessToken) {
+    return redirect("/login", { headers });
+  }
 
-  const url = new URL(request.url);
-
+  const session = await getSession(request.headers.get("Cookie"));
+  const username = session.get("userData")?.username;
   const formData = await request.formData();
   const placeId = formData.get("placeId")?.toString();
   const favoriteId = formData.get("favoriteId")?.toString();
   const method = request.method;
 
-  if (!placeId) {
-    return json({ error: "Place ID is required" });
+  if (!placeId && !favoriteId) {
+    return json({ error: "Place ID or Favorite ID is required" });
   }
 
   try {
     if (method === "POST") {
-      const response = await addFavoritePlace(request, placeId);
-      console.log(response, "responseadd");
+      await modifyFavoritePlace(accessToken, username, placeId);
     } else if (method === "DELETE") {
-      if (!favoriteId) {
-        return json({ error: "Favorite ID is required" });
-      }
-      await unfavoritePlace(request, favoriteId);
+      await modifyFavoritePlace(accessToken, username, undefined, favoriteId);
     } else {
-      return json({ error: "Invalid action type" });
+      throw new Error("Invalid method");
     }
 
-    return redirect(`/places${url.search}`);
-
-    // return json({
-    //   success: true,
-    //   message: "Added to favorites!",
-    // });
+    return redirect(`/places${new URL(request.url).search}`, { headers });
   } catch (error) {
-    console.error("Error processing favorite place action:", error);
-    return json({ error: "Failed to process favorite place" }, { status: 500 });
+    throw new Error(
+      error instanceof Error ? error.message : "An unexpected error occurred.",
+    );
   }
 }

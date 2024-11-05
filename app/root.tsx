@@ -29,8 +29,6 @@ import "./tailwind.css";
 import { BACKEND_API_URL } from "./lib/env";
 import { commitSession, getSession } from "./services/session.server";
 
-const queryClient = new QueryClient();
-
 export const meta: MetaFunction = () => [
   { title: "CheckCafe" },
   {
@@ -98,6 +96,7 @@ export const loader = async ({ request }: LoaderFunctionArgs) => {
 };
 
 export function Layout({ children }: { children: React.ReactNode }) {
+  const queryClient = new QueryClient();
   const { user } = useLoaderData<typeof loader>() || {};
   console.log(user, "user");
   return (

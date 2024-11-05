@@ -91,7 +91,7 @@ export function Navbar({ user }: { user: AuthUser }) {
       </Form>
 
       {/* Hamburger button for mobile */}
-      <div className="flex items-center gap-4 md:hidden">
+      <div className="z-50 flex items-center gap-4 md:hidden">
         <button onClick={handleHamburgerClick} className="text-primary">
           {menuState.isHamburgerOpen ? (
             <XIcon className="h-6 w-6" />
@@ -145,7 +145,7 @@ export function Navbar({ user }: { user: AuthUser }) {
                   <FaUser size={14} /> Profile
                 </Link>
                 <Link
-                  to="/new"
+                  to="/places/new"
                   className="flex items-center gap-2 p-2 text-primary transition-colors duration-200 hover:rounded hover:bg-primary hover:text-white"
                   onClick={closeAllMenus}
                 >
@@ -235,7 +235,7 @@ export function Navbar({ user }: { user: AuthUser }) {
                       Profile
                     </Link>
                     <Link
-                      to="/new"
+                      to="/places/new"
                       className="w-full rounded-md py-2 text-primary hover:bg-slate-100"
                       onClick={closeAllMenus}
                     >
