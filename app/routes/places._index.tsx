@@ -141,7 +141,7 @@ export default function Places() {
         ) : (
           <>
             <main
-              className={`w-full md:${hasCityParam ? "w-2/3" : "w-full"} ${showMap ? "hidden" : ""}`}
+              className={`w-full md:${hasCityParam ? "w-3/4" : "w-full"} ${showMap ? "hidden" : ""}`}
             >
               <ul className={`flex w-full flex-col gap-4 md:gap-7`}>
                 {places.map((place, index) => {
@@ -166,7 +166,7 @@ export default function Places() {
 
             {hasCityParam && places.length > 0 && (
               <aside
-                className={`sticky top-0 ${showMap ? "" : "hidden"} h-full w-full md:flex md:w-1/3`}
+                className={`sticky top-0 ${showMap ? "" : "hidden"} h-full w-full md:flex md:w-2/3`}
               >
                 <MapboxView
                   places={places}

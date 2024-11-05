@@ -144,7 +144,7 @@ export default function PlaceFilter() {
         <SheetTrigger asChild>
           <div className="relative">
             {activeFilterCount > 0 && (
-              <div className="absolute right-[-3px] top-[-3px] flex h-4 w-4 items-center justify-center rounded-full bg-black text-xs text-white">
+              <div className="absolute right-[-3px] top-[-3px] flex h-4 w-4 items-center justify-center rounded-full bg-black text-xs text-white md:hidden">
                 {activeFilterCount}
               </div>
             )}
