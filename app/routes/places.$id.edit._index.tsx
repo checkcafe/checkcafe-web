@@ -1,5 +1,12 @@
 import { useForm } from "@conform-to/react";
 import { parse } from "@conform-to/zod";
+import {
+  ActionFunctionArgs,
+  json,
+  LoaderFunctionArgs,
+  redirect,
+} from "@remix-run/node";
+import { useLoaderData } from "@remix-run/react";
 // import { json, LoaderFunctionArgs } from "@remix-run/node";
 // import { redirect, useActionData, useLoaderData } from "@remix-run/react";
 import { FileUploaderRegular } from "@uploadcare/react-uploader";
@@ -12,59 +19,54 @@ import { Combobox } from "~/components/shared/form-input/combobox";
 import { MultipleOperatingHours } from "~/components/shared/form-input/multiple-input-operating-hours";
 import { Input } from "~/components/ui/input";
 import { Label } from "~/components/ui/label";
-import { UPLOADCARE_PUBLIC_KEY } from "~/lib/env";
-
-// import { Input } from "~/components/ui/input";
-// import { Label } from "~/components/ui/label";
-// import { ActionData } from "~/types/auth";
+import { BACKEND_API_URL, UPLOADCARE_PUBLIC_KEY } from "~/lib/env";
+import { Place } from "~/types/model";
 
 const schema = z.object({
   name: z.string().min(4).max(255),
   streetAddress: z.string().min(4).max(100),
   cityId: z.string().min(4),
 });
-// export async function action({ request }: ActionFunctionArgs) {
-//   const formData = await request.formData();
-//   const submission = parse(formData, { schema });
+export async function action({ request }: ActionFunctionArgs) {
+  const formData = await request.formData();
+  const submission = parse(formData, { schema });
 
-//   // Send the submission back to the client if the status is not successful
-//   if (submission.status !== "success") {
-//     return submission.reply();
-//   }
+  // Send the submission back to the client if the status is not successful
+  // if (submission.status !== "success") {
+  //   return submission.reply();
+  // }
 
-//   // const session = await auth.login(submission.value);
-//   const session = false;
-//   // Send the submission with addional error message if login fails
-//   if (!session) {
-//     return submission.reply({
-//       formErrors: ["Incorrect username or password"],
-//     });
-//   }
+  // const session = await auth.login(submission.value);
+  const session = false;
+  // Send the submission with addional error message if login fails
+  // if (!session) {
+  //   return submission.reply({
+  //     formErrors: ["Incorrect username or password"],
+  //   });
+  // }
 
-//   return redirect("/dashboard");
-// }
-// export async function loader({ params }: LoaderFunctionArgs) {
-//   const { id } = params;
-//   if (!id) return redirect("/places");
+  // return redirect("/dashboard");
+  return null;
+}
+export async function loader({ params }: LoaderFunctionArgs) {
+  const { id } = params;
+  if (!id) return redirect("/");
 
-// //   // const url = `${BACKEND_API_URL}/places/${id}`;
+  const url = `${BACKEND_API_URL}/places/${id}`;
+  const responsePlace = await fetch(url);
+  const place: Place = await responsePlace.json();
 
-// //   // const responsePlace = await fetch(url);
-// //   // const place: Place = await responsePlace.json();
+  if (!place) {
+    throw new Response(null, { status: 404, statusText: "Place Not Found" });
+  }
 
-// //   // if (!place) {
-// //   //   throw new Response(null, { status: 404, statusText: "Place Not Found" });
-// //   // }
-
-//   return json({
-//     place: {
-//       id: "temp",
-//     },
-//   });
-// }
+  return json({
+    place,
+  });
+}
 
 export default function PlaceSlug() {
-  // const { place } = useLoaderData<typeof loader>();
+  const { place } = useLoaderData<typeof loader>();
   // const actionData = useActionData<ActionData>();
   const [form, fields] = useForm({
     // Configure when each field should be validated
@@ -159,7 +161,12 @@ export default function PlaceSlug() {
           >
             Operating Hours
           </Label>
-          <MultipleOperatingHours />
+          <MultipleOperatingHours
+            placeData={{
+              id: place.id,
+              operatingHours: place.operatingHours ?? [],
+            }}
+          />
         </span>
       </form>
     </div>

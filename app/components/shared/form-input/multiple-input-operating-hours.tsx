@@ -13,58 +13,81 @@ import { z } from "zod";
 
 import { Alert } from "~/components/ui/alert";
 import { Button } from "~/components/ui/button";
+import { FormDescription, FormField, FormLabel } from "~/components/ui/form";
 import { Input } from "~/components/ui/input";
-import {
-  OperatingHourSchema,
-  schemaOperatingHoursPlace,
-} from "~/schemas/places";
+import { OperatingHour, schemaOperatingHoursPlace } from "~/schemas/places";
+import { Place } from "~/types/model";
+import { type SubmissionResult } from "~/types/submission";
 
-export function MultipleOperatingHours() {
+export function MultipleOperatingHours({
+  placeData,
+}: {
+  placeData?: Pick<Place, "id" | "operatingHours">;
+}) {
   const fetcher = useFetcher();
   const [form, { id, operatingHours }] = useForm<
     z.infer<typeof schemaOperatingHoursPlace>
   >({
     shouldValidate: "onSubmit",
-    //   lastSubmission: fetcher.data as SubmissionResult,
+    lastSubmission: fetcher.data as SubmissionResult,
     onValidate({ formData }) {
       return parse(formData, { schema: schemaOperatingHoursPlace });
     },
     defaultValue: {
-      operatingHours: [],
+      operatingHours: placeData?.operatingHours,
     },
   });
 
   const operatingHoursItems = useFieldList(form.ref, operatingHours);
   const hasOperatingHoursItems = operatingHoursItems.length > 0;
-  //   const item = operatingHoursItems.map(operatingItem => operatingItem.name);
+  console.log(operatingHoursItems, "operatingHoursItems");
+  console.log(operatingHours, FormData, "operatingHours");
+  console.log({ ...list.insert(operatingHours.name) }, "insert");
   return (
     <fetcher.Form {...form.props} method="PUT" className="space-y-6">
-      <input hidden {...conform.input(id)} defaultValue={`${Math.random()}`} />{" "}
-      <Button
-        variant="outline"
-        // disabled={!isAllowAddLink}
-        onClick={() => {
-          //   form.insert();
-        }}
-        {...list.insert(operatingHours.name)}
-      >
-        <span>Add</span>
-      </Button>
-      {!hasOperatingHoursItems && <p>No links yet, add one.</p>}
-      {hasOperatingHoursItems &&
-        operatingHoursItems.map(operatingHoursItem => (
-          <li key={operatingHoursItem.key} className="flex gap-2 py-1">
-            <OperatingHoursItemFieldset />
-          </li>
-        ))}
+      <fieldset className="space-y-2 disabled:opacity-80">
+        <input hidden {...conform.input(id)} defaultValue={placeData?.id} />
+        <FormField>
+          <FormLabel id="links">Links</FormLabel>
+          <FormDescription>
+            To link your websites, social media, and projects/products. Limited
+            to 10 items.
+          </FormDescription>
+
+          <div>
+            <Button variant="outline" {...list.insert(operatingHours.name)}>
+              <span>Add</span>
+            </Button>
+
+            <Button
+              type="submit"
+              name="intent"
+              value="user-change-links"
+              variant="outline"
+            >
+              Save
+            </Button>
+          </div>
+          {!hasOperatingHoursItems && <p>No operating hours yet, add one.</p>}
+          {hasOperatingHoursItems &&
+            operatingHoursItems.map(operatingHoursItem => (
+              <li key={operatingHoursItem.key} className="flex gap-2 py-1">
+                <OperatingHoursItemFieldset {...operatingHoursItem} />
+                <p>{operatingHoursItem.name}</p>
+              </li>
+            ))}
+        </FormField>
+      </fieldset>
     </fetcher.Form>
   );
 }
 
-interface LinkItemFieldsetProps
-  extends FieldsetConfig<z.input<typeof OperatingHourSchema>> {}
+interface OperatingHoursItemFieldsetProps
+  extends FieldsetConfig<z.input<typeof OperatingHour>> {}
 
-function OperatingHoursItemFieldset({ ...config }: LinkItemFieldsetProps) {
+function OperatingHoursItemFieldset({
+  ...config
+}: OperatingHoursItemFieldsetProps) {
   const ref = useRef<HTMLFieldSetElement>(null);
   const { day, openingTime, closingTime } = useFieldset(ref, config);
 

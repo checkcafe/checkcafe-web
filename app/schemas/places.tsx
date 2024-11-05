@@ -3,16 +3,16 @@ import { z } from "zod";
 import { id } from "./general";
 import { UserSchema } from "./user";
 
-const OperatingHourSchema = z.object({
+const OperatingHour = z.object({
   day: z.string(),
   openingTime: z.string(),
   closingTime: z.string(),
 });
 
-const OperatingHoursSchema = z.array(OperatingHourSchema).optional();
+const operatingHours = z.array(OperatingHour).optional();
 const schemaOperatingHoursPlace = z.object({
   id,
-  operatingHours: OperatingHoursSchema,
+  operatingHours,
 });
 const AddressSchema = z.object({
   street: z.string(),
@@ -54,7 +54,7 @@ const PlaceSchema = z.object({
   address: AddressSchema,
   currency: z.string(),
   priceRange: z.string(),
-  operatingHours: z.array(OperatingHourSchema),
+  operatingHours: z.array(OperatingHour),
   placeFacilities: z.array(PlaceFacilitySchema),
   photos: z.array(
     z.object({
@@ -78,7 +78,7 @@ const FavoritePlaceSchema = z.object({
 });
 
 export {
-  OperatingHourSchema,
+  OperatingHour,
   AddressSchema,
   PlaceItemSchema,
   PlaceFacilitySchema,
