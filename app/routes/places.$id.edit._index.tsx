@@ -13,13 +13,23 @@ import { FileUploaderRegular } from "@uploadcare/react-uploader";
 
 import "@uploadcare/react-uploader/core.css";
 
+import {
+  deleteFile,
+  UploadcareSimpleAuthSchema,
+} from "@uploadcare/rest-client";
+import { useState } from "react";
 import { z } from "zod";
 
 import { Combobox } from "~/components/shared/form-input/combobox";
 import { MultipleOperatingHours } from "~/components/shared/form-input/multiple-input-operating-hours";
+import { Sliders } from "~/components/shared/sliders";
 import { Input } from "~/components/ui/input";
 import { Label } from "~/components/ui/label";
-import { BACKEND_API_URL, UPLOADCARE_PUBLIC_KEY } from "~/lib/env";
+import {
+  BACKEND_API_URL,
+  UPLOADCARE_PUBLIC_KEY,
+  UPLOADCARE_SECRET_KEY,
+} from "~/lib/env";
 import { Place } from "~/types/model";
 
 const schema = z.object({
@@ -65,9 +75,13 @@ export async function loader({ params }: LoaderFunctionArgs) {
   });
 }
 
-export default function PlaceSlug() {
+type url = {
+  url: string;
+};
+export default function EditPlace() {
   const { place } = useLoaderData<typeof loader>();
   // const actionData = useActionData<ActionData>();
+  const [imageUrls, setImageUrls] = useState<url[]>([]);
   const [form, fields] = useForm({
     // Configure when each field should be validated
     shouldValidate: "onBlur",
@@ -78,9 +92,42 @@ export default function PlaceSlug() {
       return parse(formData, { schema });
     },
   });
+
+  function handleSetImageUrls(data: string[]) {
+    data.forEach(url => setImageUrls(imageUrls => [...imageUrls, { url }]));
+  }
+  function handleDeleteImageUrls(urlToRemove: string) {
+    setImageUrls(prevState =>
+      prevState.filter(item => item.url !== urlToRemove),
+    );
+  }
+  console.log(imageUrls, "imageUrls");
+  const uploadcareSimpleAuthSchema = new UploadcareSimpleAuthSchema({
+    publicKey: UPLOADCARE_PUBLIC_KEY || "",
+    secretKey: UPLOADCARE_SECRET_KEY || "",
+  });
+
+  async function deleteFiles(uuid: string) {
+    const result = await deleteFile(
+      {
+        uuid,
+      },
+      { authSchema: uploadcareSimpleAuthSchema },
+    );
+    console.log(result);
+  }
   return (
-    <div className="px-32 py-20">
+    <div className="mx-auto w-1/2 px-32 py-20">
       <form method="post" id={form.id}>
+        {imageUrls && imageUrls.length > 0 && (
+          <Sliders
+            imageSlides={imageUrls.map((imageUrl: { url: string }) => ({
+              imageUrl: imageUrl.url,
+            }))}
+            widthImage={200}
+          />
+        )}
+        <input hidden value={JSON.stringify(imageUrls)} />
         <FileUploaderRegular
           sourceList="local, url, camera"
           classNameUploader="uc-light"
@@ -88,14 +135,26 @@ export default function PlaceSlug() {
           multiple={true}
           accept="image/png,image/jpeg "
           confirmUpload={true}
-          onChange={e => {
-            console.log(e, "es");
-          }}
           onFileUploadSuccess={e => {
-            console.log(e, "eurl");
+            console.log(e, "success");
+          }}
+          onDoneClick={e => {
+            if (e.successEntries.length > 0) {
+              const data = e.successEntries;
+              const urlData = data.map(item => item.cdnUrl);
+              console.log(urlData, "urlData");
+              handleSetImageUrls(urlData);
+            }
+          }}
+          onFileRemoved={e => {
+            console.log(e, "remove");
+            if (e.uuid) deleteFiles(e.uuid);
+
+            if (e.isRemoved && e.cdnUrl) {
+              handleDeleteImageUrls(e.cdnUrl);
+            }
           }}
         />
-
         <span>
           <Label
             htmlFor="username"
