@@ -15,7 +15,6 @@ import {
   useLoaderData,
   useRouteError,
 } from "@remix-run/react";
-import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { FaHouse } from "react-icons/fa6";
 
 import { Footer } from "~/components/shared/footer";
@@ -96,7 +95,6 @@ export const loader = async ({ request }: LoaderFunctionArgs) => {
 };
 
 export function Layout({ children }: { children: React.ReactNode }) {
-  const queryClient = new QueryClient();
   const { user } = useLoaderData<typeof loader>() || {};
 
   return (
@@ -108,11 +106,10 @@ export function Layout({ children }: { children: React.ReactNode }) {
         <Links />
       </head>
       <body>
-        <QueryClientProvider client={queryClient}>
-          <Navbar user={user} />
-          <div className="min-h-screen">{children}</div>
-          <Footer />
-        </QueryClientProvider>
+        <Navbar user={user} />
+        <div className="min-h-screen">{children}</div>
+        <Footer />
+
         <ScrollRestoration />
         <Toaster />
         <Scripts />
