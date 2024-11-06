@@ -15,6 +15,8 @@ interface SliderProps {
   autoplayDelay?: number;
   prevButtonText?: string;
   nextButtonText?: string;
+  widthImage?: number;
+  heightImage?: number;
 }
 
 const DEFAULT_WIDTH = 600;
@@ -25,6 +27,8 @@ export const Sliders = ({
   autoplayDelay = 0,
   prevButtonText,
   nextButtonText,
+  widthImage,
+  heightImage,
 }: SliderProps) => {
   const autoplayPlugin = React.useRef(
     autoplayDelay > 0
@@ -48,8 +52,8 @@ export const Sliders = ({
                   <img
                     src={slide.imageUrl}
                     alt={`Slide ${index + 1}`}
-                    width={DEFAULT_WIDTH}
-                    height={DEFAULT_HEIGHT}
+                    width={widthImage || DEFAULT_WIDTH}
+                    height={heightImage || DEFAULT_HEIGHT}
                     className="h-[400px] w-full rounded-lg object-cover"
                     onError={e => {
                       e.currentTarget.src =
