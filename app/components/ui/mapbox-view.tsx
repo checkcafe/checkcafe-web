@@ -33,22 +33,24 @@ type FeatureProperties = {
 
 export function MapboxView({
   places,
-  initialViewState = places.length > 0
+  hasCityParam,
+  initialViewState = places.length > 0 && hasCityParam
     ? {
         latitude: places[0].latitude,
         longitude: places[0].longitude,
         zoom: 11,
       }
     : {
-        latitude: -0.4752106,
-        longitude: 116.6995672,
-        zoom: 12,
+        latitude: -2.966349,
+        longitude: 110.127247,
+        zoom: 3,
       },
   onPlaceClick,
   height,
   showMap,
 }: {
   places: PlaceItem[];
+  hasCityParam?: boolean;
   initialViewState?: {
     latitude: number;
     longitude: number;
@@ -85,10 +87,18 @@ export function MapboxView({
   };
 
   useEffect(() => {
-    if (showMap && mapRef.current) {
-      mapRef.current.resize();
+    if (mapRef.current) {
+      mapRef.current.flyTo({
+        center: [places[0].longitude, places[0].latitude],
+        zoom: 11,
+        speed: 2,
+      });
+
+      if (showMap) {
+        mapRef.current.resize();
+      }
     }
-  }, [showMap]);
+  }, [showMap, places]);
 
   const onClick = (event: MapMouseEvent) => {
     const features = event.features as GeoJSONFeature[];

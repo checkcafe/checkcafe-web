@@ -1,4 +1,4 @@
-import { json, LoaderFunctionArgs } from "@remix-run/node";
+import { json, LoaderFunctionArgs, MetaFunction } from "@remix-run/node";
 import { redirect, useLoaderData } from "@remix-run/react";
 import { MapPin, Receipt } from "lucide-react";
 import { useState } from "react";
@@ -11,6 +11,7 @@ import ShareButton from "~/components/shared/shared-button";
 import { Sliders } from "~/components/shared/sliders";
 import { MapboxView } from "~/components/ui/mapbox-view";
 import { BACKEND_API_URL } from "~/lib/env";
+import { getPageTitle } from "~/lib/get-page-title";
 import { type Place, type PlaceItem } from "~/types/model";
 import { formatPriceRange } from "~/utils/formatter";
 
@@ -28,6 +29,16 @@ export async function loader({ params }: LoaderFunctionArgs) {
 
   return json({ place });
 }
+
+export const meta: MetaFunction<typeof loader> = ({ data }) => {
+  return [
+    { title: getPageTitle(`${data?.place.name}`) },
+    {
+      name: "description",
+      content: `Discover ${data?.place.name} and explore what it has to offer.`,
+    },
+  ];
+};
 
 export default function PlaceSlug() {
   const { place } = useLoaderData<typeof loader>();

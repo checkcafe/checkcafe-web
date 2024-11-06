@@ -2,6 +2,7 @@ import {
   ActionFunctionArgs,
   json,
   LoaderFunctionArgs,
+  MetaFunction,
   redirect,
 } from "@remix-run/node";
 import { useLoaderData } from "@remix-run/react";
@@ -13,6 +14,7 @@ import PlaceFilter from "~/components/pages/all-places/filter-places";
 import { Button } from "~/components/ui/button";
 import { MapboxView } from "~/components/ui/mapbox-view";
 import { BACKEND_API_URL } from "~/lib/env";
+import { getPageTitle } from "~/lib/get-page-title";
 import { getAccessToken } from "~/lib/token";
 import { authenticator } from "~/services/auth.server";
 import { getSession } from "~/services/session.server";
@@ -22,6 +24,16 @@ import {
   FavoritePlacesResponse,
   PlaceItem,
 } from "~/types/model";
+
+export const meta: MetaFunction = () => {
+  return [
+    { title: getPageTitle("Places") },
+    {
+      name: "description",
+      content: "Explore all places available in our collection.",
+    },
+  ];
+};
 
 async function fetchFavorites(request: Request): Promise<FavoritePlace[]> {
   const isAuthenticated = await authenticator.isAuthenticated(request);
@@ -100,6 +112,7 @@ export default function Places() {
     <div className="container relative mx-auto flex min-h-screen flex-col gap-2 px-4 pt-5 md:flex-row md:px-8">
       <div className="sticky top-20 z-40 flex justify-between bg-white py-2">
         <PlaceFilter />
+
         <Button
           onClick={() => setShowMap(prev => !prev)}
           variant="outline"
@@ -136,7 +149,7 @@ export default function Places() {
               </ul>
             </main>
 
-            {hasCityParam && (
+            {(showMap || (hasCityParam && !showMap)) && (
               <aside
                 className={`sticky top-0 ${showMap ? "" : "hidden"} h-full w-full md:flex md:w-2/3`}
               >
@@ -144,6 +157,7 @@ export default function Places() {
                   places={places}
                   onPlaceClick={handleScrollToCard}
                   showMap={showMap}
+                  hasCityParam={hasCityParam}
                 />
               </aside>
             )}
