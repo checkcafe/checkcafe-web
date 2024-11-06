@@ -10,6 +10,7 @@ import { useLoaderData } from "@remix-run/react";
 // import { json, LoaderFunctionArgs } from "@remix-run/node";
 // import { redirect, useActionData, useLoaderData } from "@remix-run/react";
 import { FileUploaderRegular } from "@uploadcare/react-uploader";
+import React from "react";
 
 import "@uploadcare/react-uploader/core.css";
 
@@ -32,6 +33,8 @@ import {
 } from "~/lib/env";
 import { Place } from "~/types/model";
 
+React.useLayoutEffect = React.useEffect;
+
 const schema = z.object({
   name: z.string().min(4).max(255),
   streetAddress: z.string().min(4).max(100),
@@ -39,7 +42,8 @@ const schema = z.object({
 });
 export async function action({ request }: ActionFunctionArgs) {
   const formData = await request.formData();
-  const submission = parse(formData, { schema });
+  console.log({ formData });
+  // const submission = parse(formData, { schema });
 
   // Send the submission back to the client if the status is not successful
   // if (submission.status !== "success") {
@@ -47,7 +51,7 @@ export async function action({ request }: ActionFunctionArgs) {
   // }
 
   // const session = await auth.login(submission.value);
-  const session = false;
+  // const session = false;
   // Send the submission with addional error message if login fails
   // if (!session) {
   //   return submission.reply({
@@ -101,24 +105,23 @@ export default function EditPlace() {
       prevState.filter(item => item.url !== urlToRemove),
     );
   }
-  console.log(imageUrls, "imageUrls");
+  // console.log(imageUrls, "imageUrls");
   const uploadcareSimpleAuthSchema = new UploadcareSimpleAuthSchema({
-    publicKey: UPLOADCARE_PUBLIC_KEY || "",
-    secretKey: UPLOADCARE_SECRET_KEY || "",
+    publicKey: UPLOADCARE_PUBLIC_KEY,
+    secretKey: UPLOADCARE_SECRET_KEY,
   });
 
   async function deleteFiles(uuid: string) {
-    const result = await deleteFile(
-      {
-        uuid,
-      },
-      { authSchema: uploadcareSimpleAuthSchema },
-    );
-    console.log(result);
+    await deleteFile({ uuid }, { authSchema: uploadcareSimpleAuthSchema });
   }
+
   return (
-    <div className="mx-auto w-1/2 px-32 py-20">
-      <form method="post" id={form.id}>
+    <div className="flex justify-center">
+      <form
+        className="w-full max-w-3xl space-y-4 px-4 py-20"
+        method="post"
+        id={form.id}
+      >
         {imageUrls && imageUrls.length > 0 && (
           <Sliders
             imageSlides={imageUrls.map((imageUrl: { url: string }) => ({
@@ -127,54 +130,53 @@ export default function EditPlace() {
             widthImage={200}
           />
         )}
-        <input hidden value={JSON.stringify(imageUrls)} />
+
+        <input hidden defaultValue={JSON.stringify(imageUrls)} />
+
         <FileUploaderRegular
           sourceList="local, url, camera"
           classNameUploader="uc-light"
           pubkey={UPLOADCARE_PUBLIC_KEY}
           multiple={true}
-          accept="image/png,image/jpeg "
+          accept="image/png,image/jpeg"
           confirmUpload={true}
-          onFileUploadSuccess={e => {
-            console.log(e, "success");
-          }}
           onDoneClick={e => {
             if (e.successEntries.length > 0) {
               const data = e.successEntries;
               const urlData = data.map(item => item.cdnUrl);
-              console.log(urlData, "urlData");
+              // console.log(urlData, "urlData");
               handleSetImageUrls(urlData);
             }
           }}
           onFileRemoved={e => {
-            console.log(e, "remove");
+            // console.log(e, "remove");
             if (e.uuid) deleteFiles(e.uuid);
-
             if (e.isRemoved && e.cdnUrl) {
               handleDeleteImageUrls(e.cdnUrl);
             }
           }}
         />
-        <span>
+
+        <div>
           <Label
             htmlFor="username"
             className="block text-sm font-medium text-gray-700"
           >
             Name
           </Label>
-
           <Input
             type="text"
             name={fields.name.name}
             id="username"
-            placeholder="Enter your username or email"
+            placeholder="Place name"
             className={`mt-1 rounded-md border p-2 ${fields.name.errors ? "border-red-500" : "border-gray-300"}`}
           />
           {fields.name.errors && (
             <p className="mt-1 text-sm text-red-700">{fields.name.errors}</p>
           )}
-        </span>
-        <span>
+        </div>
+
+        <div>
           <Label
             htmlFor="streetAddress"
             className="block text-sm font-medium text-gray-700"
@@ -193,8 +195,9 @@ export default function EditPlace() {
               {fields.streetAddress.errors}
             </p>
           )}
-        </span>
-        <span>
+        </div>
+
+        <div>
           <Label
             htmlFor="cityId"
             className="block text-sm font-medium text-gray-700"
@@ -212,8 +215,9 @@ export default function EditPlace() {
            {fields.cityId.errors && (
              <p className="mt-1 text-sm text-red-700">{fields.cityId.errors}</p>
            )} */}
-        </span>
-        <span>
+        </div>
+
+        <div>
           <Label
             htmlFor="operatingHours"
             className="block text-sm font-medium text-gray-700"
@@ -226,7 +230,7 @@ export default function EditPlace() {
               operatingHours: place.operatingHours ?? [],
             }}
           />
-        </span>
+        </div>
       </form>
     </div>
   );

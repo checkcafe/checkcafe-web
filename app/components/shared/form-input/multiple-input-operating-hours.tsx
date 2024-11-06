@@ -13,7 +13,7 @@ import { z } from "zod";
 
 import { Alert } from "~/components/ui/alert";
 import { Button } from "~/components/ui/button";
-import { FormDescription, FormField, FormLabel } from "~/components/ui/form";
+import { FormDescription, FormLabel } from "~/components/ui/form";
 import { Input } from "~/components/ui/input";
 import { OperatingHour, schemaOperatingHoursPlace } from "~/schemas/places";
 import { Place } from "~/types/model";
@@ -40,9 +40,9 @@ export function MultipleOperatingHours({
 
   const operatingHoursItems = useFieldList(form.ref, operatingHours);
   const hasOperatingHoursItems = operatingHoursItems.length > 0;
-  console.log(operatingHoursItems, "operatingHoursItems");
-  console.log(operatingHours, FormData, "operatingHours");
-  console.log({ ...list.insert(operatingHours.name) }, "insert");
+  // console.log(operatingHoursItems, "operatingHoursItems");
+  // console.log(operatingHours, FormData, "operatingHours");
+  // console.log({ ...list.insert(operatingHours.name) }, "insert");
   return (
     <fetcher.Form {...form.props} method="PUT" className="space-y-6">
       <fieldset className="space-y-2 disabled:opacity-80">
