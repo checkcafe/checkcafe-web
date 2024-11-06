@@ -1,15 +1,21 @@
 import { LoaderFunctionArgs, MetaFunction } from "@remix-run/node";
-import { json, Link, useLoaderData, useParams } from "@remix-run/react";
-import { useQuery } from "@tanstack/react-query";
-import { FaHeart, FaStar } from "react-icons/fa";
+import { json, Link, useLoaderData } from "@remix-run/react";
 
-import LoadingSpinner from "~/components/shared/loader-spinner";
 import { Avatar, AvatarFallback, AvatarImage } from "~/components/ui/avatar";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "~/components/ui/tabs";
 import { BACKEND_API_URL } from "~/lib/env";
 import { getPageTitle } from "~/lib/get-page-title";
 import { AuthUser } from "~/types/auth";
 import { ProfileFavorite, ProfilePlace } from "~/types/profile";
+
+export const meta: MetaFunction<typeof loader> = ({ data }) => {
+  return [
+    { title: getPageTitle(`${data?.user.name}`) },
+    {
+      name: "description",
+      content: `Explore ${data?.user.name}'s profile, their favorite places, and more.`,
+    },
+  ];
+};
 
 export async function loader({ params }: LoaderFunctionArgs) {
   const { username } = params;
@@ -31,67 +37,14 @@ export async function loader({ params }: LoaderFunctionArgs) {
   }
 }
 
-export const meta: MetaFunction<typeof loader> = ({ data }) => {
-  return [
-    { title: getPageTitle(`${data?.user.name}`) },
-    {
-      name: "description",
-      content: `Explore ${data?.user.name}'s profile, their favorite places, and more.`,
-    },
-  ];
-};
-
-const fetchData = async (url: string) => {
-  try {
-    const response = await fetch(url);
-    if (!response.ok) throw new Error("Data not found.");
-    return await response.json();
-  } catch (error) {
-    return {
-      error:
-        error instanceof Error
-          ? error.message
-          : "An unknown error occurred. Please try again.",
-    };
-  }
-};
-
-const fetchPlacesCreated = (username: string) =>
-  fetchData(`${BACKEND_API_URL}/users/${username}/places?limit=9`);
-
-const fetchFavorites = (username: string) =>
-  fetchData(`${BACKEND_API_URL}/users/${username}/favorites?limit=10`);
-
 export default function Profile() {
   const { user } = useLoaderData<typeof loader>();
-  const { username } = useParams<{ username: string }>();
 
-  const {
-    data: placesCreated,
-    refetch: refetchPlaces,
-    isFetching: isFetchingPlaces,
-    error: placesCreatedError,
-  } = useQuery({
-    queryKey: ["placesCreated", username],
-    queryFn: () => fetchPlacesCreated(username!),
-    enabled: !!username,
-  });
+  // const handleTabChange = (tab: string) => {
+  //   tab === "favorites" ? refetchFavorites() : refetchPlaces();
+  // };
 
-  const {
-    data: favorites,
-    refetch: refetchFavorites,
-    isFetching: isFetchingFavorites,
-    error: favoritesError,
-  } = useQuery({
-    queryKey: ["favorites", username],
-    queryFn: () => fetchFavorites(username!),
-    enabled: false,
-  });
-
-  const handleTabChange = (tab: string) => {
-    tab === "favorites" ? refetchFavorites() : refetchPlaces();
-  };
-
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const renderPlaces = (places: ProfilePlace[], isError: boolean) => {
     if (isError) {
       return (
@@ -128,6 +81,7 @@ export default function Profile() {
     );
   };
 
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const renderFavorites = (favorites: ProfileFavorite[], isError: boolean) => {
     if (isError) {
       return (
@@ -172,70 +126,16 @@ export default function Profile() {
               {user.name.charAt(0).toUpperCase() || "?"}
             </AvatarFallback>
           </Avatar>
-          <span className="mt-1">
+
+          <div className="mt-1">
             <h1 className="text-2xl font-bold">{user.name}</h1>
             <p className="text-slate-500">@{user.username}</p>
-          </span>
+          </div>
         </section>
 
-        <Tabs
-          defaultValue="created"
-          className="w-full"
-          onValueChange={handleTabChange}
-        >
-          <TabsList className="flex w-full flex-wrap">
-            <TabsTrigger
-              value="created"
-              className="flex min-w-[120px] flex-1 items-center"
-            >
-              <FaStar className="mr-2" /> Places Created
-            </TabsTrigger>
-            <TabsTrigger
-              value="favorites"
-              className="flex min-w-[120px] flex-1 items-center"
-            >
-              <FaHeart className="mr-2" /> Favorite Places
-            </TabsTrigger>
-          </TabsList>
-
-          <TabsContent value="created">
-            {isFetchingPlaces ? (
-              <p className="mt-20 text-center">
-                <LoadingSpinner size="large" color="text-gray-500" />
-              </p>
-            ) : placesCreatedError ? (
-              <p className="mt-4 text-center text-lg font-medium">
-                {placesCreatedError.message ||
-                  "An error occurred while fetching places."}
-              </p>
-            ) : placesCreated?.places ? (
-              renderPlaces(placesCreated.places, false)
-            ) : (
-              <p className="mt-4 text-center text-lg font-medium">
-                No places created yet.
-              </p>
-            )}
-          </TabsContent>
-
-          <TabsContent value="favorites">
-            {isFetchingFavorites ? (
-              <p className="mt-20 text-center">
-                <LoadingSpinner size="large" color="text-gray-500" />
-              </p>
-            ) : favoritesError ? (
-              <p className="mt-4 text-center text-lg font-medium">
-                {favoritesError.message ||
-                  "An error occurred while fetching favorites."}
-              </p>
-            ) : favorites?.placeFavorites ? (
-              renderFavorites(favorites.placeFavorites, false)
-            ) : (
-              <p className="mt-4 text-center text-lg font-medium">
-                No favorite places yet.
-              </p>
-            )}
-          </TabsContent>
-        </Tabs>
+        <section>
+          <pre>{JSON.stringify(user, null, 2)}</pre>
+        </section>
       </main>
     </div>
   );

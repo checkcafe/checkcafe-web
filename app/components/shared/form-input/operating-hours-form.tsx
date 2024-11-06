@@ -13,13 +13,13 @@ import { z } from "zod";
 
 import { Alert } from "~/components/ui/alert";
 import { Button } from "~/components/ui/button";
-import { FormDescription, FormLabel } from "~/components/ui/form";
+import { FormLabel } from "~/components/ui/form";
 import { Input } from "~/components/ui/input";
 import { OperatingHour, schemaOperatingHoursPlace } from "~/schemas/places";
 import { Place } from "~/types/model";
 import { type SubmissionResult } from "~/types/submission";
 
-export function MultipleOperatingHours({
+export function OperatingHoursForm({
   placeData,
 }: {
   placeData?: Pick<Place, "id" | "operatingHours">;
@@ -47,11 +47,7 @@ export function MultipleOperatingHours({
     <fetcher.Form {...form.props} method="PUT" className="space-y-6">
       <fieldset className="space-y-2 disabled:opacity-80">
         <input hidden {...conform.input(id)} defaultValue={placeData?.id} />
-        <FormLabel id="links">Links</FormLabel>
-        <FormDescription>
-          To link your websites, social media, and projects/products. Limited to
-          10 items.
-        </FormDescription>
+        <FormLabel id="links">Operating Hours</FormLabel>
 
         <div>
           <Button
@@ -63,7 +59,7 @@ export function MultipleOperatingHours({
           </Button>
 
           <Button
-            type="submit"
+            type="button"
             name="intent"
             value="user-change-links"
             variant="outline"
