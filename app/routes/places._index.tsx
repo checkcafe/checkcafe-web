@@ -2,6 +2,7 @@ import {
   ActionFunctionArgs,
   json,
   LoaderFunctionArgs,
+  MetaFunction,
   redirect,
 } from "@remix-run/node";
 import { useLoaderData } from "@remix-run/react";
@@ -13,6 +14,7 @@ import PlaceFilter from "~/components/pages/all-places/filter-places";
 import { Button } from "~/components/ui/button";
 import { MapboxView } from "~/components/ui/mapbox-view";
 import { BACKEND_API_URL } from "~/lib/env";
+import { getPageTitle } from "~/lib/get-page-title";
 import { getAccessToken } from "~/lib/token";
 import { authenticator } from "~/services/auth.server";
 import { getSession } from "~/services/session.server";
@@ -22,6 +24,16 @@ import {
   FavoritePlacesResponse,
   PlaceItem,
 } from "~/types/model";
+
+export const meta: MetaFunction = () => {
+  return [
+    { title: getPageTitle("Places") },
+    {
+      name: "description",
+      content: "Explore all places available in our collection.",
+    },
+  ];
+};
 
 async function fetchFavorites(request: Request): Promise<FavoritePlace[]> {
   const isAuthenticated = await authenticator.isAuthenticated(request);

@@ -1,8 +1,19 @@
-import { json } from "@remix-run/node";
+import { json, MetaFunction } from "@remix-run/node";
 import { Link, useLoaderData } from "@remix-run/react";
 import { FaGithub, FaLinkedinIn } from "react-icons/fa6";
 
 import { Avatar, AvatarFallback, AvatarImage } from "~/components/ui/avatar";
+import { getPageTitle } from "~/lib/get-page-title";
+
+export const meta: MetaFunction = () => {
+  return [
+    { title: getPageTitle("About us") },
+    {
+      name: "description",
+      content: "Meet the dedicated team behind this project.",
+    },
+  ];
+};
 
 export function loader() {
   const teamMembers = [

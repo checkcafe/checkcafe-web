@@ -1,4 +1,4 @@
-import { LoaderFunctionArgs } from "@remix-run/node";
+import { LoaderFunctionArgs, MetaFunction } from "@remix-run/node";
 import { json, Link, useLoaderData, useParams } from "@remix-run/react";
 import { useQuery } from "@tanstack/react-query";
 import { FaHeart, FaStar } from "react-icons/fa";
@@ -7,6 +7,7 @@ import LoadingSpinner from "~/components/shared/loader-spinner";
 import { Avatar, AvatarFallback, AvatarImage } from "~/components/ui/avatar";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "~/components/ui/tabs";
 import { BACKEND_API_URL } from "~/lib/env";
+import { getPageTitle } from "~/lib/get-page-title";
 import { AuthUser } from "~/types/auth";
 import { ProfileFavorite, ProfilePlace } from "~/types/profile";
 
@@ -29,6 +30,16 @@ export async function loader({ params }: LoaderFunctionArgs) {
     );
   }
 }
+
+export const meta: MetaFunction<typeof loader> = ({ data }) => {
+  return [
+    { title: getPageTitle(`${data?.user.name}`) },
+    {
+      name: "description",
+      content: `Explore ${data?.user.name}'s profile, their favorite places, and more.`,
+    },
+  ];
+};
 
 const fetchData = async (url: string) => {
   try {
