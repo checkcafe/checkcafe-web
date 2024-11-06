@@ -17,10 +17,8 @@ import {
   clusterLayer,
   unclusteredPointLayer,
 } from "~/configs/layer";
+import { MAPBOX_ACCESS_TOKEN } from "~/lib/env";
 import { PlaceItem } from "~/types/model";
-
-const MAPBOX_TOKEN =
-  "pk.eyJ1IjoiaWttYWw5NiIsImEiOiJjbTJqN3BpcGgwMnU3MmpvcW96NTRtb2RoIn0.jxkI7uKnc3mvMqWgIMKuhg";
 
 type FeatureProperties = {
   type: "Place";
@@ -209,7 +207,7 @@ export function MapboxView({
       mapStyle="mapbox://styles/mapbox/streets-v9"
       style={{ width: "100%", height: height || "100vh", borderRadius: 5 }}
       initialViewState={initialViewState}
-      mapboxAccessToken={MAPBOX_TOKEN}
+      mapboxAccessToken={MAPBOX_ACCESS_TOKEN}
       interactiveLayerIds={[
         String(clusterLayer.id),
         String(unclusteredPointLayer.id),
