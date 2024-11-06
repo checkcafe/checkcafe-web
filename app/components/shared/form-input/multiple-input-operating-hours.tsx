@@ -47,36 +47,38 @@ export function MultipleOperatingHours({
     <fetcher.Form {...form.props} method="PUT" className="space-y-6">
       <fieldset className="space-y-2 disabled:opacity-80">
         <input hidden {...conform.input(id)} defaultValue={placeData?.id} />
-        <FormField>
-          <FormLabel id="links">Links</FormLabel>
-          <FormDescription>
-            To link your websites, social media, and projects/products. Limited
-            to 10 items.
-          </FormDescription>
+        <FormLabel id="links">Links</FormLabel>
+        <FormDescription>
+          To link your websites, social media, and projects/products. Limited to
+          10 items.
+        </FormDescription>
 
-          <div>
-            <Button variant="outline" {...list.insert(operatingHours.name)}>
-              <span>Add</span>
-            </Button>
+        <div>
+          <Button
+            type="button"
+            variant="outline"
+            {...list.insert(operatingHours.name)}
+          >
+            <span>Add</span>
+          </Button>
 
-            <Button
-              type="submit"
-              name="intent"
-              value="user-change-links"
-              variant="outline"
-            >
-              Save
-            </Button>
-          </div>
-          {!hasOperatingHoursItems && <p>No operating hours yet, add one.</p>}
-          {hasOperatingHoursItems &&
-            operatingHoursItems.map(operatingHoursItem => (
-              <li key={operatingHoursItem.key} className="flex gap-2 py-1">
-                <OperatingHoursItemFieldset {...operatingHoursItem} />
-                <p>{operatingHoursItem.name}</p>
-              </li>
-            ))}
-        </FormField>
+          <Button
+            type="submit"
+            name="intent"
+            value="user-change-links"
+            variant="outline"
+          >
+            Save
+          </Button>
+        </div>
+        {!hasOperatingHoursItems && <p>No operating hours yet, add one.</p>}
+        {hasOperatingHoursItems &&
+          operatingHoursItems.map(operatingHoursItem => (
+            <li key={operatingHoursItem.key} className="flex gap-2 py-1">
+              <OperatingHoursItemFieldset {...operatingHoursItem} />
+              <p>{operatingHoursItem.name}</p>
+            </li>
+          ))}
       </fieldset>
     </fetcher.Form>
   );
