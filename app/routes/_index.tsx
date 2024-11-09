@@ -23,7 +23,7 @@ export const meta: MetaFunction = () => {
 
 export async function loader() {
   try {
-    const response = await fetch(`${BACKEND_API_URL}/places?limit=6`);
+    const response = await fetch(`${BACKEND_API_URL}/places?limit=7`);
 
     if (!response.ok) {
       throw new Error(response.statusText || "Failed to fetch places");
