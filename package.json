@@ -4,8 +4,8 @@
   "sideEffects": false,
   "type": "module",
   "scripts": {
-    "build": "bun gen-types && remix vite:build",
-    "dev": "bun gen-types && remix vite:dev",
+    "build": "bun gen-types:prod && remix vite:build",
+    "dev": "bun gen-types:prod && remix vite:dev",
     "format": "prettier --write --ignore-path .gitignore .",
     "gen-types": "openapi-typescript http://localhost:3000/openapi.json --output ./app/types/schema.d.ts",
     "gen-types:prod": "openapi-typescript https://api.checkcafe.com/openapi.json --output ./app/types/schema.d.ts",
