@@ -35,7 +35,7 @@ import {
 } from "~/lib/env";
 import { getAccessToken } from "~/lib/token";
 import { cn } from "~/lib/utils";
-import { Place } from "~/types/model";
+import { City, Place } from "~/types/model";
 
 React.useLayoutEffect = React.useEffect;
 
@@ -61,14 +61,18 @@ export async function loader({ params }: LoaderFunctionArgs) {
   if (!place) {
     throw new Response(null, { status: 404, statusText: "Place Not Found" });
   }
-
-  return json({ place });
+  const responseCity = await fetch(`${BACKEND_API_URL}/geo/cities`);
+  const city: City[] = await responseCity.json();
+  if (!city) {
+    throw new Response(null, { status: 404, statusText: "City Not Found" });
+  }
+  return json({ place, city });
 }
 
 export default function EditPlace() {
   // console.log(imageUrls, "imageUrls");
 
-  const { place } = useLoaderData<typeof loader>();
+  const { place, city } = useLoaderData<typeof loader>();
   // const actionData = useActionData<ActionData>();
   const [imageUrls, setImageUrls] = useState<{ url: string }[]>([]);
   const [form, fields] = useForm({
@@ -86,7 +90,9 @@ export default function EditPlace() {
       streetAddress: place.address.street,
     },
   });
+  const [cityId, setCityId] = React.useState(place.address.city);
 
+  console.log(cityId, "cities");
   function handleSetImageUrls(data: string[]) {
     data.forEach(url => setImageUrls(imageUrls => [...imageUrls, { url }]));
   }
@@ -205,14 +211,20 @@ export default function EditPlace() {
             >
               City
             </Label>
-            <Combobox />
-            <Input
+            <input
+              {...fields.cityId}
+              name={fields.cityId.name}
+              hidden
+              value={cityId}
+            />
+            <Combobox cities={city} setCityId={setCityId} cityId={cityId} />
+            {/* <Input
               {...fields.cityId}
               type="text"
               id="cityId"
               placeholder="Enter your cityId or email"
               className={`mt-1 rounded-md border p-2 ${fields.cityId.errors ? "border-red-500" : "border-gray-300"}`}
-            />
+            /> */}
             {fields.cityId.errors && (
               <p className="mt-1 text-sm text-red-700">
                 {fields.cityId.errors}
@@ -262,7 +274,6 @@ export async function action({ request, params }: ActionFunctionArgs) {
     body: JSON.stringify(submission.value),
   });
   const place: Place = await responsePlace.json();
-
   if (!place) {
     throw new Response(null, { status: 404, statusText: "Place Not Found" });
   }
