@@ -90,6 +90,10 @@ export default function Profile() {
 }
 
 export function UserPlacesList({ places }: { places: UserPlaces }) {
+  if (places.length <= 0) {
+    return <p>No submitted places.</p>;
+  }
+
   return (
     <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
       {places.map(place => (
