@@ -103,6 +103,12 @@ export function Navbar({ user }: { user: AuthUser }) {
 
       {/* Links for desktop */}
       <div className="hidden items-center gap-8 text-base font-semibold md:flex">
+        {user && user.name ? (
+          <Link to="/places/new" className="text-primary">
+            New Place
+          </Link>
+        ) : null}
+
         <Link to="/places" className="text-primary">
           Places
         </Link>
@@ -212,47 +218,56 @@ export function Navbar({ user }: { user: AuthUser }) {
             </Link>
 
             {user && user.name ? (
-              <div className="flex flex-col gap-1">
-                <button
-                  onClick={() =>
-                    setMenuState(prev => ({
-                      ...prev,
-                      isAccountOpen: !prev.isAccountOpen,
-                    }))
-                  }
-                  className="w-full rounded-md py-2 pl-4 text-left text-primary hover:bg-slate-100"
+              <>
+                <Link
+                  to="/places/new"
+                  className="w-full rounded-md py-2 pl-4 text-left hover:bg-slate-100"
+                  onClick={closeAllMenus}
                 >
-                  My Account
-                </button>
+                  New Places
+                </Link>
+                <div className="flex flex-col gap-1">
+                  <button
+                    onClick={() =>
+                      setMenuState(prev => ({
+                        ...prev,
+                        isAccountOpen: !prev.isAccountOpen,
+                      }))
+                    }
+                    className="w-full rounded-md py-2 pl-4 text-left text-primary hover:bg-slate-100"
+                  >
+                    My Account
+                  </button>
 
-                {menuState.isAccountOpen && (
-                  <div className="flex flex-col gap-1 pl-4">
-                    <Link
-                      to={`/${user.username}`}
-                      className="w-full rounded-md py-2 text-primary hover:bg-slate-100"
-                      onClick={closeAllMenus}
-                    >
-                      Profile
-                    </Link>
-                    <Link
-                      to="/places/new"
-                      className="w-full rounded-md py-2 text-primary hover:bg-slate-100"
-                      onClick={closeAllMenus}
-                    >
-                      New Place
-                    </Link>
-                    <Button asChild>
+                  {menuState.isAccountOpen && (
+                    <div className="flex flex-col gap-1 pl-4">
                       <Link
-                        to="/logout"
+                        to={`/${user.username}`}
                         className="w-full rounded-md py-2 text-primary hover:bg-slate-100"
                         onClick={closeAllMenus}
                       >
-                        Logout
+                        Profile
                       </Link>
-                    </Button>
-                  </div>
-                )}
-              </div>
+                      <Link
+                        to="/places/new"
+                        className="w-full rounded-md py-2 text-primary hover:bg-slate-100"
+                        onClick={closeAllMenus}
+                      >
+                        New Place
+                      </Link>
+                      <Button asChild>
+                        <Link
+                          to="/logout"
+                          className="w-full rounded-md py-2 text-primary hover:bg-slate-100"
+                          onClick={closeAllMenus}
+                        >
+                          Logout
+                        </Link>
+                      </Button>
+                    </div>
+                  )}
+                </div>
+              </>
             ) : (
               <Button asChild>
                 <Link

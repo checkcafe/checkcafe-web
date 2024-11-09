@@ -4,8 +4,7 @@ import { json, Link, useLoaderData } from "@remix-run/react";
 import { Avatar, AvatarFallback, AvatarImage } from "~/components/ui/avatar";
 import { BACKEND_API_URL } from "~/lib/env";
 import { getPageTitle } from "~/lib/get-page-title";
-import { AuthUser } from "~/types/auth";
-import { ProfileFavorite, ProfilePlace } from "~/types/profile";
+import { paths } from "~/types/schema";
 
 export const meta: MetaFunction<typeof loader> = ({ data }) => {
   return [
@@ -17,6 +16,15 @@ export const meta: MetaFunction<typeof loader> = ({ data }) => {
   ];
 };
 
+type UserSuccessResponse =
+  paths["/users/{username}"]["get"]["responses"][200]["content"]["application/json"];
+
+type UserPlaces =
+  paths["/users/{username}"]["get"]["responses"][200]["content"]["application/json"]["places"];
+
+type UserPlaceFavorites =
+  paths["/users/{username}"]["get"]["responses"][200]["content"]["application/json"]["placeFavorites"];
+
 export async function loader({ params }: LoaderFunctionArgs) {
   const { username } = params;
 
@@ -27,7 +35,7 @@ export async function loader({ params }: LoaderFunctionArgs) {
       throw new Error("Failed to load user profile. Please try again later.");
     }
 
-    const user: AuthUser = await response.json();
+    const user: UserSuccessResponse = await response.json();
 
     return json({ user });
   } catch (error) {
@@ -40,85 +48,13 @@ export async function loader({ params }: LoaderFunctionArgs) {
 export default function Profile() {
   const { user } = useLoaderData<typeof loader>();
 
-  // const handleTabChange = (tab: string) => {
-  //   tab === "favorites" ? refetchFavorites() : refetchPlaces();
-  // };
-
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  const renderPlaces = (places: ProfilePlace[], isError: boolean) => {
-    if (isError) {
-      return (
-        <p className="mt-4 text-center text-lg font-medium">
-          An error occurred while fetching places.
-        </p>
-      );
-    }
-
-    return (
-      <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
-        {places.map(place => (
-          <Link
-            to={`/places/${place.slug}`}
-            key={place.slug}
-            className="flex flex-col overflow-hidden rounded-lg border shadow-md"
-          >
-            <img
-              src={
-                place.thumbnailUrl || "https://placehold.co/150?text=No%20Image"
-              }
-              alt={place.name}
-              className="h-48 w-full object-cover"
-            />
-            <div className="p-4">
-              <h3 className="text-lg font-bold">{place.name}</h3>
-              <p className="text-gray-600">
-                {place.description || "No description available."}
-              </p>
-            </div>
-          </Link>
-        ))}
-      </div>
-    );
-  };
-
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  const renderFavorites = (favorites: ProfileFavorite[], isError: boolean) => {
-    if (isError) {
-      return (
-        <p className="mt-4 text-center text-lg font-medium">
-          An error occurred while fetching favorites.
-        </p>
-      );
-    }
-
-    return favorites.map(favorite => (
-      <Link
-        to={`/places/${favorite.slug}`}
-        key={favorite.slug}
-        className="flex items-center border-b py-2"
-      >
-        <img
-          src={
-            favorite.thumbnailUrl || "https://placehold.co/150?text=No%20Image"
-          }
-          alt={favorite.name}
-          className="mr-4 h-16 w-16 rounded-md object-cover"
-        />
-        <div className="flex-grow">
-          <h3 className="font-bold">{favorite.name}</h3>
-          <p>{favorite.streetAddress}</p>
-        </div>
-      </Link>
-    ));
-  };
-
   return (
     <div className="px-4 sm:px-6 lg:px-8">
       <main className="mx-auto flex max-w-7xl flex-col gap-10 p-5 pt-10">
         <section className="flex items-center gap-4">
           <Avatar className="h-16 w-16">
             <AvatarImage
-              src={user.avatarUrl}
+              src={user.avatarUrl || ""}
               alt={user.name}
               className="h-full w-full object-cover"
             />
@@ -133,10 +69,84 @@ export default function Profile() {
           </div>
         </section>
 
-        <section>
+        {/* <section>
           <pre>{JSON.stringify(user, null, 2)}</pre>
+        </section> */}
+
+        <section className="space-y-2">
+          <h2 className="text-xl font-bold">Submitted Places</h2>
+          <UserPlacesList places={user.places as UserPlaces} />
+        </section>
+
+        <section className="space-y-2">
+          <h2 className="text-xl font-bold">Favorited Places</h2>
+          <UserPlaceFavoritesList
+            placeFavorites={user.placeFavorites as UserPlaceFavorites}
+          />
         </section>
       </main>
+    </div>
+  );
+}
+
+export function UserPlacesList({ places }: { places: UserPlaces }) {
+  return (
+    <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
+      {places.map(place => (
+        <Link
+          to={`/places/${place.slug}`}
+          key={place.slug}
+          className="flex flex-col overflow-hidden rounded-lg border shadow-md"
+        >
+          <img
+            src={
+              place.thumbnailUrl || "https://placehold.co/150?text=No%20Image"
+            }
+            alt={place.name}
+            className="h-48 w-full object-cover"
+          />
+          <div className="p-4">
+            <h3 className="text-lg font-bold">{place.name}</h3>
+            <p className="text-gray-600">
+              {place.description || "No description available."}
+            </p>
+          </div>
+        </Link>
+      ))}
+    </div>
+  );
+}
+
+export function UserPlaceFavoritesList({
+  placeFavorites,
+}: {
+  placeFavorites: UserPlaceFavorites;
+}) {
+  if (placeFavorites.length <= 0) {
+    return <p>No favorited places.</p>;
+  }
+
+  return (
+    <div>
+      {placeFavorites.map(({ place }) => (
+        <Link
+          to={`/places/${place.slug}`}
+          key={place.slug}
+          className="flex items-center border-b py-2"
+        >
+          <img
+            src={
+              place.thumbnailUrl || "https://placehold.co/150?text=No%20Image"
+            }
+            alt={place.name}
+            className="mr-4 h-16 w-16 rounded-md object-cover"
+          />
+          <div className="flex-grow">
+            <h3 className="font-bold">{place.name}</h3>
+            <p>{place.streetAddress}</p>
+          </div>
+        </Link>
+      ))}
     </div>
   );
 }
