@@ -1,7 +1,11 @@
-import { json, LoaderFunctionArgs, MetaFunction } from "@remix-run/node";
-import { redirect, useLoaderData } from "@remix-run/react";
+import {
+  ActionFunctionArgs,
+  json,
+  LoaderFunctionArgs,
+  MetaFunction,
+} from "@remix-run/node";
+import { Form, redirect, useLoaderData, useParams } from "@remix-run/react";
 import { MapPin, Receipt } from "lucide-react";
-import { useState } from "react";
 import { BiHeart } from "react-icons/bi";
 import { FaHeart } from "react-icons/fa6";
 
@@ -12,22 +16,55 @@ import { Sliders } from "~/components/shared/sliders";
 import { MapboxView } from "~/components/ui/mapbox-view";
 import { BACKEND_API_URL } from "~/lib/env";
 import { getPageTitle } from "~/lib/get-page-title";
-import { type Place, type PlaceItem } from "~/types/model";
+import { getAccessToken } from "~/lib/token";
+import { authenticator } from "~/services/auth.server";
+import { getSession } from "~/services/session.server";
+import {
+  FavoritePlace,
+  FavoritePlacesResponse,
+  type Place,
+  type PlaceItem,
+} from "~/types/model";
 import { formatPriceRange } from "~/utils/formatter";
 
-export async function loader({ params }: LoaderFunctionArgs) {
+async function fetchFavorites(request: Request): Promise<FavoritePlace[]> {
+  const isAuthenticated = await authenticator.isAuthenticated(request);
+  if (!isAuthenticated) return [];
+
+  const session = await getSession(request.headers.get("Cookie"));
+  const username = session.get("userData")?.username;
+
+  const response = await fetch(
+    `${BACKEND_API_URL}/users/${username}/favorites`,
+    { method: "GET", headers: { "Content-Type": "application/json" } },
+  );
+
+  if (!response.ok) return [];
+
+  const { placeFavorites }: FavoritePlacesResponse = await response.json();
+
+  return placeFavorites || [];
+}
+
+export async function loader({ params, request }: LoaderFunctionArgs) {
   const { slug } = params;
   if (!slug) return redirect("/places");
 
-  const url = `${BACKEND_API_URL}/places/${slug}`;
-  const responsePlace = await fetch(url);
+  const [responsePlace, placeFavorites] = await Promise.all([
+    fetch(`${BACKEND_API_URL}/places/${slug}`),
+    fetchFavorites(request),
+  ]);
   const place: Place & PlaceItem = await responsePlace.json();
 
   if (!place) {
     throw new Response(null, { status: 404, statusText: "Place Not Found" });
   }
 
-  return json({ place });
+  const favoritePlace = placeFavorites.find(
+    placeFavorite => placeFavorite.slug === slug,
+  );
+
+  return json({ place, favoritePlace });
 }
 
 export const meta: MetaFunction<typeof loader> = ({ data }) => {
@@ -41,8 +78,8 @@ export const meta: MetaFunction<typeof loader> = ({ data }) => {
 };
 
 export default function PlaceSlug() {
-  const { place } = useLoaderData<typeof loader>();
-  const [isFavorited, setIsFavorited] = useState<boolean>(false);
+  const { place, favoritePlace } = useLoaderData<typeof loader>();
+  const { slug } = useParams();
 
   const placesOnMap = [
     {
@@ -57,9 +94,7 @@ export default function PlaceSlug() {
     zoom: 14,
   };
 
-  const handleFavoriteClicked = () => {
-    setIsFavorited(!isFavorited);
-  };
+  const method = favoritePlace ? "delete" : "post";
 
   return (
     <div className="px-4 py-8 md:px-32 md:py-20">
@@ -77,16 +112,30 @@ export default function PlaceSlug() {
               {place.name}
             </h1>
             <div className="flex flex-row items-center justify-center gap-1">
-              <button
-                onClick={handleFavoriteClicked}
-                className="hover:cursor-pointer hover:opacity-50"
+              <Form
+                method={method}
+                action={`/places/${slug}`}
+                preventScrollReset={true}
               >
-                {isFavorited ? (
-                  <FaHeart className="h-8 w-8" color="#FF9129" />
-                ) : (
-                  <BiHeart className="h-8 w-8" />
-                )}
-              </button>
+                <input type="hidden" name="placeId" value={place.id} />
+                <input
+                  type="hidden"
+                  name="favoriteId"
+                  value={favoritePlace?.favoriteId || ""}
+                />
+                <button
+                  type="submit"
+                  name="favorite"
+                  value={favoritePlace ? "false" : "true"}
+                  className="flex cursor-pointer items-center justify-center"
+                >
+                  {favoritePlace ? (
+                    <FaHeart className="h-7 w-7" color="#FF9129" />
+                  ) : (
+                    <BiHeart className="h-8 w-8" />
+                  )}
+                </button>
+              </Form>
               <ShareButton />
             </div>
           </div>
@@ -139,4 +188,73 @@ export default function PlaceSlug() {
       </section>
     </div>
   );
+}
+
+async function modifyFavoritePlace(
+  accessToken: string,
+  username: string,
+  placeId?: string,
+  favoriteId?: string,
+) {
+  const method = placeId ? "POST" : "DELETE";
+  const url = placeId
+    ? `${BACKEND_API_URL}/users/${username}/favorites`
+    : `${BACKEND_API_URL}/users/${username}/favorites/${favoriteId}`;
+
+  const body = placeId ? JSON.stringify({ id: placeId }) : undefined;
+
+  const response = await fetch(url, {
+    method,
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${accessToken}`,
+    },
+    body,
+  });
+
+  if (!response.ok) {
+    throw new Error(
+      method === "POST"
+        ? "Failed to add favorite place"
+        : "Failed to unfavorite place",
+    );
+  }
+}
+
+export async function action({ request, params }: ActionFunctionArgs) {
+  const authenticated = await authenticator.isAuthenticated(request);
+  const { accessToken, headers } = await getAccessToken(request);
+
+  if (!authenticated || !accessToken) {
+    return redirect("/login", { headers });
+  }
+
+  const session = await getSession(request.headers.get("Cookie"));
+  const formData = await request.formData();
+
+  const username = session.get("userData")?.username;
+  const placeId = formData.get("placeId")?.toString();
+  const favoriteId = formData.get("favoriteId")?.toString();
+  const method = request.method;
+  const { slug } = params;
+
+  if (!placeId && !favoriteId) {
+    return json({ error: "Place ID or Favorite ID is required" });
+  }
+
+  try {
+    if (method === "POST") {
+      await modifyFavoritePlace(accessToken, username, placeId);
+    } else if (method === "DELETE") {
+      await modifyFavoritePlace(accessToken, username, undefined, favoriteId);
+    } else {
+      throw new Error("Invalid method");
+    }
+
+    return redirect(`/places/${slug}`, { headers });
+  } catch (error) {
+    throw new Error(
+      error instanceof Error ? error.message : "An unexpected error occurred.",
+    );
+  }
 }
