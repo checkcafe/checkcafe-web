@@ -5,14 +5,17 @@ import {
   MetaFunction,
 } from "@remix-run/node";
 import { Form, redirect, useLoaderData, useParams } from "@remix-run/react";
-import { MapPin, Receipt } from "lucide-react";
+import { MapIcon, MapPin, Receipt } from "lucide-react";
+import { useState } from "react";
 import { BiHeart } from "react-icons/bi";
-import { FaHeart } from "react-icons/fa6";
+import { FaHeart, FaRegImages } from "react-icons/fa6";
 
 import { Facility } from "~/components/shared/places/facility";
 import { OperatingHourItem } from "~/components/shared/places/operating-hour";
 import ShareButton from "~/components/shared/shared-button";
 import { Sliders } from "~/components/shared/sliders";
+import { Avatar, AvatarFallback, AvatarImage } from "~/components/ui/avatar";
+import { Button } from "~/components/ui/button";
 import { MapboxView } from "~/components/ui/mapbox-view";
 import { BACKEND_API_URL } from "~/lib/env";
 import { getPageTitle } from "~/lib/get-page-title";
@@ -81,6 +84,8 @@ export default function PlaceSlug() {
   const { place, favoritePlace } = useLoaderData<typeof loader>();
   const { slug } = useParams();
 
+  const [showMap, setShowMap] = useState(false);
+
   const placesOnMap = [
     {
       ...place,
@@ -98,16 +103,35 @@ export default function PlaceSlug() {
 
   return (
     <div className="px-4 py-8 md:px-32 md:py-20">
+      <Button
+        onClick={() => setShowMap((prev: boolean) => !prev)}
+        variant="outline"
+        className="mb-4 md:hidden"
+      >
+        {showMap ? "Show Photos" : "Show Map"}
+        <span>{showMap ? <FaRegImages /> : <MapIcon />}</span>
+      </Button>
       <section className="flex flex-col gap-10 md:flex-row md:gap-28">
         <div className="h-96 w-full md:w-2/4">
-          <Sliders
-            imageSlides={place.photos.map((photo: { url: string }) => ({
-              imageUrl: photo.url,
-            }))}
-          />
+          {showMap ? (
+            <aside className="md:hidden">
+              <MapboxView
+                places={placesOnMap}
+                initialViewState={initialViewMap}
+                onPlaceClick={() => {}}
+                height="50vh"
+              />
+            </aside>
+          ) : (
+            <Sliders
+              imageSlides={place.photos.map((photo: { url: string }) => ({
+                imageUrl: photo.url,
+              }))}
+            />
+          )}
         </div>
         <header className="w-full md:w-2/5">
-          <div className="flex flex-col justify-between md:flex-row">
+          <div className="flex flex-row justify-between">
             <h1 className="text-2xl font-semibold text-amber-900 md:text-3xl">
               {place.name}
             </h1>
@@ -154,7 +178,7 @@ export default function PlaceSlug() {
               {formatPriceRange(place.priceRangeMin, place.priceRangeMax)}
             </p>
           </span>
-          <p className="mt-16 text-base font-semibold text-lime-600">
+          <p className="mt-7 text-base font-semibold text-amber-950 md:mt-16">
             Operational Time
           </p>
           <div className="mt-2">
@@ -166,8 +190,8 @@ export default function PlaceSlug() {
         </header>
       </section>
 
-      <section className="mt-20 flex flex-col gap-10 md:flex-row md:gap-28">
-        <aside className="h-96 w-full md:w-1/2">
+      <section className="mt-7 flex flex-col gap-10 md:mt-20 md:flex-row md:gap-28">
+        <aside className="hidden h-96 w-full md:block md:w-1/2">
           <MapboxView
             places={placesOnMap}
             initialViewState={initialViewMap}
@@ -176,14 +200,35 @@ export default function PlaceSlug() {
           />
         </aside>
 
-        <div className="flex flex-col">
-          <h1 className="mb-9 mt-2 text-xl font-semibold text-amber-950 md:text-2xl">
-            Facility
-          </h1>
-          {place.placeFacilities?.length > 0 &&
-            place.placeFacilities.map((facility, index) => (
-              <Facility facility={facility} key={index} />
-            ))}
+        <div className="flex flex-col gap-4">
+          <div className="flex flex-col">
+            <h1 className="mb-4 mt-2 text-base font-semibold text-amber-950 md:text-lg">
+              Facility
+            </h1>
+            {place.placeFacilities?.length > 0 &&
+              place.placeFacilities.map((facility, index) => (
+                <Facility facility={facility} key={index} />
+              ))}
+          </div>
+          <section>
+            <h1 className="mb-4 mt-2 text-base font-semibold text-amber-950 md:text-lg">
+              Submitter
+            </h1>
+            <div className="flex flex-row items-center gap-4">
+              <Avatar>
+                <AvatarImage
+                  src={place.submitter.avatarUrl}
+                  alt={place.submitter.username}
+                />
+                <AvatarFallback>
+                  {place.submitter.name.charAt(0).toUpperCase()}
+                </AvatarFallback>
+              </Avatar>
+              <p className="md:text-md text-sm font-medium text-amber-950">
+                {place.submitter.name}
+              </p>
+            </div>
+          </section>
         </div>
       </section>
     </div>
