@@ -10,7 +10,7 @@ export function OperatingHourItem({
   operatingHour: OperatingHour;
 }) {
   return (
-    <div className="flex w-72 flex-row justify-between text-amber-950">
+    <div className="flex w-72 flex-row justify-between text-sm text-amber-950 md:text-base">
       <p>{operatingHour.day}</p>
       <div className="flex flex-row">
         <p>{formatTime(operatingHour.openingTime)}</p>
