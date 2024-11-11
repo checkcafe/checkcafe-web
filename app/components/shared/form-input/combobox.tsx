@@ -20,29 +20,6 @@ import {
 import { cn } from "~/lib/utils";
 import { City } from "~/types/model";
 
-// const frameworks = [
-//   {
-//     value: "next.js",
-//     label: "Next.js",
-//   },
-//   {
-//     value: "sveltekit",
-//     label: "SvelteKit",
-//   },
-//   {
-//     value: "nuxt.js",
-//     label: "Nuxt.js",
-//   },
-//   {
-//     value: "remix",
-//     label: "Remix",
-//   },
-//   {
-//     value: "astro",
-//     label: "Astro",
-//   },
-// ];
-
 type ComboboxProps = {
   cities: City[];
   setCityId: (value: string) => void;
