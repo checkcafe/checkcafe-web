@@ -65,6 +65,10 @@ export function Navbar({ user }: { user: AuthUser }) {
     });
   };
 
+  const getCapitalization = (val: string) => {
+    return val.charAt(0).toUpperCase() + val.slice(1);
+  };
+
   return (
     <nav className="sticky top-0 z-50 flex w-full items-center justify-between bg-amber-50 p-4 md:p-8">
       <Link to="/" className="flex items-center">
@@ -124,17 +128,25 @@ export function Navbar({ user }: { user: AuthUser }) {
             }
           >
             <PopoverTrigger asChild>
-              <button
-                className="flex cursor-pointer items-center justify-center rounded-full bg-primary p-0.5"
-                aria-label="Open user menu"
-              >
-                <Avatar>
-                  <AvatarImage src={user.avatarUrl} alt={user.name} />
-                  <AvatarFallback>
-                    {user.name.charAt(0).toUpperCase()}
-                  </AvatarFallback>
-                </Avatar>
-              </button>
+              <aside className="flex flex-row items-center gap-2">
+                <button
+                  className="flex cursor-pointer items-center justify-center rounded-full bg-primary p-0.5"
+                  aria-label="Open user menu"
+                >
+                  <Avatar>
+                    <AvatarImage src={user.avatarUrl} alt={user.name} />
+                    <AvatarFallback>
+                      {user.name.charAt(0).toUpperCase()}
+                    </AvatarFallback>
+                  </Avatar>
+                </button>
+                <p className="flex flex-row gap-1 font-normal">
+                  Hi,{" "}
+                  <p className="font-semibold">
+                    {getCapitalization(user.username)}
+                  </p>
+                </p>
+              </aside>
             </PopoverTrigger>
 
             <PopoverContent
