@@ -1,8 +1,8 @@
 export interface Filter {
   name?: string;
-  priceRangeMin?: number;
-  priceRangeMax?: number;
+  priceRangeMin?: { lte: string };
+  priceRangeMax?: { gte: string };
   "city.name"?: string;
-  "operatingHours.openingTime"?: { gte: string };
-  "operatingHours.closingTime"?: { lte: string };
+  openingTime?: { lte: string };
+  closingTime?: { gte: string };
 }

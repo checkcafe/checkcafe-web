@@ -2,11 +2,11 @@ import { z } from "zod";
 
 export const filterSchema = z
   .object({
-    priceFrom: z
+    priceRangeMin: z
       .number()
       .min(1, { message: "Price must be greater than 1" })
       .optional(),
-    priceTo: z
+    priceRangeMax: z
       .number()
       .min(1, { message: "Price must be greater than 1" })
       .optional(),
@@ -14,10 +14,14 @@ export const filterSchema = z
     closeTime: z.string().optional(),
   })
   .superRefine((data, ctx) => {
-    if (data.priceFrom && data.priceTo && data.priceTo < data.priceFrom) {
+    if (
+      data.priceRangeMin &&
+      data.priceRangeMax &&
+      data.priceRangeMax < data.priceRangeMin
+    ) {
       ctx.addIssue({
         code: "custom",
-        path: ["priceTo"],
+        path: ["priceRangeMax"],
         message:
           "The maximum price must be greater than or equal to the minimum price",
       });

@@ -32,7 +32,7 @@ type FeatureProperties = {
 export function MapboxView({
   places,
   hasCityParam,
-  initialViewState = places.length > 0 && hasCityParam
+  initialViewState = places.length > 0 && places[0] && hasCityParam
     ? {
         latitude: places[0].latitude,
         longitude: places[0].longitude,
@@ -87,8 +87,11 @@ export function MapboxView({
   useEffect(() => {
     if (mapRef.current) {
       mapRef.current.flyTo({
-        center: [places[0].longitude, places[0].latitude],
-        zoom: 11,
+        center:
+          (height && places[0]) || (hasCityParam && places[0])
+            ? [places[0].longitude, places[0].latitude]
+            : [110.127247, -2.966349],
+        zoom: height || hasCityParam ? 11 : 3,
         speed: 2,
       });
 
@@ -96,7 +99,7 @@ export function MapboxView({
         mapRef.current.resize();
       }
     }
-  }, [showMap, places]);
+  }, [showMap, places, hasCityParam, height]);
 
   const onClick = (event: MapMouseEvent) => {
     const features = event.features as GeoJSONFeature[];
@@ -141,7 +144,7 @@ export function MapboxView({
 
         // Zoom in to the clicked point
         map.flyTo({
-          center: [longitude, latitude],
+          center: [longitude ?? 110.127247, latitude ?? -2.966349],
           zoom: 16,
           speed: 2,
         });
@@ -173,7 +176,7 @@ export function MapboxView({
 
   const onMouseEnter = (event: MapMouseEvent) => {
     const features = event.features as GeoJSONFeature[];
-    if (features.length) {
+    if (features.length && features[0]) {
       const feature = features[0];
       const featureProperties = feature.properties as FeatureProperties;
 

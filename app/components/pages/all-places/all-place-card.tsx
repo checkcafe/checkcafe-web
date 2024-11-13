@@ -82,7 +82,7 @@ const AllPlaceCard = forwardRef<HTMLDivElement, PlaceCardProps>(
           <CardContent className="items-end p-0">
             <span className="mb-2 flex items-center gap-2 font-bold">
               <FaDollarSign className="h-3 w-3 md:h-4 md:w-4" />
-              <p className="text-xs md:text-sm">{`${place.currency} ${formatPrice(parseInt(place.priceRangeMin))}`}</p>
+              <p className="text-xs md:text-sm">{`${place.currency} ${formatPrice(parseInt(place.priceRangeMin))} - ${formatPrice(parseInt(place.priceRangeMax))} `}</p>
             </span>
             <span className="mb-2 flex items-center gap-2 font-bold">
               <Clock3 className="h-3 w-3 md:h-4 md:w-4" />
