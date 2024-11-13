@@ -295,7 +295,9 @@ export async function action({ request, params }: ActionFunctionArgs) {
 
   if (!action) {
     const submission = parse(formData, { schema: EditPlaceSchema });
-    console.log({ submission });
+    console.dir({ submission }, { depth: null });
+    const placePhotosData = JSON.parse(String(submission.value?.placePhotos));
+    console.dir({ placePhotosData }, { depth: null });
 
     // Send the submission back to the client if the status is not successful
     if (submission.intent !== "submit" || !submission.value) {
@@ -315,7 +317,7 @@ export async function action({ request, params }: ActionFunctionArgs) {
       throw new Response(null, { status: 404, statusText: "Place Not Found" });
     }
 
-    console.log({ place });
+    console.dir({ place }, { depth: null });
   } else if (action === "delete") {
     const responseDelete = await fetch(`${BACKEND_API_URL}/places/${placeId}`, {
       method: "DELETE",
