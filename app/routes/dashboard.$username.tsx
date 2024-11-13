@@ -2,6 +2,7 @@ import { LoaderFunctionArgs, MetaFunction } from "@remix-run/node";
 import { json, Link, useLoaderData } from "@remix-run/react";
 
 import { Avatar, AvatarFallback, AvatarImage } from "~/components/ui/avatar";
+import { Button } from "~/components/ui/button";
 import { BACKEND_API_URL } from "~/lib/env";
 import { getPageTitle } from "~/lib/get-page-title";
 import { getAccessToken } from "~/lib/token";
@@ -91,12 +92,12 @@ export default function Profile() {
           <UserPlacesList places={user.places as UserPlaces} />
         </section>
 
-        <section className="space-y-2">
+        {/* <section className="space-y-2">
           <h2 className="text-xl font-bold">Favorited Places</h2>
           <UserPlaceFavoritesList
             placeFavorites={user.placeFavorites as UserPlaceFavorites}
           />
-        </section>
+        </section> */}
       </main>
     </div>
   );
@@ -127,6 +128,11 @@ export function UserPlacesList({ places }: { places: UserPlaces }) {
             <p className="text-gray-600">
               {place.description || "No description available."}
             </p>
+          </div>
+          <div className="p-4">
+            <Button asChild>
+              <Link to={`/places/${place.id}/edit`}>Edit</Link>
+            </Button>
           </div>
         </Link>
       ))}

@@ -142,12 +142,12 @@ export function Navbar({ user }: { user: AuthUser }) {
                     </AvatarFallback>
                   </Avatar>
                 </button>
-                <p className="flex flex-row gap-1 font-normal">
+                <span className="flex flex-row gap-1 font-normal">
                   Hi,{" "}
                   <p className="font-semibold">
                     {getCapitalization(user.username)}
                   </p>
-                </p>
+                </span>
               </aside>
             </PopoverTrigger>
 
@@ -165,7 +165,7 @@ export function Navbar({ user }: { user: AuthUser }) {
                   <FaUser size={14} /> Profile
                 </Link>
                 <Link
-                  to={`/${user.username}/dashboard`}
+                  to={`/dashboard/${user.username}`}
                   className="flex items-center gap-2 p-2 text-primary transition-colors duration-200 hover:rounded hover:bg-primary hover:text-white"
                   onClick={closeAllMenus}
                 >
