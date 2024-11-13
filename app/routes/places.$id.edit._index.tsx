@@ -120,7 +120,9 @@ export default function EditPlace() {
             <Form method="post" id="change-status-publish">
               <input type="hidden" name="action" value="isPublish" />
               <input type="hidden" name="placeId" value={place.id} />
-              <Button type="submit">Publish</Button>
+              <Button type="submit">
+                {place?.isPublished ? "Unpublish" : "Publish"}
+              </Button>
             </Form>
           </div>
         </section>
@@ -313,17 +315,22 @@ export async function action({ request, params }: ActionFunctionArgs) {
     }
     return redirect("/");
   } else if (action === "isPublish") {
-    const responseDelete = await fetch(`${BACKEND_API_URL}/places/${id}`, {
-      method: "PATCH",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${accessToken}`,
+    const responseDelete = await fetch(
+      `${BACKEND_API_URL}/places/${id}/isPublished`,
+      {
+        method: "PATCH",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${accessToken}`,
+        },
       },
-    });
+    );
     const result: { message: string } = await responseDelete.json();
-    console.log(result);
     if (!result) {
-      throw new Response(null, { status: 404, statusText: "Place Not Found" });
+      throw new Response(null, {
+        status: 404,
+        statusText: "Chage Status Failed",
+      });
     }
     return redirect("/");
   }

@@ -53,6 +53,7 @@ export type Place = {
   operatingHours: OperatingHour[];
   placeFacilities: PlaceFacility[];
   cityId: string;
+  isPublished: boolean;
   photos: {
     url: string;
     order: number;
