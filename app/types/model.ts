@@ -77,3 +77,17 @@ export type FavoritePlacesResponse = {
   avatarUrl: string;
   placeFavorites: FavoritePlace[];
 };
+
+export type City = {
+  id: string;
+  name: string;
+  latitude: number | null;
+  longitude: number | null;
+  state: {
+    name: string;
+    country: {
+      name: string;
+      code: string;
+    };
+  };
+};
