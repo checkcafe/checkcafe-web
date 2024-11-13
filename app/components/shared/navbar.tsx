@@ -165,7 +165,7 @@ export function Navbar({ user }: { user: AuthUser }) {
                   <FaUser size={14} /> Profile
                 </Link>
                 <Link
-                  to={`/${user.username}/dashboard`}
+                  to={`/dashboard/${user.username}`}
                   className="flex items-center gap-2 p-2 text-primary transition-colors duration-200 hover:rounded hover:bg-primary hover:text-white"
                   onClick={closeAllMenus}
                 >
