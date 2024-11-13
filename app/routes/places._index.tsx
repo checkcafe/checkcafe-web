@@ -60,8 +60,8 @@ async function fetchPlaces(url: URL): Promise<PlaceItem[]> {
 
   const params: { [key: string]: (value: string) => void } = {
     q: value => (filter.name = value),
-    priceFrom: value => (filter["priceRangeMin"] = { lte: value }),
-    priceTo: value => (filter["priceRangeMax"] = { gte: value }),
+    priceFrom: value => (filter["priceRangeMin"] = { gte: value }),
+    priceTo: value => (filter["priceRangeMax"] = { lte: value }),
     city: value => (filter["city.name"] = value),
     openTime: value =>
       (filter["openingTime"] = { lte: formatFilterTime(value) }),
