@@ -6,11 +6,9 @@ import {
   LoaderFunctionArgs,
   redirect,
 } from "@remix-run/node";
-import { Form, useFetcher, useLoaderData } from "@remix-run/react";
-// import { json, LoaderFunctionArgs } from "@remix-run/node";
-// import { redirect, useActionData, useLoaderData } from "@remix-run/react";
+import { Form, useLoaderData } from "@remix-run/react";
 import { FileUploaderRegular } from "@uploadcare/react-uploader";
-import React, { useEffect } from "react";
+import React from "react";
 
 import "@uploadcare/react-uploader/core.css";
 
@@ -18,7 +16,7 @@ import {
   deleteFile,
   UploadcareSimpleAuthSchema,
 } from "@uploadcare/rest-client";
-import { Trash, TrashIcon } from "lucide-react";
+import { TrashIcon } from "lucide-react";
 import { useState } from "react";
 import { z } from "zod";
 
@@ -38,8 +36,6 @@ import { getAccessToken } from "~/lib/token";
 import { cn } from "~/lib/utils";
 import { City, Place } from "~/types/model";
 
-// import { paths } from "~/types/schema";
-
 React.useLayoutEffect = React.useEffect;
 
 const uploadcareSimpleAuthSchema = new UploadcareSimpleAuthSchema({
@@ -48,14 +44,12 @@ const uploadcareSimpleAuthSchema = new UploadcareSimpleAuthSchema({
 });
 
 const EditPlaceSchema = z.object({
-  // imageUrls: z.array(z.object({ url: z.string() })).optional(),
   placePhotos: z.string().min(1).optional(),
   name: z.string().min(4).max(255),
   streetAddress: z.string().min(4).max(100),
   cityId: z.string().min(4),
 });
-// type PlaceItem =
-//   paths["/places/{slugOrId}"]["get"]["responses"][200]["content"]["application/json"][""];
+
 export async function loader({ params }: LoaderFunctionArgs) {
   const { id } = params;
   if (!id) return redirect("/");
@@ -75,17 +69,12 @@ export async function loader({ params }: LoaderFunctionArgs) {
 }
 
 export default function EditPlace() {
-  // console.log(imageUrls, "imageUrls");
-  const fetcher = useFetcher();
   const { place, city } = useLoaderData<typeof loader>();
-  // const actionData = useActionData<ActionData>();
+  const [cityId, setCityId] = useState(place.cityId);
+
   const [imageUrls, setImageUrls] = useState<{ url: string }[]>(place.photos);
   const [form, fields] = useForm({
-    // Configure when each field should be validated
     shouldValidate: "onBlur",
-    // Optional: Required only if you're validating on the server
-    // actionData.def,
-    // Optional: Client validation. Fallback to server validation if not provided
     onValidate({ formData }) {
       return parse(formData, { schema: EditPlaceSchema });
     },
@@ -95,8 +84,6 @@ export default function EditPlace() {
       streetAddress: place.address.street,
     },
   });
-
-  const [cityId, setCityId] = React.useState(place.cityId);
 
   function handleSetImageUrls(data: string[]) {
     data.forEach(url => setImageUrls(imageUrls => [...imageUrls, { url }]));
@@ -112,13 +99,6 @@ export default function EditPlace() {
   async function deleteFiles(uuid: string) {
     await deleteFile({ uuid }, { authSchema: uploadcareSimpleAuthSchema });
   }
-
-  // useEffect(() => {
-  //   console.log(imageUrls, "imageUrls");
-  // }, [imageUrls]);
-  // useEffect(() => {
-  //   console.log(place, "place");
-  // }, [place]);
 
   return (
     <div className="flex justify-center">
@@ -182,14 +162,10 @@ export default function EditPlace() {
                 if (e.successEntries.length > 0) {
                   const data = e.successEntries;
                   const urlData = data.map(item => item.cdnUrl);
-                  // console.log(urlData, "urlData");
                   handleSetImageUrls(urlData);
                 }
               }}
               onFileRemoved={e => {
-                // console.log(e, "remove");
-
-                // Call action to delete file
                 if (e.uuid) deleteFiles(e.uuid);
                 if (e.isRemoved && e.cdnUrl) {
                   handleDeleteImageUrls(e.cdnUrl);
@@ -288,7 +264,6 @@ export async function action({ request, params }: ActionFunctionArgs) {
   if (!id) return redirect("/");
 
   const { accessToken } = await getAccessToken(request);
-  // http://localhost:5173/places/cm3fnje7d000ljng6xn3nnoyg/edit?index;
   const formData = await request.formData();
   const placeId = formData.get("placeId");
   const action = formData.get("action");
