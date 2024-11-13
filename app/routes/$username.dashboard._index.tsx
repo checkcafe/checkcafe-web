@@ -1,9 +1,10 @@
-import { MetaFunction } from "@remix-run/node";
+import { LoaderFunctionArgs, MetaFunction } from "@remix-run/node";
 import { json, Link, useLoaderData } from "@remix-run/react";
 
 import { Avatar, AvatarFallback, AvatarImage } from "~/components/ui/avatar";
 import { BACKEND_API_URL } from "~/lib/env";
 import { getPageTitle } from "~/lib/get-page-title";
+import { getAccessToken } from "~/lib/token";
 import { paths } from "~/types/schema";
 
 export const meta: MetaFunction<typeof loader> = ({ data }) => {
@@ -25,12 +26,23 @@ type UserPlaces =
 type UserPlaceFavorites =
   paths["/users/{username}"]["get"]["responses"][200]["content"]["application/json"]["placeFavorites"];
 
-export async function loader() {
+export async function loader({ params, request }: LoaderFunctionArgs) {
   // TODO: Get authenticated user
+  const { username } = params;
+  const { accessToken } = await getAccessToken(request);
 
   try {
     // TODO: Get private user profile with unpublished places
-    const response = await fetch(`${BACKEND_API_URL}/users/admin`);
+    const response = await fetch(
+      `${BACKEND_API_URL}/users/${username}/dashboard`,
+      {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${accessToken}`,
+        },
+      },
+    );
 
     if (!response.ok) {
       throw new Error("Failed to load user profile. Please try again later.");
