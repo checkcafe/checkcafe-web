@@ -24,6 +24,7 @@ import {
   FavoritePlacesResponse,
   PlaceItem,
 } from "~/types/model";
+import { formatFilterTime } from "~/utils/formatter";
 
 export const meta: MetaFunction = () => {
   return [
@@ -59,16 +60,18 @@ async function fetchPlaces(url: URL): Promise<PlaceItem[]> {
 
   const params: { [key: string]: (value: string) => void } = {
     q: value => (filter.name = value),
-    priceFrom: value => (filter.priceRangeMin = Number(value)),
-    priceTo: value => (filter.priceRangeMax = Number(value)),
+    priceFrom: value => (filter["priceRangeMin"] = { lte: value }),
+    priceTo: value => (filter["priceRangeMax"] = { gte: value }),
     city: value => (filter["city.name"] = value),
-    openTime: value => (filter["operatingHours.openingTime"] = { gte: value }),
-    closeTime: value => (filter["operatingHours.closingTime"] = { lte: value }),
+    openTime: value =>
+      (filter["openingTime"] = { lte: formatFilterTime(value) }),
+    closeTime: value =>
+      (filter["closingTime"] = { gte: formatFilterTime(value) }),
   };
 
   Object.keys(params).forEach(param => {
     const value = url.searchParams.get(param);
-    if (value) {
+    if (value && params[param]) {
       params[param](value);
     }
   });
@@ -149,18 +152,16 @@ export default function Places() {
               </ul>
             </main>
 
-            {(showMap || (hasCityParam && !showMap)) && (
-              <aside
-                className={`sticky top-0 ${showMap ? "" : "hidden"} h-full w-full md:flex md:w-2/3`}
-              >
-                <MapboxView
-                  places={places}
-                  onPlaceClick={handleScrollToCard}
-                  showMap={showMap}
-                  hasCityParam={hasCityParam}
-                />
-              </aside>
-            )}
+            <aside
+              className={`sticky top-0 ${showMap ? "" : "hidden"} h-full w-full md:flex md:w-2/3`}
+            >
+              <MapboxView
+                places={places}
+                onPlaceClick={handleScrollToCard}
+                showMap={showMap}
+                hasCityParam={hasCityParam}
+              />
+            </aside>
           </>
         )}
       </div>
