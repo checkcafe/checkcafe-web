@@ -42,13 +42,8 @@ export const formatPriceRange = (
   return formattedMin || formattedMax || "-";
 };
 
-export const formatFilterTime = (localTime: string): string => {
-  const localDate = new Date(`1970-01-01T${localTime}:00`);
+export const formatFilterTime = (inputTime: string) => {
+  const localDate = new Date(`1970-01-01T${inputTime}:00+08:00`);
 
-  const hoursUTC = localDate.getUTCHours();
-  const minutesUTC = localDate.getUTCMinutes();
-
-  const utcDate = new Date(Date.UTC(1970, 0, 1, hoursUTC, minutesUTC));
-
-  return utcDate.toISOString();
+  return localDate.toISOString();
 };
