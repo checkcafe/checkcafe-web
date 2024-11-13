@@ -6,11 +6,11 @@ import {
   LoaderFunctionArgs,
   redirect,
 } from "@remix-run/node";
-import { Form, useLoaderData } from "@remix-run/react";
+import { Form, useFetcher, useLoaderData } from "@remix-run/react";
 // import { json, LoaderFunctionArgs } from "@remix-run/node";
 // import { redirect, useActionData, useLoaderData } from "@remix-run/react";
 import { FileUploaderRegular } from "@uploadcare/react-uploader";
-import React from "react";
+import React, { useEffect } from "react";
 
 import "@uploadcare/react-uploader/core.css";
 
@@ -18,6 +18,7 @@ import {
   deleteFile,
   UploadcareSimpleAuthSchema,
 } from "@uploadcare/rest-client";
+import { Trash, TrashIcon } from "lucide-react";
 import { useState } from "react";
 import { z } from "zod";
 
@@ -37,6 +38,8 @@ import { getAccessToken } from "~/lib/token";
 import { cn } from "~/lib/utils";
 import { City, Place } from "~/types/model";
 
+// import { paths } from "~/types/schema";
+
 React.useLayoutEffect = React.useEffect;
 
 const uploadcareSimpleAuthSchema = new UploadcareSimpleAuthSchema({
@@ -45,12 +48,14 @@ const uploadcareSimpleAuthSchema = new UploadcareSimpleAuthSchema({
 });
 
 const EditPlaceSchema = z.object({
-  imageUrls: z.array(z.object({ url: z.string() })).optional(),
+  // imageUrls: z.array(z.object({ url: z.string() })).optional(),
+  placePhotos: z.string().min(1).optional(),
   name: z.string().min(4).max(255),
-  streetAddress: z.string().min(4).max(100).optional(),
-  cityId: z.string().min(4).optional(),
+  streetAddress: z.string().min(4).max(100),
+  cityId: z.string().min(4),
 });
-
+// type PlaceItem =
+//   paths["/places/{slugOrId}"]["get"]["responses"][200]["content"]["application/json"][""];
 export async function loader({ params }: LoaderFunctionArgs) {
   const { id } = params;
   if (!id) return redirect("/");
@@ -71,10 +76,10 @@ export async function loader({ params }: LoaderFunctionArgs) {
 
 export default function EditPlace() {
   // console.log(imageUrls, "imageUrls");
-
+  const fetcher = useFetcher();
   const { place, city } = useLoaderData<typeof loader>();
   // const actionData = useActionData<ActionData>();
-  const [imageUrls, setImageUrls] = useState<{ url: string }[]>([]);
+  const [imageUrls, setImageUrls] = useState<{ url: string }[]>(place.photos);
   const [form, fields] = useForm({
     // Configure when each field should be validated
     shouldValidate: "onBlur",
@@ -90,9 +95,9 @@ export default function EditPlace() {
       streetAddress: place.address.street,
     },
   });
-  const [cityId, setCityId] = React.useState(place.address.city);
 
-  console.log(cityId, "cities");
+  const [cityId, setCityId] = React.useState(place.cityId);
+
   function handleSetImageUrls(data: string[]) {
     data.forEach(url => setImageUrls(imageUrls => [...imageUrls, { url }]));
   }
@@ -108,9 +113,37 @@ export default function EditPlace() {
     await deleteFile({ uuid }, { authSchema: uploadcareSimpleAuthSchema });
   }
 
+  // useEffect(() => {
+  //   console.log(imageUrls, "imageUrls");
+  // }, [imageUrls]);
+  // useEffect(() => {
+  //   console.log(place, "place");
+  // }, [place]);
+
   return (
     <div className="flex justify-center">
       <div className="w-full max-w-3xl space-y-8 px-4 py-20">
+        <section className="container-button flex justify-between">
+          <div className="container-action-button">
+            <Form method="post" id="user-delete-place-by-id">
+              <input type="hidden" name="action" value="delete" />
+              <input type="hidden" name="placeId" value={place.id} />
+              <Button variant={"destructive"} type="submit">
+                <span className="flex items-center gap-2">
+                  <TrashIcon />
+                  <p>Delete</p>
+                </span>
+              </Button>
+            </Form>
+          </div>
+          <div className="container-publish-button">
+            <Form method="post" id="change-status-publish">
+              <input type="hidden" name="action" value="isPublish" />
+              <input type="hidden" name="placeId" value={place.id} />
+              <Button type="submit">Publish</Button>
+            </Form>
+          </div>
+        </section>
         <Form method="post" className="space-y-4" {...form.props}>
           <h1 className="text-2xl font-bold">Edit Place</h1>
 
@@ -124,10 +157,10 @@ export default function EditPlace() {
           )}
 
           <input
-            // {...fields.imageUrls}
-            name={fields.imageUrls.name}
+            name={fields.placePhotos.name}
             hidden
-            // value={JSON.stringify(imageUrls || undefined)}
+            value={JSON.stringify(imageUrls) || "[]"}
+            readOnly
           />
 
           <div>
@@ -139,6 +172,12 @@ export default function EditPlace() {
               multiple={true}
               accept="image/png,image/jpeg"
               confirmUpload={true}
+              onFileUploadFailed={e => {
+                console.log(e, "failed");
+              }}
+              onFileUploadSuccess={e => {
+                console.log(e, "success");
+              }}
               onDoneClick={e => {
                 if (e.successEntries.length > 0) {
                   const data = e.successEntries;
@@ -218,13 +257,7 @@ export default function EditPlace() {
               value={cityId}
             />
             <Combobox cities={city} setCityId={setCityId} cityId={cityId} />
-            {/* <Input
-              {...fields.cityId}
-              type="text"
-              id="cityId"
-              placeholder="Enter your cityId or email"
-              className={`mt-1 rounded-md border p-2 ${fields.cityId.errors ? "border-red-500" : "border-gray-300"}`}
-            /> */}
+
             {fields.cityId.errors && (
               <p className="mt-1 text-sm text-red-700">
                 {fields.cityId.errors}
@@ -255,30 +288,63 @@ export async function action({ request, params }: ActionFunctionArgs) {
   if (!id) return redirect("/");
 
   const { accessToken } = await getAccessToken(request);
-
+  // http://localhost:5173/places/cm3fnje7d000ljng6xn3nnoyg/edit?index;
   const formData = await request.formData();
-  const submission = parse(formData, { schema: EditPlaceSchema });
-  console.log({ submission });
+  const placeId = formData.get("placeId");
+  const action = formData.get("action");
 
-  // Send the submission back to the client if the status is not successful
-  if (submission.intent !== "submit" || !submission.value) {
-    return json(submission);
+  if (!action) {
+    const submission = parse(formData, { schema: EditPlaceSchema });
+    console.log({ submission });
+
+    // Send the submission back to the client if the status is not successful
+    if (submission.intent !== "submit" || !submission.value) {
+      return json(submission);
+    }
+
+    const responsePlace = await fetch(`${BACKEND_API_URL}/places/${id}`, {
+      method: "PATCH",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${accessToken}`,
+      },
+      body: JSON.stringify(submission.value),
+    });
+    const place: Place = await responsePlace.json();
+    if (!place) {
+      throw new Response(null, { status: 404, statusText: "Place Not Found" });
+    }
+
+    console.log({ place });
+  } else if (action === "delete") {
+    const responseDelete = await fetch(`${BACKEND_API_URL}/places/${placeId}`, {
+      method: "DELETE",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${accessToken}`,
+      },
+    });
+    const result: { message: string } = await responseDelete.json();
+    console.log(result);
+    if (!result) {
+      throw new Response(null, { status: 404, statusText: "Place Not Found" });
+    }
+    return redirect("/");
+  } else if (action === "isPublish") {
+    const responseDelete = await fetch(`${BACKEND_API_URL}/places/${id}`, {
+      method: "PATCH",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${accessToken}`,
+      },
+    });
+    const result: { message: string } = await responseDelete.json();
+    console.log(result);
+    if (!result) {
+      throw new Response(null, { status: 404, statusText: "Place Not Found" });
+    }
+    return redirect("/");
   }
-
-  const responsePlace = await fetch(`${BACKEND_API_URL}/places/${id}`, {
-    method: "PATCH",
-    headers: {
-      "Content-Type": "application/json",
-      Authorization: `Bearer ${accessToken}`,
-    },
-    body: JSON.stringify(submission.value),
-  });
-  const place: Place = await responsePlace.json();
-  if (!place) {
-    throw new Response(null, { status: 404, statusText: "Place Not Found" });
-  }
-
-  console.log({ place });
 
   return null;
 }
