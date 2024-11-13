@@ -169,7 +169,7 @@ export function Navbar({ user }: { user: AuthUser }) {
                   className="flex items-center gap-2 p-2 text-primary transition-colors duration-200 hover:rounded hover:bg-primary hover:text-white"
                   onClick={closeAllMenus}
                 >
-                  <FaUser size={14} /> Dashboard
+                  Dashboard
                 </Link>
                 <Link
                   to="/places/new"
