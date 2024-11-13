@@ -10,7 +10,7 @@ import { Form, useLoaderData } from "@remix-run/react";
 // import { json, LoaderFunctionArgs } from "@remix-run/node";
 // import { redirect, useActionData, useLoaderData } from "@remix-run/react";
 import { FileUploaderRegular } from "@uploadcare/react-uploader";
-import React from "react";
+import React, { useEffect } from "react";
 
 import "@uploadcare/react-uploader/core.css";
 
@@ -37,6 +37,8 @@ import { getAccessToken } from "~/lib/token";
 import { cn } from "~/lib/utils";
 import { City, Place } from "~/types/model";
 
+// import { paths } from "~/types/schema";
+
 React.useLayoutEffect = React.useEffect;
 
 const uploadcareSimpleAuthSchema = new UploadcareSimpleAuthSchema({
@@ -45,12 +47,14 @@ const uploadcareSimpleAuthSchema = new UploadcareSimpleAuthSchema({
 });
 
 const EditPlaceSchema = z.object({
-  imageUrls: z.array(z.object({ url: z.string() })).optional(),
+  // imageUrls: z.array(z.object({ url: z.string() })).optional(),
+  placePhotos: z.string().min(1).optional(),
   name: z.string().min(4).max(255),
-  streetAddress: z.string().min(4).max(100).optional(),
-  cityId: z.string().min(4).optional(),
+  streetAddress: z.string().min(4).max(100),
+  cityId: z.string().min(4),
 });
-
+// type PlaceItem =
+//   paths["/places/{slugOrId}"]["get"]["responses"][200]["content"]["application/json"][""];
 export async function loader({ params }: LoaderFunctionArgs) {
   const { id } = params;
   if (!id) return redirect("/");
@@ -74,7 +78,7 @@ export default function EditPlace() {
 
   const { place, city } = useLoaderData<typeof loader>();
   // const actionData = useActionData<ActionData>();
-  const [imageUrls, setImageUrls] = useState<{ url: string }[]>([]);
+  const [imageUrls, setImageUrls] = useState<{ url: string }[]>(place.photos);
   const [form, fields] = useForm({
     // Configure when each field should be validated
     shouldValidate: "onBlur",
@@ -90,9 +94,9 @@ export default function EditPlace() {
       streetAddress: place.address.street,
     },
   });
-  const [cityId, setCityId] = React.useState(place.address.city);
 
-  console.log(cityId, "cities");
+  const [cityId, setCityId] = React.useState(place.cityId);
+
   function handleSetImageUrls(data: string[]) {
     data.forEach(url => setImageUrls(imageUrls => [...imageUrls, { url }]));
   }
@@ -107,6 +111,13 @@ export default function EditPlace() {
   async function deleteFiles(uuid: string) {
     await deleteFile({ uuid }, { authSchema: uploadcareSimpleAuthSchema });
   }
+
+  // useEffect(() => {
+  //   console.log(imageUrls, "imageUrls");
+  // }, [imageUrls]);
+  // useEffect(() => {
+  //   console.log(place, "place");
+  // }, [place]);
 
   return (
     <div className="flex justify-center">
@@ -124,10 +135,10 @@ export default function EditPlace() {
           )}
 
           <input
-            // {...fields.imageUrls}
-            name={fields.imageUrls.name}
+            name={fields.placePhotos.name}
             hidden
-            // value={JSON.stringify(imageUrls || undefined)}
+            value={JSON.stringify(imageUrls) || "[]"}
+            readOnly
           />
 
           <div>
@@ -139,6 +150,12 @@ export default function EditPlace() {
               multiple={true}
               accept="image/png,image/jpeg"
               confirmUpload={true}
+              onFileUploadFailed={e => {
+                console.log(e, "failed");
+              }}
+              onFileUploadSuccess={e => {
+                console.log(e, "success");
+              }}
               onDoneClick={e => {
                 if (e.successEntries.length > 0) {
                   const data = e.successEntries;
@@ -218,13 +235,7 @@ export default function EditPlace() {
               value={cityId}
             />
             <Combobox cities={city} setCityId={setCityId} cityId={cityId} />
-            {/* <Input
-              {...fields.cityId}
-              type="text"
-              id="cityId"
-              placeholder="Enter your cityId or email"
-              className={`mt-1 rounded-md border p-2 ${fields.cityId.errors ? "border-red-500" : "border-gray-300"}`}
-            /> */}
+
             {fields.cityId.errors && (
               <p className="mt-1 text-sm text-red-700">
                 {fields.cityId.errors}
