@@ -108,9 +108,11 @@ export function Navbar({ user }: { user: AuthUser }) {
       {/* Links for desktop */}
       <div className="hidden items-center gap-8 text-base font-semibold md:flex">
         {user && user.name ? (
-          <Link to="/places/new" className="text-primary">
-            New Place
-          </Link>
+          <Button asChild>
+            <Link to="/places/new" className="text-primary">
+              <FaPlus size={14} /> New Place
+            </Link>
+          </Button>
         ) : null}
 
         <Link to="/places" className="text-primary">
