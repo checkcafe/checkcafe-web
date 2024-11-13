@@ -142,12 +142,12 @@ export function Navbar({ user }: { user: AuthUser }) {
                     </AvatarFallback>
                   </Avatar>
                 </button>
-                <p className="flex flex-row gap-1 font-normal">
+                <span className="flex flex-row gap-1 font-normal">
                   Hi,{" "}
                   <p className="font-semibold">
                     {getCapitalization(user.username)}
                   </p>
-                </p>
+                </span>
               </aside>
             </PopoverTrigger>
 
