@@ -27,7 +27,10 @@ type ComboboxProps = {
 };
 export function Combobox({ cities, setCityId, cityId }: ComboboxProps) {
   const [open, setOpen] = React.useState(false);
-
+  function getIdByName(name: string) {
+    const city = cities.find(city => city.name === name);
+    return city ? city.id : "";
+  }
   return (
     <Popover open={open} onOpenChange={setOpen}>
       <PopoverTrigger asChild>
@@ -52,9 +55,13 @@ export function Combobox({ cities, setCityId, cityId }: ComboboxProps) {
               {cities.map(city => (
                 <CommandItem
                   key={city.id}
-                  value={city.id}
+                  value={city.name}
                   onSelect={currentValue => {
-                    setCityId(currentValue === cityId ? "" : currentValue);
+                    setCityId(
+                      currentValue === city.name
+                        ? getIdByName(currentValue)
+                        : "",
+                    );
                     setOpen(false);
                   }}
                 >
