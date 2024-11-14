@@ -46,7 +46,11 @@ const uploadcareSimpleAuthSchema = new UploadcareSimpleAuthSchema({
 const EditPlaceSchema = z.object({
   placePhotos: z.string().min(1).optional(),
   name: z.string().min(4).max(255),
+  description: z.string().min(4).max(255).optional(),
   streetAddress: z.string().min(4).max(100),
+  wifiSpeedAvg: z.number().min(1).optional(),
+  priceRangeMin: z.number().min(1).optional(),
+  priceRangeMax: z.number().min(1).optional(),
   cityId: z.string().min(4),
 });
 
@@ -191,6 +195,46 @@ export default function EditPlace() {
             />
             {fields.name.errors && (
               <p className="mt-1 text-sm text-red-700">{fields.name.errors}</p>
+            )}
+          </div>
+          <div>
+            <Label
+              htmlFor="description"
+              className="block text-sm font-medium text-gray-700"
+            >
+              Description
+            </Label>
+            <Input
+              {...fields.description}
+              type="text"
+              id="description"
+              placeholder="Description of the place"
+              className={`mt-1 rounded-md border p-2 ${fields.description.errors ? "border-red-500" : "border-gray-300"}`}
+            />
+            {fields.description.errors && (
+              <p className="mt-1 text-sm text-red-700">
+                {fields.description.errors}
+              </p>
+            )}
+          </div>
+          <div>
+            <Label
+              htmlFor="wifiSpeedAvg"
+              className="block text-sm font-medium text-gray-700"
+            >
+              WiFi Speed Avg (Mbps)
+            </Label>
+            <Input
+              {...fields.description}
+              type="number"
+              id="wifiSpeedAvg"
+              placeholder="average speed of wifi connection"
+              className={`mt-1 rounded-md border p-2 ${fields.description.errors ? "border-red-500" : "border-gray-300"}`}
+            />
+            {fields.description.errors && (
+              <p className="mt-1 text-sm text-red-700">
+                {fields.description.errors}
+              </p>
             )}
           </div>
 
