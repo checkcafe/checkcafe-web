@@ -10,6 +10,7 @@ export type Address = {
   state: string;
   country: string;
   countryCode: string;
+  cityId: string;
 };
 
 export type User = {
