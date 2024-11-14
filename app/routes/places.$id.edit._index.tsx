@@ -70,7 +70,7 @@ export async function loader({ params }: LoaderFunctionArgs) {
 
 export default function EditPlace() {
   const { place, city } = useLoaderData<typeof loader>();
-  const [cityId, setCityId] = useState(place.cityId);
+  const [cityId, setCityId] = useState(place.address.cityId);
 
   const [imageUrls, setImageUrls] = useState<{ url: string }[]>(place.photos);
   const [form, fields] = useForm({
@@ -99,15 +99,14 @@ export default function EditPlace() {
   async function deleteFiles(uuid: string) {
     await deleteFile({ uuid }, { authSchema: uploadcareSimpleAuthSchema });
   }
-
   return (
     <div className="flex justify-center">
       <div className="w-full max-w-3xl space-y-8 px-4 py-20">
         <section className="container-button flex justify-between">
           <div className="container-action-button">
             <Form method="post" id="user-delete-place-by-id">
-              <input type="hidden" name="action" value="delete" />
-              <input type="hidden" name="placeId" value={place.id} />
+              <input type="hidden" name="action" value="delete" readOnly />
+              <input type="hidden" name="placeId" value={place.id} readOnly />
               <Button variant={"destructive"} type="submit">
                 <span className="flex items-center gap-2">
                   <TrashIcon />
