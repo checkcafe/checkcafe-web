@@ -130,25 +130,29 @@ export function Navbar({ user }: { user: AuthUser }) {
             }
           >
             <PopoverTrigger asChild>
-              <aside className="flex flex-row items-center gap-2">
-                <button
-                  className="flex cursor-pointer items-center justify-center rounded-full bg-primary p-0.5"
-                  aria-label="Open user menu"
-                >
-                  <Avatar>
-                    <AvatarImage src={user.avatarUrl} alt={user.name} />
+              <button
+                className="flex cursor-pointer items-center justify-center"
+                aria-label="Open user menu"
+              >
+                <aside className="flex flex-row items-center gap-2">
+                  <Avatar className="rounded-full bg-primary p-0.5">
+                    <AvatarImage
+                      className="rounded-full"
+                      src={user.avatarUrl}
+                      alt={user.name}
+                    />
                     <AvatarFallback>
                       {user.name.charAt(0).toUpperCase()}
                     </AvatarFallback>
                   </Avatar>
-                </button>
-                <span className="flex flex-row gap-1 font-normal">
-                  Hi,{" "}
-                  <p className="font-semibold">
-                    {getCapitalization(user.username)}
-                  </p>
-                </span>
-              </aside>
+                  <span className="flex flex-row gap-1 font-normal">
+                    Hi,{" "}
+                    <p className="font-semibold">
+                      {getCapitalization(user.username)}
+                    </p>
+                  </span>
+                </aside>
+              </button>
             </PopoverTrigger>
 
             <PopoverContent
