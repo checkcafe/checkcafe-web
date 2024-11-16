@@ -38,12 +38,15 @@ export function SelectCity() {
         <SelectTrigger className="rounded-none border-0 border-l border-gray-300 bg-white text-gray-700">
           <SelectValue placeholder="Choose location" />
         </SelectTrigger>
-        <SelectContent>
+        <SelectContent className="max-h-32 overflow-y-auto">
           <SelectGroup>
             <SelectItem value="none" className="hidden"></SelectItem>
             <SelectItem value="jakarta">Jakarta</SelectItem>
             <SelectItem value="bandung">Bandung</SelectItem>
             <SelectItem value="pontianak">Pontianak</SelectItem>
+            <SelectItem value="pontianak">Kuala Lumpur</SelectItem>
+            <SelectItem value="pontianak">Singapore</SelectItem>
+            <SelectItem value="pontianak">Denpasar</SelectItem>
           </SelectGroup>
         </SelectContent>
       </Select>
