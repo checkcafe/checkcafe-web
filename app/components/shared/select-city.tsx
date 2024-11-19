@@ -44,9 +44,9 @@ export function SelectCity() {
             <SelectItem value="jakarta">Jakarta</SelectItem>
             <SelectItem value="bandung">Bandung</SelectItem>
             <SelectItem value="pontianak">Pontianak</SelectItem>
-            <SelectItem value="pontianak">Kuala Lumpur</SelectItem>
-            <SelectItem value="pontianak">Singapore</SelectItem>
-            <SelectItem value="pontianak">Denpasar</SelectItem>
+            <SelectItem value="kualaLumpur">Kuala Lumpur</SelectItem>
+            <SelectItem value="Singapore">Singapore</SelectItem>
+            <SelectItem value="Denpasar">Denpasar</SelectItem>
           </SelectGroup>
         </SelectContent>
       </Select>
