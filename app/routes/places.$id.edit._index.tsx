@@ -91,7 +91,7 @@ export default function EditPlace() {
       return parse(formData, { schema: EditPlaceSchema });
     },
     defaultValue: {
-      imageUrls: [{ url: "https://example.com" }],
+      imageUrls: place.photos,
       name: place.name,
       streetAddress: place.address.street,
       description: place.description,
