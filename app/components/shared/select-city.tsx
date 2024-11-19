@@ -32,6 +32,34 @@ export function SelectCity() {
     handleValueChange("");
   };
 
+  const cities = [
+    {
+      id: 1,
+      value: "Jakarta",
+    },
+    {
+      id: 2,
+      value: "Bandung",
+    },
+    {
+      id: 3,
+      value: "Pontianak",
+    },
+    {
+      id: 4,
+      value: "Kuala Lumpur",
+    },
+    {
+      id: 5,
+      value: "Singapore",
+    },
+    {
+      id: 6,
+      value: "Denpasar",
+    },
+  ];
+  const sortedCities = cities.sort((a, b) => a.value.localeCompare(b.value));
+
   return (
     <div className="flex h-full w-full items-center px-1">
       <Select value={value} onValueChange={handleValueChange} name="city">
@@ -41,12 +69,11 @@ export function SelectCity() {
         <SelectContent className="max-h-32 overflow-y-auto">
           <SelectGroup>
             <SelectItem value="none" className="hidden"></SelectItem>
-            <SelectItem value="jakarta">Jakarta</SelectItem>
-            <SelectItem value="bandung">Bandung</SelectItem>
-            <SelectItem value="pontianak">Pontianak</SelectItem>
-            <SelectItem value="pontianak">Kuala Lumpur</SelectItem>
-            <SelectItem value="pontianak">Singapore</SelectItem>
-            <SelectItem value="pontianak">Denpasar</SelectItem>
+            {sortedCities.map(item => (
+              <SelectItem key={item.id} value={item.value}>
+                {item.value}
+              </SelectItem>
+            ))}
           </SelectGroup>
         </SelectContent>
       </Select>

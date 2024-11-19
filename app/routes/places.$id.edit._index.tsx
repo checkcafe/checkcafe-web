@@ -63,7 +63,11 @@ export async function loader({ params }: LoaderFunctionArgs) {
   if (!place) {
     throw new Response(null, { status: 404, statusText: "Place Not Found" });
   }
-  const responseCity = await fetch(`${BACKEND_API_URL}/geo/cities`);
+
+  const responseCity = await fetch(
+    `${BACKEND_API_URL}/geo/cities?sort={ "name": "asc" }`,
+  );
+
   const city: City[] = await responseCity.json();
   if (!city) {
     throw new Response(null, { status: 404, statusText: "City Not Found" });
