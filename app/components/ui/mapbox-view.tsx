@@ -4,6 +4,7 @@ import { useEffect, useRef, useState } from "react";
 import {
   Layer,
   Map,
+  NavigationControl,
   Popup,
   Source,
   type GeoJSONSource,
@@ -116,22 +117,18 @@ export function MapboxView({
     if (feature.layer.id === clusterLayer.id) {
       const clusterId = feature.id as number;
 
-      const source = map.getSource("places-source") as GeoJSONSource;
+      // Get the source and fetch the expansion zoom level for the cluster
+      const source = mapRef.current.getSource("places-source") as GeoJSONSource;
 
-      source.getClusterExpansionZoom(clusterId, err => {
-        if (err) return;
+      source.getClusterExpansionZoom(clusterId, (err, zoom) => {
+        if (err || !mapRef.current) return;
 
         if (feature.geometry.type === "Point") {
-          const [longitude, latitude] = feature.geometry.coordinates as [
-            number,
-            number,
-          ];
-
-          // Fly to the cluster with expanded zoom
-          map.flyTo({
-            center: [longitude, latitude],
-            zoom: 15,
-            speed: 2,
+          const coordinates = feature.geometry.coordinates as [number, number];
+          mapRef.current.easeTo({
+            center: coordinates,
+            zoom: zoom ?? 3,
+            duration: 1000,
           });
         }
       });
@@ -225,8 +222,8 @@ export function MapboxView({
         type="geojson"
         data={geojson}
         cluster={true}
-        clusterMaxZoom={14}
-        clusterRadius={50}
+        clusterMaxZoom={30}
+        clusterRadius={20}
       >
         <Layer {...clusterLayer} />
         <Layer {...clusterCountLayer} />
@@ -254,6 +251,7 @@ export function MapboxView({
           </p>
         </Popup>
       )}
+      <NavigationControl />
     </Map>
   );
 }
