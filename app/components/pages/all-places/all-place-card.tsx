@@ -50,9 +50,6 @@ const AllPlaceCard = forwardRef<HTMLDivElement, PlaceCardProps>(
                 <span className="flex gap-2 text-xs text-slate-400 md:text-sm">
                   <PinIcon className="h-3 w-3 md:h-4 md:w-4" />
                   <p className="self-center text-xs md:flex md:flex-col md:text-sm">
-                    <span className="hidden md:flex">
-                      {place.address.street},
-                    </span>
                     {place.address.city}
                   </p>
                 </span>

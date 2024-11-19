@@ -113,7 +113,7 @@ export default function Places() {
 
   return (
     <div className="container relative mx-auto flex min-h-screen flex-col gap-2 px-4 pt-5 md:flex-row md:px-8">
-      <div className="sticky top-20 z-40 flex justify-between bg-white py-2">
+      <div className="sticky top-20 z-40 flex justify-between bg-white">
         <PlaceFilter />
 
         <Button
@@ -153,7 +153,7 @@ export default function Places() {
             </main>
 
             <aside
-              className={`sticky top-0 ${showMap ? "" : "hidden"} h-full w-full md:flex md:w-2/3`}
+              className={`sticky top-32 ${showMap ? "" : "hidden"} h-full w-full md:flex md:w-2/3`}
             >
               <MapboxView
                 places={places}

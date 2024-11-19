@@ -43,7 +43,7 @@ export const formatPriceRange = (
 };
 
 export const formatFilterTime = (inputTime: string) => {
-  const localDate = new Date(`1970-01-01T${inputTime}:00+08:00`);
+  const localDate = new Date(`1970-01-01T${inputTime}:00+07:00`);
 
   return localDate.toISOString();
 };
