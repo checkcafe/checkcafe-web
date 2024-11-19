@@ -48,7 +48,6 @@ const EditPlaceSchema = z.object({
   name: z.string().min(4).max(255),
   description: z.string().min(4).max(255).optional(),
   streetAddress: z.string().min(4).max(100),
-  wifiSpeedAvg: z.number().min(1).optional(),
   priceRangeMin: z.number().min(1).optional(),
   priceRangeMax: z.number().min(1).optional(),
   cityId: z.string().min(4),
@@ -72,11 +71,15 @@ export async function loader({ params }: LoaderFunctionArgs) {
   return json({ place, city });
 }
 
+type placePhotosData = {
+  order: number;
+  url: string;
+};
 export default function EditPlace() {
   const { place, city } = useLoaderData<typeof loader>();
   const [cityId, setCityId] = useState(place.address.cityId);
 
-  const [imageUrls, setImageUrls] = useState<{ url: string }[]>(place.photos);
+  const [imageUrls, setImageUrls] = useState<placePhotosData[]>(place.photos);
   const [form, fields] = useForm({
     shouldValidate: "onBlur",
     onValidate({ formData }) {
@@ -86,11 +89,16 @@ export default function EditPlace() {
       imageUrls: [{ url: "https://example.com" }],
       name: place.name,
       streetAddress: place.address.street,
+      description: place.description,
+      priceRangeMin: place.priceRangeMin,
+      priceRangeMax: place.priceRangeMax,
     },
   });
 
   function handleSetImageUrls(data: string[]) {
-    data.forEach(url => setImageUrls(imageUrls => [...imageUrls, { url }]));
+    data.forEach((url, i) =>
+      setImageUrls(imageUrls => [...imageUrls, { order: i, url }]),
+    );
   }
 
   function handleDeleteImageUrls(urlToRemove: string) {
@@ -199,47 +207,6 @@ export default function EditPlace() {
           </div>
           <div>
             <Label
-              htmlFor="description"
-              className="block text-sm font-medium text-gray-700"
-            >
-              Description
-            </Label>
-            <Input
-              {...fields.description}
-              type="text"
-              id="description"
-              placeholder="Description of the place"
-              className={`mt-1 rounded-md border p-2 ${fields.description.errors ? "border-red-500" : "border-gray-300"}`}
-            />
-            {fields.description.errors && (
-              <p className="mt-1 text-sm text-red-700">
-                {fields.description.errors}
-              </p>
-            )}
-          </div>
-          <div>
-            <Label
-              htmlFor="wifiSpeedAvg"
-              className="block text-sm font-medium text-gray-700"
-            >
-              WiFi Speed Avg (Mbps)
-            </Label>
-            <Input
-              {...fields.description}
-              type="number"
-              id="wifiSpeedAvg"
-              placeholder="average speed of wifi connection"
-              className={`mt-1 rounded-md border p-2 ${fields.description.errors ? "border-red-500" : "border-gray-300"}`}
-            />
-            {fields.description.errors && (
-              <p className="mt-1 text-sm text-red-700">
-                {fields.description.errors}
-              </p>
-            )}
-          </div>
-
-          <div>
-            <Label
               htmlFor="streetAddress"
               className="block text-sm font-medium text-gray-700"
             >
@@ -285,7 +252,85 @@ export default function EditPlace() {
               </p>
             )}
           </div>
+          <div>
+            <Label
+              htmlFor="description"
+              className="block text-sm font-medium text-gray-700"
+            >
+              Description
+            </Label>
+            <Input
+              {...fields.description}
+              type="text"
+              id="description"
+              name={fields.description.name}
+              placeholder="Description of the place"
+              className={`mt-1 rounded-md border p-2 ${fields.description.errors ? "border-red-500" : "border-gray-300"}`}
+            />
+            {fields.description.errors && (
+              <p className="mt-1 text-sm text-red-700">
+                {fields.description.errors}
+              </p>
+            )}
+          </div>
 
+          <div className="flex flex-col gap-2">
+            <h2 className="text-lg font-semibold text-gray-800">
+              Average Price Range for Food and Beverage
+            </h2>
+            <div className="flex gap-10">
+              <div>
+                <Label
+                  htmlFor="priceRangeMin"
+                  className="block text-sm font-medium text-gray-700"
+                >
+                  Price (Min)
+                </Label>
+                <Input
+                  {...fields.priceRangeMin}
+                  type="number"
+                  id="priceRangeMin"
+                  name={fields.priceRangeMin.name}
+                  placeholder="Enter minimum price"
+                  className={`mt-1 rounded-md border p-2 ${
+                    fields.priceRangeMin.errors
+                      ? "border-red-500"
+                      : "border-gray-300"
+                  }`}
+                />
+                {fields.priceRangeMin.errors && (
+                  <p className="mt-1 text-sm text-red-700">
+                    {fields.priceRangeMin.errors}
+                  </p>
+                )}
+              </div>
+              <div>
+                <Label
+                  htmlFor="priceRangeMax"
+                  className="block text-sm font-medium text-gray-700"
+                >
+                  Price (Max)
+                </Label>
+                <Input
+                  {...fields.priceRangeMax}
+                  name={fields.priceRangeMax.name}
+                  type="number"
+                  id="priceRangeMax"
+                  placeholder="Enter maximum price"
+                  className={`mt-1 rounded-md border p-2 ${
+                    fields.priceRangeMax.errors
+                      ? "border-red-500"
+                      : "border-gray-300"
+                  }`}
+                />
+                {fields.priceRangeMax.errors && (
+                  <p className="mt-1 text-sm text-red-700">
+                    {fields.priceRangeMax.errors}
+                  </p>
+                )}
+              </div>
+            </div>
+          </div>
           <div>
             <Button type="submit">Save Place</Button>
           </div>
@@ -316,8 +361,11 @@ export async function action({ request, params }: ActionFunctionArgs) {
   if (!action) {
     const submission = parse(formData, { schema: EditPlaceSchema });
     console.dir({ submission }, { depth: null });
-    const { placePhotosData } = JSON.parse(
-      String(submission.value?.placePhotos),
+    const placePhotosData = JSON.parse(String(submission.value?.placePhotos));
+    console.info(
+      placePhotosData,
+      "placePhotosData",
+      JSON.parse(String(submission.value?.placePhotos)),
     );
     console.dir({ placePhotosData }, { depth: null });
 
