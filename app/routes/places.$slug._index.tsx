@@ -253,72 +253,76 @@ export default function PlaceSlug() {
         </div>
       </section>
 
-      <div className="mb-2 mt-16 flex flex-row items-center justify-between">
-        <p className="text-xl font-medium text-[#372816]">Nearby Places</p>
-      </div>
-      <ScrollArea className="w-full overflow-hidden">
-        <div className="flex space-x-4 overflow-x-auto overflow-y-hidden md:space-x-6">
-          {nearbyPlaces.map(
-            ({
-              id,
-              slug,
-              thumbnailUrl,
-              name,
-              address: { city },
-              currency,
-              priceRangeMin,
-              priceRangeMax,
-              openingTime,
-              closingTime,
-            }) => (
-              <Link to={`places/${slug}`} key={id}>
-                <Card className="h-80 w-56 shadow-lg hover:cursor-pointer hover:opacity-50">
-                  <CardContent className="flex flex-col px-5 py-5">
-                    <img
-                      src={
-                        thumbnailUrl ||
-                        "https://placehold.co/150?text=No%20Image"
-                      }
-                      alt="cafe-image"
-                      className="h-40 w-full rounded-md rounded-b-none object-cover"
-                    />
-                    <div className="mt-2 flex flex-col justify-between gap-4">
-                      <div className="flex flex-col">
-                        <p className="max-w-full truncate text-base font-medium text-[#372816]">
-                          {name}
-                        </p>
-                        <p className="text-sm font-normal text-[#9BA0A7]">
-                          {city}
-                        </p>
-                      </div>
-                      <div className="flex flex-col gap-1">
-                        {currency && (priceRangeMin || priceRangeMax) && (
-                          <div className="flex items-center gap-2">
-                            <FaDollarSign
-                              size={16}
-                              className="text-[#372816]"
-                            />
-                            <p className="text-xs font-normal text-[#372816]">
-                              {`${currency} ${formatPriceRange(priceRangeMin, priceRangeMax)}`}
+      {nearbyPlaces.length > 0 && (
+        <>
+          <div className="mb-2 mt-16 flex flex-row items-center justify-between">
+            <p className="text-xl font-medium text-[#372816]">Nearby Places</p>
+          </div>
+          <ScrollArea className="w-full overflow-hidden">
+            <div className="flex space-x-4 overflow-x-auto overflow-y-hidden md:space-x-6">
+              {nearbyPlaces.map(
+                ({
+                  id,
+                  slug,
+                  thumbnailUrl,
+                  name,
+                  address: { city },
+                  currency,
+                  priceRangeMin,
+                  priceRangeMax,
+                  openingTime,
+                  closingTime,
+                }) => (
+                  <Link to={`places/${slug}`} key={id}>
+                    <Card className="h-80 w-56 shadow-lg hover:cursor-pointer hover:opacity-50">
+                      <CardContent className="flex flex-col px-5 py-5">
+                        <img
+                          src={
+                            thumbnailUrl ||
+                            "https://placehold.co/150?text=No%20Image"
+                          }
+                          alt="cafe-image"
+                          className="h-40 w-full rounded-md rounded-b-none object-cover"
+                        />
+                        <div className="mt-2 flex flex-col justify-between gap-4">
+                          <div className="flex flex-col">
+                            <p className="max-w-full truncate text-base font-medium text-[#372816]">
+                              {name}
+                            </p>
+                            <p className="text-sm font-normal text-[#9BA0A7]">
+                              {city}
                             </p>
                           </div>
-                        )}
-                        <div className="flex items-center gap-2">
-                          <FaClock size={16} className="text-[#372816]" />
-                          <p className="text-xs font-normal text-[#372816]">
-                            {`${formatTime(openingTime)} - ${formatTime(closingTime)}`}
-                          </p>
+                          <div className="flex flex-col gap-1">
+                            {currency && (priceRangeMin || priceRangeMax) && (
+                              <div className="flex items-center gap-2">
+                                <FaDollarSign
+                                  size={16}
+                                  className="text-[#372816]"
+                                />
+                                <p className="text-xs font-normal text-[#372816]">
+                                  {`${currency} ${formatPriceRange(priceRangeMin, priceRangeMax)}`}
+                                </p>
+                              </div>
+                            )}
+                            <div className="flex items-center gap-2">
+                              <FaClock size={16} className="text-[#372816]" />
+                              <p className="text-xs font-normal text-[#372816]">
+                                {`${formatTime(openingTime)} - ${formatTime(closingTime)}`}
+                              </p>
+                            </div>
+                          </div>
                         </div>
-                      </div>
-                    </div>
-                  </CardContent>
-                </Card>
-              </Link>
-            ),
-          )}
-        </div>
-        <ScrollBar orientation="horizontal" />
-      </ScrollArea>
+                      </CardContent>
+                    </Card>
+                  </Link>
+                ),
+              )}
+            </div>
+            <ScrollBar orientation="horizontal" />
+          </ScrollArea>
+        </>
+      )}
     </div>
   );
 }
