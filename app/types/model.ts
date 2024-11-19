@@ -50,7 +50,8 @@ export type Place = {
   slug: string;
   address: Address;
   currency: string;
-  priceRange: string;
+  priceRangeMin: string;
+  priceRangeMax: string;
   operatingHours: OperatingHour[];
   placeFacilities: PlaceFacility[];
   cityId: string;
