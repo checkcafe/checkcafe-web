@@ -404,7 +404,6 @@ export async function action({ request, params }: ActionFunctionArgs) {
       },
     });
     const result: { message: string } = await responseDelete.json();
-    console.log(result);
     if (!result) {
       throw new Response(null, { status: 404, statusText: "Place Not Found" });
     }
@@ -427,7 +426,7 @@ export async function action({ request, params }: ActionFunctionArgs) {
         statusText: "Chage Status Failed",
       });
     }
-    return redirect("/");
+    return null;
   }
 
   return null;
