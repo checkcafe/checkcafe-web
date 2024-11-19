@@ -1,6 +1,6 @@
 /* eslint-disable react/display-name */
 
-import { Link, useFetcher, useSearchParams } from "@remix-run/react";
+import { useFetcher, useNavigate, useSearchParams } from "@remix-run/react";
 import { Clock3 } from "lucide-react";
 import React, { forwardRef } from "react";
 import { BiHeart } from "react-icons/bi";
@@ -20,6 +20,7 @@ interface PlaceCardProps {
 
 const AllPlaceCard = forwardRef<HTMLDivElement, PlaceCardProps>(
   ({ place, isFavorite, favoriteId }, ref) => {
+    const navigate = useNavigate();
     const fetcher = useFetcher();
     const [searchParams] = useSearchParams();
 
@@ -33,32 +34,33 @@ const AllPlaceCard = forwardRef<HTMLDivElement, PlaceCardProps>(
       <Card
         ref={ref}
         key={place.id}
-        className="flex h-[15vh] w-full border border-[#F9D9AA] md:h-[30vh]"
+        className="flex h-[15vh] w-full cursor-pointer border border-[#F9D9AA] md:h-[30vh]"
+        onClick={() => navigate(`/places/${place.slug}`)} // Navigasi seluruh card
       >
         <img
           src={place.thumbnailUrl || "https://placehold.co/150?text=No%20Image"}
-          alt={place.name}
+          alt={place.name || "Unknown Place"}
           className="w-36 min-w-36 rounded-l-lg object-cover md:w-64 md:min-w-64"
         />
         <div className="flex w-full flex-col justify-between px-2 md:p-3">
           <CardTitle className="flex justify-between">
-            <Link to={`/places/${place.slug}`}>
-              <span>
-                <h4 className="text-base font-semibold md:text-2xl">
-                  {place.name}
-                </h4>
-                <span className="flex gap-2 text-xs text-slate-400 md:text-sm">
-                  <PinIcon className="h-3 w-3 md:h-4 md:w-4" />
-                  <p className="self-center text-xs md:flex md:flex-col md:text-sm">
-                    {place.address.city}
-                  </p>
-                </span>
+            <span>
+              <h4 className="mt-2 text-base font-semibold md:text-2xl">
+                {place.name || "Unknown Name"}
+              </h4>
+              <span className="mt-1 flex gap-2 text-xs text-slate-400 md:text-sm">
+                <PinIcon className="h-3 w-3 md:h-4 md:w-4" />
+                <p className="self-center text-xs md:flex md:flex-col md:text-sm">
+                  {place.address?.city || "Unknown City"},{" "}
+                  {place.address?.state || "Unknown State"}
+                </p>
               </span>
-            </Link>
+            </span>
             <fetcher.Form
               method={method}
               action={`/places?${searchParams.toString()}`}
               preventScrollReset={true}
+              onClick={e => e.stopPropagation()}
             >
               <input type="hidden" name="placeId" value={place.id} />
               <input type="hidden" name="favoriteId" value={favoriteId || ""} />
@@ -79,12 +81,18 @@ const AllPlaceCard = forwardRef<HTMLDivElement, PlaceCardProps>(
           <CardContent className="items-end p-0">
             <span className="mb-2 flex items-center gap-2 font-bold">
               <FaDollarSign className="h-3 w-3 md:h-4 md:w-4" />
-              <p className="text-xs md:text-sm">{`${place.currency} ${formatPrice(parseInt(place.priceRangeMin))} - ${formatPrice(parseInt(place.priceRangeMax))} `}</p>
+              <p className="text-xs md:text-sm">
+                {`${place.currency || "USD"} ${formatPrice(
+                  parseInt(place.priceRangeMin || "0"),
+                )} - ${formatPrice(parseInt(place.priceRangeMax || "0"))}`}
+              </p>
             </span>
             <span className="mb-2 flex items-center gap-2 font-bold">
               <Clock3 className="h-3 w-3 md:h-4 md:w-4" />
               <p className="text-xs md:text-sm">
-                {`${formatTime(place.openingTime)} - ${formatTime(place.closingTime)}`}
+                {`${formatTime(place.openingTime || "00:00")} - ${formatTime(
+                  place.closingTime || "23:59",
+                )}`}
               </p>
             </span>
           </CardContent>
