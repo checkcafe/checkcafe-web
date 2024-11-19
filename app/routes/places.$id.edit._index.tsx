@@ -27,6 +27,7 @@ import { Button } from "~/components/ui/button";
 import { Input } from "~/components/ui/input";
 import { Label } from "~/components/ui/label";
 import { Separator } from "~/components/ui/separator";
+import { Textarea } from "~/components/ui/textarea";
 import {
   BACKEND_API_URL,
   UPLOADCARE_PUBLIC_KEY,
@@ -263,9 +264,8 @@ export default function EditPlace() {
             >
               Description
             </Label>
-            <Input
+            <Textarea
               {...fields.description}
-              type="text"
               id="description"
               name={fields.description.name}
               placeholder="Description of the place"
@@ -296,6 +296,7 @@ export default function EditPlace() {
                   id="priceRangeMin"
                   name={fields.priceRangeMin.name}
                   placeholder="Enter minimum price"
+                  min={0}
                   className={`mt-1 rounded-md border p-2 ${
                     fields.priceRangeMin.errors
                       ? "border-red-500"
@@ -320,6 +321,7 @@ export default function EditPlace() {
                   name={fields.priceRangeMax.name}
                   type="number"
                   id="priceRangeMax"
+                  min={0}
                   placeholder="Enter maximum price"
                   className={`mt-1 rounded-md border p-2 ${
                     fields.priceRangeMax.errors
