@@ -4,11 +4,17 @@ import {
   LoaderFunctionArgs,
   MetaFunction,
 } from "@remix-run/node";
-import { Form, redirect, useLoaderData, useParams } from "@remix-run/react";
+import {
+  Form,
+  Link,
+  redirect,
+  useLoaderData,
+  useParams,
+} from "@remix-run/react";
 import { MapIcon, MapPin, Receipt } from "lucide-react";
 import { useState } from "react";
 import { BiHeart } from "react-icons/bi";
-import { FaHeart, FaRegImages } from "react-icons/fa6";
+import { FaClock, FaDollarSign, FaHeart, FaRegImages } from "react-icons/fa6";
 
 import { Facility } from "~/components/shared/places/facility";
 import { OperatingHourItem } from "~/components/shared/places/operating-hour";
@@ -16,7 +22,9 @@ import ShareButton from "~/components/shared/shared-button";
 import { Sliders } from "~/components/shared/sliders";
 import { Avatar, AvatarFallback, AvatarImage } from "~/components/ui/avatar";
 import { Button } from "~/components/ui/button";
+import { Card, CardContent } from "~/components/ui/card";
 import { MapboxView } from "~/components/ui/mapbox-view";
+import { ScrollArea, ScrollBar } from "~/components/ui/scroll-area";
 import { BACKEND_API_URL } from "~/lib/env";
 import { getPageTitle } from "~/lib/get-page-title";
 import { getAccessToken } from "~/lib/token";
@@ -28,7 +36,7 @@ import {
   type Place,
   type PlaceItem,
 } from "~/types/model";
-import { formatPriceRange } from "~/utils/formatter";
+import { formatPriceRange, formatTime } from "~/utils/formatter";
 
 async function fetchFavorites(request: Request): Promise<FavoritePlace[]> {
   const isAuthenticated = await authenticator.isAuthenticated(request);
@@ -63,11 +71,24 @@ export async function loader({ params, request }: LoaderFunctionArgs) {
     throw new Response(null, { status: 404, statusText: "Place Not Found" });
   }
 
+  const cityId = place.address?.cityId;
+  let nearbyPlaces: PlaceItem[] = [];
+
+  if (cityId) {
+    const responseNearbyPlaces = await fetch(
+      `${BACKEND_API_URL}/places?filter={ "cityId":"${cityId}" }&limit=6`,
+    );
+
+    if (responseNearbyPlaces.ok) {
+      nearbyPlaces = await responseNearbyPlaces.json();
+    }
+  }
+
   const favoritePlace = placeFavorites.find(
     placeFavorite => placeFavorite.slug === slug,
   );
 
-  return json({ place, favoritePlace });
+  return json({ place, favoritePlace, nearbyPlaces });
 }
 
 export const meta: MetaFunction<typeof loader> = ({ data }) => {
@@ -81,7 +102,7 @@ export const meta: MetaFunction<typeof loader> = ({ data }) => {
 };
 
 export default function PlaceSlug() {
-  const { place, favoritePlace } = useLoaderData<typeof loader>();
+  const { place, favoritePlace, nearbyPlaces } = useLoaderData<typeof loader>();
   const { slug } = useParams();
 
   const [showMap, setShowMap] = useState(false);
@@ -231,6 +252,77 @@ export default function PlaceSlug() {
           </section>
         </div>
       </section>
+
+      {nearbyPlaces.length > 0 && (
+        <>
+          <div className="mb-2 mt-16 flex flex-row items-center justify-between">
+            <p className="text-xl font-medium text-[#372816]">Nearby Places</p>
+          </div>
+          <ScrollArea className="w-full overflow-hidden">
+            <div className="flex space-x-4 overflow-x-auto overflow-y-hidden md:space-x-6">
+              {nearbyPlaces.map(
+                ({
+                  id,
+                  slug,
+                  thumbnailUrl,
+                  name,
+                  address: { city },
+                  currency,
+                  priceRangeMin,
+                  priceRangeMax,
+                  openingTime,
+                  closingTime,
+                }) => (
+                  <Link to={`places/${slug}`} key={id}>
+                    <Card className="h-80 w-56 shadow-lg hover:cursor-pointer hover:opacity-50">
+                      <CardContent className="flex flex-col px-5 py-5">
+                        <img
+                          src={
+                            thumbnailUrl ||
+                            "https://placehold.co/150?text=No%20Image"
+                          }
+                          alt="cafe-image"
+                          className="h-40 w-full rounded-md rounded-b-none object-cover"
+                        />
+                        <div className="mt-2 flex flex-col justify-between gap-4">
+                          <div className="flex flex-col">
+                            <p className="max-w-full truncate text-base font-medium text-[#372816]">
+                              {name}
+                            </p>
+                            <p className="text-sm font-normal text-[#9BA0A7]">
+                              {city}
+                            </p>
+                          </div>
+                          <div className="flex flex-col gap-1">
+                            {currency && (priceRangeMin || priceRangeMax) && (
+                              <div className="flex items-center gap-2">
+                                <FaDollarSign
+                                  size={16}
+                                  className="text-[#372816]"
+                                />
+                                <p className="text-xs font-normal text-[#372816]">
+                                  {`${currency} ${formatPriceRange(priceRangeMin, priceRangeMax)}`}
+                                </p>
+                              </div>
+                            )}
+                            <div className="flex items-center gap-2">
+                              <FaClock size={16} className="text-[#372816]" />
+                              <p className="text-xs font-normal text-[#372816]">
+                                {`${formatTime(openingTime)} - ${formatTime(closingTime)}`}
+                              </p>
+                            </div>
+                          </div>
+                        </div>
+                      </CardContent>
+                    </Card>
+                  </Link>
+                ),
+              )}
+            </div>
+            <ScrollBar orientation="horizontal" />
+          </ScrollArea>
+        </>
+      )}
     </div>
   );
 }
