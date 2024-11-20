@@ -101,8 +101,11 @@ export default function EditPlace() {
   });
 
   function handleSetImageUrls(data: string[]) {
-    data.forEach((url, i) =>
-      setImageUrls(imageUrls => [...imageUrls, { order: i, url }]),
+    data.forEach(url =>
+      setImageUrls(imageUrls => [
+        ...imageUrls,
+        { order: imageUrls.length + 1, url },
+      ]),
     );
   }
 
@@ -189,6 +192,7 @@ export default function EditPlace() {
                   handleDeleteImageUrls(e.cdnUrl);
                 }
               }}
+              // className="hidden"
             />
           </div>
 
