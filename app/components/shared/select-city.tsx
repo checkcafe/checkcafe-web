@@ -66,7 +66,7 @@ export function SelectCity() {
         <SelectTrigger className="rounded-none border-0 border-l border-gray-300 bg-white text-gray-700">
           <SelectValue placeholder="Choose location" />
         </SelectTrigger>
-        <SelectContent className="max-h-32 overflow-y-auto">
+        <SelectContent className="max-h-32 overflow-y-auto md:max-h-none md:overflow-visible">
           <SelectGroup>
             <SelectItem value="none" className="hidden"></SelectItem>
             {sortedCities.map(item => (
