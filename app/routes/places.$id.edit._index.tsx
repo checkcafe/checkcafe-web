@@ -6,7 +6,7 @@ import {
   LoaderFunctionArgs,
   redirect,
 } from "@remix-run/node";
-import { Form, useLoaderData } from "@remix-run/react";
+import { Form, Link, useLoaderData } from "@remix-run/react";
 import { FileUploaderRegular } from "@uploadcare/react-uploader";
 import React from "react";
 
@@ -135,7 +135,15 @@ export default function EditPlace() {
               </Button>
             </Form>
           </div>
-          <div className="container-publish-button">
+          <div className="container-publish-button flex gap-4">
+            <Button variant={"outline"} type="submit">
+              <Link
+                to={`/places/${place.slug}`}
+                className="flex items-center gap-2"
+              >
+                View
+              </Link>
+            </Button>
             <Form method="post" id="change-status-publish">
               <input type="hidden" name="action" value="isPublish" />
               <input type="hidden" name="placeId" value={place.id} />
