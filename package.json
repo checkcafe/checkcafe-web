@@ -14,8 +14,8 @@
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
-    "@conform-to/react": "^0.9.1",
-    "@conform-to/zod": "^0.9.1",
+    "@conform-to/react": "^1.2.2",
+    "@conform-to/zod": "^1.2.2",
     "@hookform/resolvers": "^3.9.1",
     "@mapbox/mapbox-gl-geocoder": "^5.0.3",
     "@radix-ui/react-avatar": "^1.1.1",

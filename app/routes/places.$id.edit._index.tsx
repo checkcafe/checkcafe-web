@@ -1,5 +1,10 @@
-import { useForm } from "@conform-to/react";
-import { parse } from "@conform-to/zod";
+import {
+  getFormProps,
+  getInputProps,
+  getTextareaProps,
+  useForm,
+} from "@conform-to/react";
+import { parseWithZod } from "@conform-to/zod";
 import MapboxGeocoder from "@mapbox/mapbox-gl-geocoder";
 import {
   ActionFunctionArgs,
@@ -7,11 +12,11 @@ import {
   LoaderFunctionArgs,
   redirect,
 } from "@remix-run/node";
+import { Form, Link, useLoaderData } from "@remix-run/react";
 
 import "mapbox-gl/dist/mapbox-gl.css";
 import "@mapbox/mapbox-gl-geocoder/dist/mapbox-gl-geocoder.css";
 
-import { Form, useLoaderData } from "@remix-run/react";
 import { FileUploaderRegular } from "@uploadcare/react-uploader";
 import React, { useRef } from "react";
 
@@ -33,7 +38,8 @@ import {
 import { z } from "zod";
 
 import { Combobox } from "~/components/shared/form-input/combobox";
-import { OperatingHoursForm } from "~/components/shared/form-input/operating-hours-form";
+// import { MultipleOperatingHoursUpdate } from "~/components/shared/form-input/multiple-input-operating-hours-updated";
+// import { OperatingHoursForm } from "~/components/shared/form-input/operating-hours-form";
 import { Sliders } from "~/components/shared/sliders";
 import { Button } from "~/components/ui/button";
 import { Input } from "~/components/ui/input";
@@ -60,10 +66,20 @@ const uploadcareSimpleAuthSchema = new UploadcareSimpleAuthSchema({
 const EditPlaceSchema = z.object({
   placePhotos: z.string().min(1).optional(),
   name: z.string().min(4).max(255),
-  description: z.string().min(4).max(255).optional(),
+  description: z.preprocess(
+    value => (value === "" ? undefined : value),
+    z.string().min(4).max(255).optional(),
+  ),
   streetAddress: z.string().min(4).max(100),
-  priceRangeMin: z.number().min(1).optional(),
-  priceRangeMax: z.number().min(1).optional(),
+  priceRangeMin: z.preprocess(
+    value => (value === "" ? undefined : value),
+    z.number().min(1).optional(),
+  ),
+  priceRangeMax: z.preprocess(
+    value => (value === "" ? undefined : value),
+    z.number().min(1).optional(),
+  ),
+
   latitude: z
     .number()
     .min(-90, { message: "Latitude must be between -90 and 90." }),
@@ -135,13 +151,31 @@ export default function EditPlace() {
   };
 
   const [imageUrls, setImageUrls] = useState<placePhotosData[]>(place.photos);
+  // const [form, fields] = useForm({
+  //   shouldValidate: "onBlur",
+  //   onValidate({ formData }) {
+  //     return parse(formData, { schema: EditPlaceSchema });
+  //   },
+  //   defaultValue: {
+  //     imageUrls: place.photos,
+  //     name: place.name,
+  //     streetAddress: place.address.street,
+  //     description: place.description,
+  //     priceRangeMin: place.priceRangeMin,
+  //     priceRangeMax: place.priceRangeMax,
+  //   },
+  // });
+
   const [form, fields] = useForm({
     shouldValidate: "onBlur",
+    shouldRevalidate: "onInput",
+
+    // Setup client validation
     onValidate({ formData }) {
-      return parse(formData, { schema: EditPlaceSchema });
+      return parseWithZod(formData, { schema: EditPlaceSchema });
     },
     defaultValue: {
-      imageUrls: place.photos,
+      // imageUrls: place.photos,
       name: place.name,
       streetAddress: place.address.street,
       description: place.description,
@@ -151,7 +185,6 @@ export default function EditPlace() {
       longitude: place.longitude,
     },
   });
-
   function handleSetImageUrls(data: string[]) {
     data.forEach(url =>
       setImageUrls(imageUrls => [
@@ -187,7 +220,15 @@ export default function EditPlace() {
               </Button>
             </Form>
           </div>
-          <div className="container-publish-button">
+          <div className="container-publish-button flex gap-4">
+            <Button variant={"outline"} type="submit">
+              <Link
+                to={`/places/${place.slug}`}
+                className="flex items-center gap-2"
+              >
+                View
+              </Link>
+            </Button>
             <Form method="post" id="change-status-publish">
               <input type="hidden" name="action" value="isPublish" />
               <input type="hidden" name="placeId" value={place.id} />
@@ -197,7 +238,7 @@ export default function EditPlace() {
             </Form>
           </div>
         </section>
-        <Form method="post" className="space-y-4" {...form.props}>
+        <Form method="post" className="space-y-4" {...getFormProps(form)}>
           <h1 className="text-2xl font-bold">Edit Place</h1>
 
           {imageUrls && imageUrls.length > 0 && (
@@ -210,7 +251,7 @@ export default function EditPlace() {
           )}
 
           <input
-            name={fields.placePhotos.name}
+            {...getInputProps(fields.placePhotos, { type: "text" })}
             hidden
             value={JSON.stringify(imageUrls) || "[]"}
             readOnly
@@ -225,12 +266,12 @@ export default function EditPlace() {
               multiple={true}
               accept="image/png,image/jpeg"
               confirmUpload={true}
-              onFileUploadFailed={e => {
-                console.log(e, "failed");
-              }}
-              onFileUploadSuccess={e => {
-                console.log(e, "success");
-              }}
+              // onFileUploadFailed={e => {
+              //   console.log(e, "failed");
+              // }}
+              // onFileUploadSuccess={e => {
+              //   console.log(e, "success");
+              // }}
               onDoneClick={e => {
                 if (e.successEntries.length > 0) {
                   const data = e.successEntries;
@@ -256,7 +297,7 @@ export default function EditPlace() {
               Name
             </Label>
             <Input
-              {...fields.name}
+              {...getInputProps(fields.name, { type: "text" })}
               type="text"
               id="name"
               placeholder="Place name"
@@ -274,7 +315,7 @@ export default function EditPlace() {
               Street Address
             </Label>
             <Input
-              {...fields.streetAddress}
+              {...getInputProps(fields.streetAddress, { type: "text" })}
               type="text"
               id="streetAddress"
               placeholder="Enter your streetAddress or email"
@@ -300,7 +341,7 @@ export default function EditPlace() {
               City
             </Label>
             <input
-              {...fields.cityId}
+              {...getInputProps(fields.cityId, { type: "text" })}
               name={fields.cityId.name}
               hidden
               value={cityId}
@@ -321,7 +362,7 @@ export default function EditPlace() {
               Description
             </Label>
             <Textarea
-              {...fields.description}
+              {...getTextareaProps(fields.description)}
               id="description"
               name={fields.description.name}
               placeholder="Description of the place"
@@ -347,7 +388,7 @@ export default function EditPlace() {
                   Price (Min)
                 </Label>
                 <Input
-                  {...fields.priceRangeMin}
+                  {...getInputProps(fields.priceRangeMin, { type: "text" })}
                   type="number"
                   id="priceRangeMin"
                   name={fields.priceRangeMin.name}
@@ -373,7 +414,7 @@ export default function EditPlace() {
                   Price (Max)
                 </Label>
                 <Input
-                  {...fields.priceRangeMax}
+                  {...getInputProps(fields.priceRangeMax, { type: "text" })}
                   name={fields.priceRangeMax.name}
                   type="number"
                   id="priceRangeMax"
@@ -430,7 +471,7 @@ export default function EditPlace() {
             type="number"
             hidden
             name="latitude"
-            value={marker ? marker.latitude : ""}
+            value={marker ? String(marker.latitude) : ""}
           />
           <input
             type="number"
@@ -446,12 +487,18 @@ export default function EditPlace() {
 
         <Separator />
 
-        <OperatingHoursForm
+        {/* <OperatingHoursForm
           placeData={{
             id: place.id,
             operatingHours: place.operatingHours ?? [],
           }}
-        />
+        /> */}
+        {/* <MultipleOperatingHoursUpdate
+          placeData={{
+            id: place.id,
+            operatingHours: place.operatingHours ?? [],
+          }}
+        /> */}
       </div>
     </div>
   );
@@ -465,25 +512,26 @@ export async function action({ request, params }: ActionFunctionArgs) {
   const formData = await request.formData();
   const placeId = formData.get("placeId");
   const action = formData.get("action");
-
   if (!action) {
-    const submission = parse(formData, { schema: EditPlaceSchema });
-    console.dir({ submission }, { depth: null });
-    const placePhotosData = JSON.parse(String(submission.value?.placePhotos));
-    console.info(
-      placePhotosData,
-      "placePhotosData",
-      JSON.parse(String(submission.value?.placePhotos)),
-    );
-    console.dir({ placePhotosData }, { depth: null });
+    const submission = parseWithZod(formData, { schema: EditPlaceSchema });
+    const placePhotosData = JSON.parse(String(submission.payload.placePhotos));
+    // console.info(
+    //   placePhotosData,
+    //   "placePhotosData",
+    //   JSON.parse(String(submission.value?.placePhotos)),
+    // );
+    // console.dir({ placePhotosData }, { depth: null });
 
     // Send the submission back to the client if the status is not successful
-    if (submission.intent !== "submit" || !submission.value) {
-      return json(submission);
+    // if (submission.intent !== "submit" || !submission.value) {
+    //   return json(submission);
+    // }
+    if (submission.status !== "success") {
+      return json(submission.reply(), {
+        // You can also use the status to determine the HTTP status code
+        status: submission.status === "error" ? 400 : 200,
+      });
     }
-
-    console.log(submission);
-    return null;
 
     const responsePlace = await fetch(`${BACKEND_API_URL}/places/${id}`, {
       method: "PATCH",
@@ -500,8 +548,6 @@ export async function action({ request, params }: ActionFunctionArgs) {
     if (!place) {
       throw new Response(null, { status: 404, statusText: "Place Not Found" });
     }
-
-    console.dir({ place }, { depth: null });
   } else if (action === "delete") {
     const responseDelete = await fetch(`${BACKEND_API_URL}/places/${placeId}`, {
       method: "DELETE",
