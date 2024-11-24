@@ -12,7 +12,7 @@ import {
   useParams,
 } from "@remix-run/react";
 import { MapIcon, MapPin, Receipt } from "lucide-react";
-import { useState } from "react";
+import React, { useState } from "react";
 import { BiHeart } from "react-icons/bi";
 import { FaClock, FaDollarSign, FaHeart, FaRegImages } from "react-icons/fa6";
 
@@ -25,6 +25,7 @@ import { Button } from "~/components/ui/button";
 import { Card, CardContent } from "~/components/ui/card";
 import { MapboxView } from "~/components/ui/mapbox-view";
 import { ScrollArea, ScrollBar } from "~/components/ui/scroll-area";
+import Constants from "~/constants";
 import { BACKEND_API_URL } from "~/lib/env";
 import { getPageTitle } from "~/lib/get-page-title";
 import { getAccessToken } from "~/lib/token";
@@ -37,6 +38,8 @@ import {
   type PlaceItem,
 } from "~/types/model";
 import { formatPriceRange, formatTime } from "~/utils/formatter";
+
+const { DEFAULT_HEIGHT, DEFAULT_WIDTH } = Constants;
 
 async function fetchFavorites(request: Request): Promise<FavoritePlace[]> {
   const isAuthenticated = await authenticator.isAuthenticated(request);
@@ -67,6 +70,13 @@ export async function loader({ params, request }: LoaderFunctionArgs) {
   ]);
   const place: Place & PlaceItem = await responsePlace.json();
 
+  const session = await getSession(request.headers.get("Cookie"));
+  const username = session.get("userData")?.username;
+
+  if (place.submitter.username !== username) {
+    return redirect("/login");
+  }
+
   if (!place) {
     throw new Response(null, { status: 404, statusText: "Place Not Found" });
   }
@@ -88,7 +98,7 @@ export async function loader({ params, request }: LoaderFunctionArgs) {
     placeFavorite => placeFavorite.slug === slug,
   );
 
-  return json({ place, favoritePlace, nearbyPlaces });
+  return json({ place, favoritePlace, nearbyPlaces, username });
 }
 
 export const meta: MetaFunction<typeof loader> = ({ data }) => {
@@ -124,14 +134,26 @@ export default function PlaceSlug() {
 
   return (
     <div className="px-4 py-8 md:px-32 md:py-20">
-      <Button
-        onClick={() => setShowMap((prev: boolean) => !prev)}
-        variant="outline"
-        className="mb-4 md:hidden"
-      >
-        {showMap ? "Show Photos" : "Show Map"}
-        <span>{showMap ? <FaRegImages /> : <MapIcon />}</span>
-      </Button>
+      <div className="mb-4 flex flex-row justify-between">
+        <Button
+          onClick={() => setShowMap((prev: boolean) => !prev)}
+          variant="outline"
+          className="md:hidden"
+        >
+          {showMap ? "Show Photos" : "Show Map"}
+          <span>{showMap ? <FaRegImages /> : <MapIcon />}</span>
+        </Button>
+        {!place.isPublished && (
+          <Button asChild className="ml-auto">
+            <Link
+              to={`/places/${place.id}/edit`}
+              className="bg-amber-950 text-primary"
+            >
+              Continue Edit
+            </Link>
+          </Button>
+        )}
+      </div>
       <section className="flex flex-col gap-10 md:flex-row md:gap-28">
         <div className="h-96 w-full md:w-2/4">
           {showMap ? (
@@ -144,17 +166,29 @@ export default function PlaceSlug() {
               />
             </aside>
           ) : (
-            <Sliders
-              imageSlides={place.photos.map((photo: { url: string }) => ({
-                imageUrl: photo.url,
-              }))}
-            />
+            <React.Fragment>
+              {place.photos.length > 0 ? (
+                <Sliders
+                  imageSlides={place.photos.map((photo: { url: string }) => ({
+                    imageUrl: photo.url,
+                  }))}
+                />
+              ) : (
+                <img
+                  src={"https://placehold.co/600x400?text=No%20Image"}
+                  alt={"No images"}
+                  width={DEFAULT_WIDTH}
+                  height={DEFAULT_HEIGHT}
+                  className="h-[400px] w-full rounded-lg object-cover"
+                />
+              )}
+            </React.Fragment>
           )}
         </div>
         <header className="w-full md:w-2/5">
           <div className="flex flex-row justify-between">
             <h1 className="text-2xl font-semibold text-amber-900 md:text-3xl">
-              {place.name}
+              {place.name || "Name is not available"}
             </h1>
             <div className="flex flex-row items-center justify-center gap-1">
               <Form
@@ -181,32 +215,48 @@ export default function PlaceSlug() {
                   )}
                 </button>
               </Form>
-              <ShareButton />
+              {place.isPublished && <ShareButton />}
             </div>
           </div>
-          <p className="mb-8 text-base font-normal">{place.description}</p>
-          <span className="flex flex-row gap-2">
-            <MapPin size={24} />
-            <p className="mb-2 text-sm font-medium text-amber-950">
-              {place.address.street}, {place.address.state},{" "}
-              {place.address.country}
-            </p>
-          </span>
+          <p className="mb-5 mt-2 text-base font-normal">
+            {place.description || "Description is not available"}
+          </p>
+          {place.address ? (
+            <span className="flex flex-row items-center gap-2">
+              <div className="flex h-8 w-8 items-center justify-center rounded-full bg-amber-500">
+                <MapPin size={24} color="white" />
+              </div>
+              <p className="mb-2 text-sm font-medium text-amber-950">
+                {place.address.street || "No street"},{" "}
+                {place.address.state || "No state"},{" "}
+                {place.address.country || "No country"}
+              </p>
+            </span>
+          ) : (
+            <p className="text-base font-normal">Address is not available</p>
+          )}
           <span className="mt-2 flex flex-row items-center gap-2">
-            <Receipt size={24} />
+            <div className="flex h-8 w-8 items-center justify-center rounded-full bg-amber-500">
+              <Receipt size={24} color="white" />
+            </div>
             <p className="text-sm font-medium text-amber-950">
-              {place.currency}{" "}
+              {place.currency || "IDR"}{" "}
               {formatPriceRange(place.priceRangeMin, place.priceRangeMax)}
             </p>
           </span>
-          <p className="mt-7 text-base font-semibold text-amber-950 md:mt-16">
+          <p className="mt-7 text-2xl font-semibold text-amber-950 md:mt-7">
             Operational Time
           </p>
           <div className="mt-2">
-            {place.operatingHours?.length > 0 &&
+            {place.operatingHours?.length > 0 ? (
               place.operatingHours.map((operatingHour, index) => (
                 <OperatingHourItem operatingHour={operatingHour} key={index} />
-              ))}
+              ))
+            ) : (
+              <p className="text-sm text-amber-950 md:text-base">
+                Operational Hours is not available
+              </p>
+            )}
           </div>
         </header>
       </section>
@@ -223,21 +273,27 @@ export default function PlaceSlug() {
 
         <div className="flex flex-col gap-4">
           <div className="flex flex-col">
-            <h1 className="mb-4 mt-2 text-base font-semibold text-amber-950 md:text-lg">
+            <h1 className="mb-4 mt-2 text-base font-semibold text-amber-950 md:text-2xl">
               Facility
             </h1>
-            {place.placeFacilities?.length > 0 &&
+            {place.placeFacilities?.length > 0 ? (
               place.placeFacilities.map((facility, index) => (
                 <Facility facility={facility} key={index} />
-              ))}
+              ))
+            ) : (
+              <p className="text-sm text-amber-950 md:text-base">
+                Facilities is not available
+              </p>
+            )}
           </div>
           <section>
-            <h1 className="mb-4 mt-2 text-base font-semibold text-amber-950 md:text-lg">
+            <h1 className="mb-4 mt-2 text-base font-semibold text-amber-950 md:text-2xl">
               Submitter
             </h1>
             <div className="flex flex-row items-center gap-4">
-              <Avatar>
+              <Avatar className="rounded-full bg-primary p-0.5">
                 <AvatarImage
+                  className="rounded-full"
                   src={place.submitter.avatarUrl}
                   alt={place.submitter.username}
                 />
@@ -245,8 +301,8 @@ export default function PlaceSlug() {
                   {place.submitter.name.charAt(0).toUpperCase()}
                 </AvatarFallback>
               </Avatar>
-              <p className="md:text-md text-sm font-medium text-amber-950">
-                {place.submitter.name}
+              <p className="text-sm font-medium text-amber-950 md:text-base">
+                {place.submitter.name || "Submitter name is not available"}
               </p>
             </div>
           </section>
@@ -372,8 +428,13 @@ export async function action({ request, params }: ActionFunctionArgs) {
   const username = session.get("userData")?.username;
   const placeId = formData.get("placeId")?.toString();
   const favoriteId = formData.get("favoriteId")?.toString();
+  const isPublished = formData.get("isPublished")?.toString();
   const method = request.method;
   const { slug } = params;
+
+  if (!isPublished) {
+    throw new Error("The place must be published to favorite");
+  }
 
   if (!placeId && !favoriteId) {
     return json({ error: "Place ID or Favorite ID is required" });

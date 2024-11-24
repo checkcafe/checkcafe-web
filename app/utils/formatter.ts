@@ -39,6 +39,7 @@ export const formatPriceRange = (
   if (formattedMin && formattedMax) {
     return `${formattedMin} - ${formattedMax}`;
   }
+
   return formattedMin || formattedMax || "-";
 };
 

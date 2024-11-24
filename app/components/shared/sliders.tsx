@@ -9,6 +9,7 @@ import {
   CarouselNext,
   CarouselPrevious,
 } from "~/components/ui/carousel";
+import Constants from "~/constants";
 
 interface SliderProps {
   imageSlides: { imageUrl: string; url?: string }[];
@@ -19,8 +20,7 @@ interface SliderProps {
   heightImage?: number;
 }
 
-const DEFAULT_WIDTH = 600;
-const DEFAULT_HEIGHT = 400;
+const { DEFAULT_HEIGHT, DEFAULT_WIDTH } = Constants;
 
 export const Sliders = ({
   imageSlides,
