@@ -5,6 +5,7 @@ import {
   useForm,
 } from "@conform-to/react";
 import { parseWithZod } from "@conform-to/zod";
+import MapboxGeocoder from "@mapbox/mapbox-gl-geocoder";
 import {
   ActionFunctionArgs,
   json,
@@ -12,8 +13,12 @@ import {
   redirect,
 } from "@remix-run/node";
 import { Form, Link, useLoaderData } from "@remix-run/react";
+
+import "mapbox-gl/dist/mapbox-gl.css";
+import "@mapbox/mapbox-gl-geocoder/dist/mapbox-gl-geocoder.css";
+
 import { FileUploaderRegular } from "@uploadcare/react-uploader";
-import React from "react";
+import React, { useRef } from "react";
 
 import "@uploadcare/react-uploader/core.css";
 
@@ -23,10 +28,17 @@ import {
 } from "@uploadcare/rest-client";
 import { TrashIcon } from "lucide-react";
 import { useState } from "react";
+import {
+  Map,
+  MapMouseEvent,
+  MapRef,
+  Marker,
+  NavigationControl,
+} from "react-map-gl";
 import { z } from "zod";
 
 import { Combobox } from "~/components/shared/form-input/combobox";
-import { MultipleOperatingHoursUpdate } from "~/components/shared/form-input/multiple-input-operating-hours-updated";
+// import { MultipleOperatingHoursUpdate } from "~/components/shared/form-input/multiple-input-operating-hours-updated";
 // import { OperatingHoursForm } from "~/components/shared/form-input/operating-hours-form";
 import { Sliders } from "~/components/shared/sliders";
 import { Button } from "~/components/ui/button";
@@ -36,6 +48,7 @@ import { Separator } from "~/components/ui/separator";
 import { Textarea } from "~/components/ui/textarea";
 import {
   BACKEND_API_URL,
+  MAPBOX_ACCESS_TOKEN,
   UPLOADCARE_PUBLIC_KEY,
   UPLOADCARE_SECRET_KEY,
 } from "~/lib/env";
@@ -66,6 +79,13 @@ const EditPlaceSchema = z.object({
     value => (value === "" ? undefined : value),
     z.number().min(1).optional(),
   ),
+
+  latitude: z
+    .number()
+    .min(-90, { message: "Latitude must be between -90 and 90." }),
+  longitude: z
+    .number()
+    .min(-180, { message: "Longitude must be between -180 and 180." }),
   cityId: z.string().min(4),
 });
 
@@ -95,9 +115,40 @@ type placePhotosData = {
   order: number;
   url: string;
 };
+
+type Marker = {
+  longitude: number;
+  latitude: number;
+} | null;
+
 export default function EditPlace() {
   const { place, city } = useLoaderData<typeof loader>();
   const [cityId, setCityId] = useState(place.address.cityId);
+  const [marker, setMarker] = useState<Marker>(
+    place.latitude && place.longitude
+      ? { latitude: place.latitude, longitude: place.longitude }
+      : null,
+  );
+  const mapRef = useRef<MapRef | null>(null);
+
+  const handleMapClick = (event: MapMouseEvent) => {
+    const { lngLat } = event;
+    setMarker({
+      latitude: lngLat.lat,
+      longitude: lngLat.lng,
+    });
+  };
+
+  const handleMapLoad = () => {
+    if (mapRef.current) {
+      const map = mapRef.current.getMap();
+      const geocoder = new MapboxGeocoder({
+        accessToken: MAPBOX_ACCESS_TOKEN,
+        marker: false,
+      });
+      map.addControl(geocoder, "top-left");
+    }
+  };
 
   const [imageUrls, setImageUrls] = useState<placePhotosData[]>(place.photos);
   // const [form, fields] = useForm({
@@ -130,6 +181,8 @@ export default function EditPlace() {
       description: place.description,
       priceRangeMin: place.priceRangeMin,
       priceRangeMax: place.priceRangeMax,
+      latitude: place.latitude,
+      longitude: place.longitude,
     },
   });
   function handleSetImageUrls(data: string[]) {
@@ -381,6 +434,52 @@ export default function EditPlace() {
               </div>
             </div>
           </div>
+
+          <Label className="block text-sm font-medium text-gray-700">
+            Set Point Location
+          </Label>
+          {fields.latitude.errors && (
+            <p className="mt-1 text-sm text-red-700">
+              {fields.latitude.errors}
+            </p>
+          )}
+          <Map
+            mapboxAccessToken={MAPBOX_ACCESS_TOKEN}
+            initialViewState={{
+              longitude: place.longitude ?? 118.64493557421042,
+              latitude: place.latitude ?? 0.1972476798250682,
+              zoom: place.latitude && place.longitude ? 10 : 3,
+            }}
+            style={{ width: "100%", height: "50vh", borderRadius: 5 }}
+            mapStyle="mapbox://styles/mapbox/streets-v9"
+            onClick={handleMapClick}
+            ref={mapRef}
+            onLoad={handleMapLoad}
+          >
+            {marker && (
+              <Marker
+                longitude={marker.longitude}
+                latitude={marker.latitude}
+                color="red"
+                anchor="center"
+              />
+            )}
+            <NavigationControl />
+          </Map>
+
+          <input
+            type="number"
+            hidden
+            name="latitude"
+            value={marker ? marker.latitude : ""}
+          />
+          <input
+            type="number"
+            hidden
+            name="longitude"
+            value={marker ? marker.longitude : ""}
+          />
+
           <div>
             <Button type="submit">Save Place</Button>
           </div>
@@ -436,7 +535,7 @@ export async function action({ request, params }: ActionFunctionArgs) {
         status: submission.status === "error" ? 400 : 200,
       });
     }
-    console.log(submission.value, "submission.value");
+
     const responsePlace = await fetch(`${BACKEND_API_URL}/places/${id}`, {
       method: "PATCH",
       headers: {
@@ -444,7 +543,7 @@ export async function action({ request, params }: ActionFunctionArgs) {
         Authorization: `Bearer ${accessToken}`,
       },
       body: JSON.stringify({
-        ...submission.value,
+        ...submission.payload,
         placePhotos: placePhotosData,
       }),
     });
