@@ -110,7 +110,6 @@ export const refreshAccessToken = async (refreshToken: string) => {
 
     return await response.json();
   } catch (error) {
-    console.error("Error refreshing access token:", error);
     return null;
   }
 };
