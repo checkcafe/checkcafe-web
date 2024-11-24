@@ -64,8 +64,12 @@ const EditPlaceSchema = z.object({
   streetAddress: z.string().min(4).max(100),
   priceRangeMin: z.number().min(1).optional(),
   priceRangeMax: z.number().min(1).optional(),
-  latitude: z.number().optional(),
-  longitude: z.number().optional(),
+  latitude: z
+    .number()
+    .min(-90, { message: "Latitude must be between -90 and 90." }),
+  longitude: z
+    .number()
+    .min(-180, { message: "Longitude must be between -180 and 180." }),
   cityId: z.string().min(4),
 });
 
@@ -393,6 +397,11 @@ export default function EditPlace() {
           <Label className="block text-sm font-medium text-gray-700">
             Set Point Location
           </Label>
+          {fields.latitude.errors && (
+            <p className="mt-1 text-sm text-red-700">
+              {fields.latitude.errors}
+            </p>
+          )}
           <Map
             mapboxAccessToken={MAPBOX_ACCESS_TOKEN}
             initialViewState={{
@@ -417,16 +426,19 @@ export default function EditPlace() {
             <NavigationControl />
           </Map>
 
-          <Input
-            type="hidden"
+          <input
+            type="number"
+            hidden
             name="latitude"
             value={marker ? marker.latitude : ""}
           />
-          <Input
-            type="hidden"
+          <input
+            type="number"
+            hidden
             name="longitude"
             value={marker ? marker.longitude : ""}
           />
+
           <div>
             <Button type="submit">Save Place</Button>
           </div>
@@ -469,6 +481,9 @@ export async function action({ request, params }: ActionFunctionArgs) {
     if (submission.intent !== "submit" || !submission.value) {
       return json(submission);
     }
+
+    console.log(submission);
+    return null;
 
     const responsePlace = await fetch(`${BACKEND_API_URL}/places/${id}`, {
       method: "PATCH",
