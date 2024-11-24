@@ -25,6 +25,7 @@ import { Button } from "~/components/ui/button";
 import { Card, CardContent } from "~/components/ui/card";
 import { MapboxView } from "~/components/ui/mapbox-view";
 import { ScrollArea, ScrollBar } from "~/components/ui/scroll-area";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "~/components/ui/tabs";
 import Constants from "~/constants";
 import { BACKEND_API_URL } from "~/lib/env";
 import { getPageTitle } from "~/lib/get-page-title";
@@ -133,12 +134,12 @@ export default function PlaceSlug() {
   const method = favoritePlace ? "delete" : "post";
 
   return (
-    <div className="px-4 py-8 md:px-32 md:py-20">
+    <div className="px-4 py-8 md:px-32 md:py-10">
       <div className="mb-4 flex flex-row justify-between">
         <Button
           onClick={() => setShowMap((prev: boolean) => !prev)}
           variant="outline"
-          className="md:hidden"
+          className=""
         >
           {showMap ? "Show Photos" : "Show Map"}
           <span>{showMap ? <FaRegImages /> : <MapIcon />}</span>
@@ -157,7 +158,7 @@ export default function PlaceSlug() {
       <section className="flex flex-col gap-10 md:flex-row md:gap-28">
         <div className="h-96 w-full md:w-2/4">
           {showMap ? (
-            <aside className="md:hidden">
+            <aside className="">
               <MapboxView
                 places={placesOnMap}
                 initialViewState={initialViewMap}
@@ -244,50 +245,8 @@ export default function PlaceSlug() {
               {formatPriceRange(place.priceRangeMin, place.priceRangeMax)}
             </p>
           </span>
-          <p className="mt-7 text-2xl font-semibold text-amber-950 md:mt-7">
-            Operational Time
-          </p>
-          <div className="mt-2">
-            {place.operatingHours?.length > 0 ? (
-              place.operatingHours.map((operatingHour, index) => (
-                <OperatingHourItem operatingHour={operatingHour} key={index} />
-              ))
-            ) : (
-              <p className="text-sm text-amber-950 md:text-base">
-                Operational Hours is not available
-              </p>
-            )}
-          </div>
-        </header>
-      </section>
-
-      <section className="mt-7 flex flex-col gap-10 md:mt-20 md:flex-row md:gap-28">
-        <aside className="hidden h-96 w-full md:block md:w-1/2">
-          <MapboxView
-            places={placesOnMap}
-            initialViewState={initialViewMap}
-            onPlaceClick={() => {}}
-            height="50vh"
-          />
-        </aside>
-
-        <div className="flex flex-col gap-4">
-          <div className="flex flex-col">
-            <h1 className="mb-4 mt-2 text-base font-semibold text-amber-950 md:text-2xl">
-              Facility
-            </h1>
-            {place.placeFacilities?.length > 0 ? (
-              place.placeFacilities.map((facility, index) => (
-                <Facility facility={facility} key={index} />
-              ))
-            ) : (
-              <p className="text-sm text-amber-950 md:text-base">
-                Facilities is not available
-              </p>
-            )}
-          </div>
           <section>
-            <h1 className="mb-4 mt-2 text-base font-semibold text-amber-950 md:text-2xl">
+            <h1 className="mb-4 mt-6 text-base font-semibold text-amber-950 md:text-2xl">
               Submitter
             </h1>
             <div className="flex flex-row items-center gap-4">
@@ -306,7 +265,50 @@ export default function PlaceSlug() {
               </p>
             </div>
           </section>
-        </div>
+          <Tabs defaultValue="operationalHours" className="mt-4">
+            <TabsList className="grid w-full grid-cols-2">
+              <TabsTrigger value="operationalHours">
+                Operational Time
+              </TabsTrigger>
+              <TabsTrigger value="facilities">Facility</TabsTrigger>
+            </TabsList>
+            <TabsContent value="operationalHours">
+              <p className="mt-7 text-2xl font-semibold text-amber-950 md:mt-7">
+                Operational Time
+              </p>
+              <div className="mt-2">
+                {place.operatingHours?.length > 0 ? (
+                  place.operatingHours.map((operatingHour, index) => (
+                    <OperatingHourItem
+                      operatingHour={operatingHour}
+                      key={index}
+                    />
+                  ))
+                ) : (
+                  <p className="text-sm text-amber-950 md:text-base">
+                    Operational Hours is not available
+                  </p>
+                )}
+              </div>
+            </TabsContent>
+            <TabsContent value="facilities">
+              <div className="flex flex-col">
+                <h1 className="mb-4 mt-2 text-base font-semibold text-amber-950 md:text-2xl">
+                  Facility
+                </h1>
+                {place.placeFacilities?.length > 0 ? (
+                  place.placeFacilities.map((facility, index) => (
+                    <Facility facility={facility} key={index} />
+                  ))
+                ) : (
+                  <p className="text-sm text-amber-950 md:text-base">
+                    Facilities is not available
+                  </p>
+                )}
+              </div>
+            </TabsContent>
+          </Tabs>
+        </header>
       </section>
 
       {nearbyPlaces.length > 0 && (
