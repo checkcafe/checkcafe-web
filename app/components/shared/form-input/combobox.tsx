@@ -27,10 +27,12 @@ type ComboboxProps = {
 };
 export function Combobox({ cities, setCityId, cityId }: ComboboxProps) {
   const [open, setOpen] = React.useState(false);
+
   function getIdByName(name: string) {
     const city = cities.find(city => city.name === name);
     return city ? city.id : "";
   }
+
   return (
     <Popover open={open} onOpenChange={setOpen}>
       <PopoverTrigger asChild>
@@ -48,9 +50,9 @@ export function Combobox({ cities, setCityId, cityId }: ComboboxProps) {
       </PopoverTrigger>
       <PopoverContent className="w-[200px] p-0">
         <Command>
-          <CommandInput placeholder="Search framework..." />
+          <CommandInput placeholder="Search City..." />
           <CommandList>
-            <CommandEmpty>No framework found.</CommandEmpty>
+            <CommandEmpty>No city found.</CommandEmpty>
             <CommandGroup>
               {cities.map(city => (
                 <CommandItem
