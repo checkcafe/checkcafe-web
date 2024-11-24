@@ -266,12 +266,12 @@ export default function EditPlace() {
               multiple={true}
               accept="image/png,image/jpeg"
               confirmUpload={true}
-              onFileUploadFailed={e => {
-                console.log(e, "failed");
-              }}
-              onFileUploadSuccess={e => {
-                console.log(e, "success");
-              }}
+              // onFileUploadFailed={e => {
+              //   console.log(e, "failed");
+              // }}
+              // onFileUploadSuccess={e => {
+              //   console.log(e, "success");
+              // }}
               onDoneClick={e => {
                 if (e.successEntries.length > 0) {
                   const data = e.successEntries;
@@ -471,7 +471,7 @@ export default function EditPlace() {
             type="number"
             hidden
             name="latitude"
-            value={marker ? marker.latitude : ""}
+            value={marker ? String(marker.latitude) : ""}
           />
           <input
             type="number"
@@ -512,11 +512,8 @@ export async function action({ request, params }: ActionFunctionArgs) {
   const formData = await request.formData();
   const placeId = formData.get("placeId");
   const action = formData.get("action");
-  console.dir({ formData }, { depth: null });
-  console.log("Form data received:", Object.fromEntries(formData));
   if (!action) {
     const submission = parseWithZod(formData, { schema: EditPlaceSchema });
-    console.dir({ submission }, { depth: null });
     const placePhotosData = JSON.parse(String(submission.payload.placePhotos));
     // console.info(
     //   placePhotosData,
@@ -543,7 +540,7 @@ export async function action({ request, params }: ActionFunctionArgs) {
         Authorization: `Bearer ${accessToken}`,
       },
       body: JSON.stringify({
-        ...submission.payload,
+        ...submission.value,
         placePhotos: placePhotosData,
       }),
     });
@@ -551,8 +548,6 @@ export async function action({ request, params }: ActionFunctionArgs) {
     if (!place) {
       throw new Response(null, { status: 404, statusText: "Place Not Found" });
     }
-
-    console.dir({ place }, { depth: null });
   } else if (action === "delete") {
     const responseDelete = await fetch(`${BACKEND_API_URL}/places/${placeId}`, {
       method: "DELETE",
