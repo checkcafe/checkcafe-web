@@ -73,7 +73,7 @@ export async function loader({ params, request }: LoaderFunctionArgs) {
   const session = await getSession(request.headers.get("Cookie"));
   const username = session.get("userData")?.username;
 
-  if (place.submitter.username !== username) {
+  if (!place.isPublished && place.submitter.username !== username) {
     return redirect("/login");
   }
 
