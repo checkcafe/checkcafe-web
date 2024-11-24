@@ -104,7 +104,11 @@ type Marker = {
 export default function EditPlace() {
   const { place, city } = useLoaderData<typeof loader>();
   const [cityId, setCityId] = useState(place.address.cityId);
-  const [marker, setMarker] = useState<Marker>(null);
+  const [marker, setMarker] = useState<Marker>(
+    place.latitude && place.longitude
+      ? { latitude: place.latitude, longitude: place.longitude }
+      : null,
+  );
   const mapRef = useRef<MapRef | null>(null);
 
   const handleMapClick = (event: MapMouseEvent) => {
@@ -139,6 +143,8 @@ export default function EditPlace() {
       description: place.description,
       priceRangeMin: place.priceRangeMin,
       priceRangeMax: place.priceRangeMax,
+      latitude: place.latitude,
+      longitude: place.longitude,
     },
   });
 
@@ -390,9 +396,9 @@ export default function EditPlace() {
           <Map
             mapboxAccessToken={MAPBOX_ACCESS_TOKEN}
             initialViewState={{
-              longitude: 118.64493557421042,
-              latitude: 0.1972476798250682,
-              zoom: 3,
+              longitude: place.longitude ?? 118.64493557421042,
+              latitude: place.latitude ?? 0.1972476798250682,
+              zoom: place.latitude && place.longitude ? 10 : 3,
             }}
             style={{ width: "100%", height: "50vh", borderRadius: 5 }}
             mapStyle="mapbox://styles/mapbox/streets-v9"
