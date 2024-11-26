@@ -194,7 +194,7 @@ export default function PlaceSlug() {
               {place.name || "Name is not available"}
             </h1>
             <div className="flex flex-row items-center justify-center gap-1">
-              {isOwner && !place.isPublished ? null : (
+              {place.isPublished && (
                 <Form
                   method={method}
                   action={`/places/${slug}`}
