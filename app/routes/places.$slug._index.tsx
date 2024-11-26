@@ -25,7 +25,6 @@ import { Button } from "~/components/ui/button";
 import { Card, CardContent } from "~/components/ui/card";
 import { MapboxView } from "~/components/ui/mapbox-view";
 import { ScrollArea, ScrollBar } from "~/components/ui/scroll-area";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "~/components/ui/tabs";
 import Constants from "~/constants";
 import { BACKEND_API_URL } from "~/lib/env";
 import { getPageTitle } from "~/lib/get-page-title";
@@ -113,7 +112,8 @@ export const meta: MetaFunction<typeof loader> = ({ data }) => {
 };
 
 export default function PlaceSlug() {
-  const { place, favoritePlace, nearbyPlaces } = useLoaderData<typeof loader>();
+  const { place, favoritePlace, nearbyPlaces, username } =
+    useLoaderData<typeof loader>();
   const { slug } = useParams();
 
   const [showMap, setShowMap] = useState(false);
@@ -133,24 +133,26 @@ export default function PlaceSlug() {
 
   const method = favoritePlace ? "delete" : "post";
 
+  const isOwner = place.submitter.username === username;
+
   return (
     <div className="px-4 py-8 md:px-32 md:py-10">
       <div className="mb-4 flex flex-row justify-between">
         <Button
           onClick={() => setShowMap((prev: boolean) => !prev)}
           variant="outline"
-          className=""
+          className="md:hidden"
         >
           {showMap ? "Show Photos" : "Show Map"}
           <span>{showMap ? <FaRegImages /> : <MapIcon />}</span>
         </Button>
-        {!place.isPublished && (
+        {isOwner && (
           <Button asChild className="ml-auto">
             <Link
               to={`/places/${place.id}/edit`}
               className="bg-amber-950 text-primary"
             >
-              Continue Edit
+              Edit
             </Link>
           </Button>
         )}
@@ -192,38 +194,49 @@ export default function PlaceSlug() {
               {place.name || "Name is not available"}
             </h1>
             <div className="flex flex-row items-center justify-center gap-1">
-              <Form
-                method={method}
-                action={`/places/${slug}`}
-                preventScrollReset={true}
-              >
-                <input type="hidden" name="placeId" value={place.id} />
-                <input
-                  type="hidden"
-                  name="favoriteId"
-                  value={favoritePlace?.favoriteId || ""}
-                />
-                <button
-                  type="submit"
-                  name="favorite"
-                  value={favoritePlace ? "false" : "true"}
-                  className="flex cursor-pointer items-center justify-center"
+              {isOwner && !place.isPublished ? null : (
+                <Form
+                  method={method}
+                  action={`/places/${slug}`}
+                  preventScrollReset={true}
                 >
-                  {favoritePlace ? (
-                    <FaHeart className="h-7 w-7" color="#FF9129" />
-                  ) : (
-                    <BiHeart className="h-8 w-8" />
-                  )}
-                </button>
-              </Form>
+                  <input type="hidden" name="placeId" value={place.id} />
+                  <input
+                    type="hidden"
+                    name="favoriteId"
+                    value={favoritePlace?.favoriteId || ""}
+                  />
+                  <button
+                    type="submit"
+                    name="favorite"
+                    value={favoritePlace ? "false" : "true"}
+                    className="flex cursor-pointer items-center justify-center"
+                  >
+                    {favoritePlace ? (
+                      <FaHeart className="h-7 w-7" color="#FF9129" />
+                    ) : (
+                      <BiHeart className="h-8 w-8" />
+                    )}
+                  </button>
+                </Form>
+              )}
               {place.isPublished && <ShareButton />}
             </div>
           </div>
           <p className="mb-5 mt-2 text-base font-normal">
             {place.description || "Description is not available"}
           </p>
+          <span className="mt-2 flex flex-row items-center gap-2">
+            <div className="flex h-8 w-8 items-center justify-center rounded-full bg-amber-500">
+              <Receipt size={24} color="white" />
+            </div>
+            <p className="text-sm font-medium text-amber-950">
+              {place.currency || "IDR"}{" "}
+              {formatPriceRange(place.priceRangeMin, place.priceRangeMax)}
+            </p>
+          </span>
           {place.address ? (
-            <span className="flex flex-row items-center gap-2">
+            <span className="mt-4 flex flex-row items-center gap-4">
               <div className="flex h-8 w-8 items-center justify-center rounded-full bg-amber-500">
                 <MapPin size={24} color="white" />
               </div>
@@ -236,79 +249,66 @@ export default function PlaceSlug() {
           ) : (
             <p className="text-base font-normal">Address is not available</p>
           )}
-          <span className="mt-2 flex flex-row items-center gap-2">
-            <div className="flex h-8 w-8 items-center justify-center rounded-full bg-amber-500">
-              <Receipt size={24} color="white" />
-            </div>
-            <p className="text-sm font-medium text-amber-950">
-              {place.currency || "IDR"}{" "}
-              {formatPriceRange(place.priceRangeMin, place.priceRangeMax)}
-            </p>
-          </span>
-          <section>
-            <h1 className="mb-4 mt-6 text-base font-semibold text-amber-950 md:text-2xl">
-              Submitter
-            </h1>
-            <div className="flex flex-row items-center gap-4">
-              <Avatar className="rounded-full bg-primary p-0.5">
-                <AvatarImage
-                  className="rounded-full"
-                  src={place.submitter.avatarUrl}
-                  alt={place.submitter.username}
-                />
-                <AvatarFallback>
-                  {place.submitter.name.charAt(0).toUpperCase()}
-                </AvatarFallback>
-              </Avatar>
-              <p className="text-sm font-medium text-amber-950 md:text-base">
-                {place.submitter.name || "Submitter name is not available"}
+          <p className="mt-7 text-2xl font-semibold text-amber-950 md:mt-7">
+            Operational Time
+          </p>
+          <div className="mt-2">
+            {place.operatingHours?.length > 0 ? (
+              place.operatingHours.map((operatingHour, index) => (
+                <OperatingHourItem operatingHour={operatingHour} key={index} />
+              ))
+            ) : (
+              <p className="text-sm text-amber-950 md:text-base">
+                Operational Hours is not available
               </p>
-            </div>
-          </section>
-          <Tabs defaultValue="operationalHours" className="mt-4">
-            <TabsList className="grid w-full grid-cols-2">
-              <TabsTrigger value="operationalHours">
-                Operational Time
-              </TabsTrigger>
-              <TabsTrigger value="facilities">Facility</TabsTrigger>
-            </TabsList>
-            <TabsContent value="operationalHours">
-              <p className="mt-7 text-2xl font-semibold text-amber-950 md:mt-7">
-                Operational Time
-              </p>
-              <div className="mt-2">
-                {place.operatingHours?.length > 0 ? (
-                  place.operatingHours.map((operatingHour, index) => (
-                    <OperatingHourItem
-                      operatingHour={operatingHour}
-                      key={index}
-                    />
-                  ))
-                ) : (
-                  <p className="text-sm text-amber-950 md:text-base">
-                    Operational Hours is not available
-                  </p>
-                )}
-              </div>
-            </TabsContent>
-            <TabsContent value="facilities">
-              <div className="flex flex-col">
-                <h1 className="mb-4 mt-2 text-base font-semibold text-amber-950 md:text-2xl">
-                  Facility
-                </h1>
-                {place.placeFacilities?.length > 0 ? (
-                  place.placeFacilities.map((facility, index) => (
-                    <Facility facility={facility} key={index} />
-                  ))
-                ) : (
-                  <p className="text-sm text-amber-950 md:text-base">
-                    Facilities is not available
-                  </p>
-                )}
-              </div>
-            </TabsContent>
-          </Tabs>
+            )}
+          </div>
         </header>
+      </section>
+
+      <section className="mt-7 flex flex-col gap-10 md:mt-10 md:flex-row md:gap-28">
+        <aside className="hidden h-96 w-full md:block md:w-1/2">
+          <MapboxView
+            places={placesOnMap}
+            initialViewState={initialViewMap}
+            onPlaceClick={() => {}}
+            height="50vh"
+          />
+        </aside>
+        <section>
+          <div className="flex flex-col">
+            <h1 className="mb-4 mt-2 text-base font-semibold text-amber-950 md:text-2xl">
+              Facility
+            </h1>
+            {place.placeFacilities?.length > 0 ? (
+              place.placeFacilities.map((facility, index) => (
+                <Facility facility={facility} key={index} />
+              ))
+            ) : (
+              <p className="text-sm text-amber-950 md:text-base">
+                Facilities is not available
+              </p>
+            )}
+          </div>
+          <h1 className="mb-4 mt-6 text-base font-semibold text-amber-950 md:text-2xl">
+            Submitter
+          </h1>
+          <div className="flex flex-row items-center gap-4">
+            <Avatar className="rounded-full bg-primary p-0.5">
+              <AvatarImage
+                className="rounded-full"
+                src={place.submitter.avatarUrl}
+                alt={place.submitter.username}
+              />
+              <AvatarFallback>
+                {place.submitter.name.charAt(0).toUpperCase()}
+              </AvatarFallback>
+            </Avatar>
+            <p className="text-sm font-medium text-amber-950 md:text-base">
+              {place.submitter.name || "Submitter name is not available"}
+            </p>
+          </div>
+        </section>
       </section>
 
       {nearbyPlaces.length > 0 && (
@@ -430,13 +430,8 @@ export async function action({ request, params }: ActionFunctionArgs) {
   const username = session.get("userData")?.username;
   const placeId = formData.get("placeId")?.toString();
   const favoriteId = formData.get("favoriteId")?.toString();
-  const isPublished = formData.get("isPublished")?.toString();
   const method = request.method;
   const { slug } = params;
-
-  if (!isPublished) {
-    throw new Error("The place must be published to favorite");
-  }
 
   if (!placeId && !favoriteId) {
     return json({ error: "Place ID or Favorite ID is required" });
