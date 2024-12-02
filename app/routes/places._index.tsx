@@ -5,7 +5,7 @@ import {
   MetaFunction,
   redirect,
 } from "@remix-run/node";
-import { useLoaderData } from "@remix-run/react";
+import { useLoaderData, useNavigate, useNavigation } from "@remix-run/react";
 import { List, MapIcon } from "lucide-react";
 import { useRef, useState } from "react";
 
@@ -25,6 +25,12 @@ import {
   PlaceItem,
 } from "~/types/model";
 import { formatFilterTime } from "~/utils/formatter";
+
+interface FetchPlacesResponse {
+  data: PlaceItem[];
+  totalItems: number;
+  perPage: number;
+}
 
 export const meta: MetaFunction = () => {
   return [
@@ -54,7 +60,7 @@ async function fetchFavorites(request: Request): Promise<FavoritePlace[]> {
   return placeFavorites || [];
 }
 
-async function fetchPlaces(url: URL): Promise<PlaceItem[]> {
+async function fetchPlaces(url: URL): Promise<FetchPlacesResponse> {
   const apiUrl = new URL(`${BACKEND_API_URL}/places`);
   const filter: Filter = {};
 
@@ -80,35 +86,66 @@ async function fetchPlaces(url: URL): Promise<PlaceItem[]> {
     apiUrl.searchParams.append("filter", JSON.stringify(filter));
   }
 
+  const limit = url.searchParams.get("limit") || "10";
+  apiUrl.searchParams.append("limit", limit);
+  apiUrl.searchParams.append("page", "1");
   const response = await fetch(apiUrl.toString());
-  if (!response.ok) return [];
-  return await response.json();
+  if (!response.ok)
+    return {
+      data: [],
+      totalItems: 0,
+      perPage: 0,
+    };
+  const jsonResponse = await response.json();
+  return {
+    data: jsonResponse.data,
+    totalItems: jsonResponse.pagination.totalData,
+    perPage: jsonResponse.pagination.perPage,
+  };
 }
 
 export async function loader({ request }: LoaderFunctionArgs) {
   const url = new URL(request.url);
-  const [placeFavorites, places] = await Promise.all([
+  const [placeFavorites, placesResponse] = await Promise.all([
     fetchFavorites(request),
     fetchPlaces(url),
   ]);
 
   return {
-    places,
+    places: placesResponse.data,
     favorites: placeFavorites,
     hasCityParam: Boolean(url.searchParams.get("city")),
+    pagination: {
+      totalItem: placesResponse.totalItems,
+      perPage: placesResponse.perPage,
+    },
   };
 }
 
 export default function Places() {
-  const { places, hasCityParam, favorites } = useLoaderData<typeof loader>();
+  const { places, hasCityParam, favorites, pagination } =
+    useLoaderData<typeof loader>();
   const favoriteMap = new Map(favorites.map(fav => [fav.slug, fav.favoriteId]));
   const [showMap, setShowMap] = useState(false);
   const cardRefs = useRef<(HTMLDivElement | null)[]>([]);
-
+  const navigate = useNavigate();
+  const navigation = useNavigation();
   const handleScrollToCard = (placeId: string) => {
     const cardIndex = places.findIndex(place => place.id === placeId);
     const selectedCard = cardRefs.current[cardIndex];
     selectedCard?.scrollIntoView({ behavior: "smooth", block: "center" });
+  };
+
+  const loadMorePlaces = () => {
+    const currentQueryParams = new URLSearchParams(window.location.search);
+
+    currentQueryParams.delete("limit");
+
+    currentQueryParams.append("limit", String(pagination.perPage + 10));
+
+    const newUrl = `/places?${currentQueryParams.toString()}`;
+
+    navigate(newUrl, { replace: true, preventScrollReset: true });
   };
 
   return (
@@ -150,6 +187,20 @@ export default function Places() {
                   </div>
                 ))}
               </ul>
+
+              {pagination.totalItem > pagination.perPage && (
+                <div className="mt-4 flex justify-center">
+                  <Button
+                    className="w-full"
+                    onClick={loadMorePlaces}
+                    disabled={navigation.state === "loading"}
+                  >
+                    {navigation.state === "loading"
+                      ? "Loading..."
+                      : "Load More"}
+                  </Button>
+                </div>
+              )}
             </main>
 
             <aside

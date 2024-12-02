@@ -21,6 +21,7 @@ export function SelectCity() {
     setValue(newValue);
     if (newValue) {
       searchParams.set("city", newValue);
+      searchParams.delete("limit");
     } else {
       searchParams.delete("city");
     }
