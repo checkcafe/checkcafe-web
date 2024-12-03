@@ -51,14 +51,8 @@ const ShareButton: React.FC<ShareButtonProps> = ({ initialUrl }) => {
 
   const handleCopyLink = async () => {
     if (navigator.clipboard && url) {
-      try {
-        await navigator.clipboard.writeText(url);
-        toast("Link copied to clipboard!");
-      } catch (err) {
-        console.error("Failed to copy link: ", err);
-      }
-    } else {
-      console.warn("Clipboard API not available or URL is not set");
+      await navigator.clipboard.writeText(url);
+      toast("Link copied to clipboard!");
     }
   };
 
