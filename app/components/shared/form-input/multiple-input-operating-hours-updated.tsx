@@ -1,130 +1,241 @@
-// import { getFormProps, getInputProps, useForm } from "@conform-to/react";
-// import { parseWithZod } from "@conform-to/zod";
-// import { useFetcher } from "@remix-run/react";
-// import { useRef } from "react";
-// import { z } from "zod";
+import {
+  getFormProps,
+  getInputProps,
+  getSelectProps,
+  useForm,
+} from "@conform-to/react";
+import { parseWithZod } from "@conform-to/zod";
+import { ActionFunctionArgs } from "@remix-run/node";
+import { json, useFetcher } from "@remix-run/react";
+import { ArrowDown, ArrowUpIcon, Trash, TrashIcon } from "lucide-react";
+import { useRef } from "react";
+import { z } from "zod";
 
-// import { Alert } from "~/components/ui/alert";
-// import { Button } from "~/components/ui/button";
-// import { FormDescription, FormField, FormLabel } from "~/components/ui/form";
-// import { Input } from "~/components/ui/input";
-// import { OperatingHour, schemaOperatingHoursPlace } from "~/schemas/places";
-// import { Place } from "~/types/model";
+import { Alert } from "~/components/ui/alert";
+import { Button } from "~/components/ui/button";
+import { FormDescription, FormField, FormLabel } from "~/components/ui/form";
+import { Input } from "~/components/ui/input";
+import { Label } from "~/components/ui/label";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "~/components/ui/select";
+import { BACKEND_API_URL } from "~/lib/env";
+import { getAccessToken } from "~/lib/token";
+import { OperatingHour, schemaOperatingHoursPlace } from "~/schemas/places";
+import { Place } from "~/types/model";
 
-// // import { type SubmissionResult } from "~/types/submission";
+import SelectHour, { generateTimeOptions } from "../select-hour";
 
-// export function MultipleOperatingHoursUpdate({
-//   placeData,
-// }: {
-//   placeData?: Pick<Place, "id" | "operatingHours">;
-// }) {
-//   const fetcher = useFetcher();
-//   const [form, fields] = useForm<z.infer<typeof schemaOperatingHoursPlace>>({
-//     shouldValidate: "onSubmit",
-//     // lastSubmission: fetcher.data as SubmissionResult,
-//     onValidate({ formData }) {
-//       return parseWithZod(formData, { schema: schemaOperatingHoursPlace });
-//     },
-//     defaultValue: {
-//       operatingHours: placeData?.operatingHours,
-//     },
-//   });
+// Define the available time options and days of the week
+const timeOptions = generateTimeOptions();
+const daysData = [
+  "Monday",
+  "Tuesday",
+  "Wednesday",
+  "Thursday",
+  "Friday",
+  "Saturday",
+  "Sunday",
+];
 
-//   // const operatingHoursItems = useFieldList(form.ref, operatingHours);
-//   const operatingHoursItems = fields.operatingHours.getFieldList();
-//   const hasOperatingHoursItems = operatingHoursItems.length > 0;
-//   console.log(operatingHoursItems, FormData, "operatingHours");
-//   // console.log({ ...list.insert(operatingHours.name) }, "insert");
-//   return (
-//     <fetcher.Form {...getFormProps(form)} method="PUT" className="space-y-6">
-//       <fieldset className="space-y-2 disabled:opacity-80">
-//         <input
-//           hidden
-//           {...getInputProps(fields.id, { type: "text" })}
-//           defaultValue={placeData?.id}
-//         />
-//         <FormField>
-//           <FormLabel id="links">Links</FormLabel>
-//           <FormDescription>
-//             To link your websites, social media, and projects/products. Limited
-//             to 10 items.
-//           </FormDescription>
+// Component to update operating hours
+export function MultipleOperatingHoursUpdate({
+  placeData,
+}: {
+  placeData?: Pick<Place, "id" | "operatingHours">;
+}) {
+  const fetcher = useFetcher();
+  const [form, fields] = useForm<z.infer<typeof schemaOperatingHoursPlace>>({
+    shouldValidate: "onSubmit",
+    onValidate({ formData }) {
+      console.log(formData);
+      return parseWithZod(formData, { schema: schemaOperatingHoursPlace });
+    },
+    defaultValue: {
+      operatingHours: placeData?.operatingHours || [],
+    },
+  });
 
-//           <div>
-//             {/* <Button
-//               variant="outline"
-//               {...form.insert(`${fields.operatingHours.name}`)}
-//             >
-//               <span>Add</span>
-//             </Button> */}
-//             <Button
-//               {...form.insert.getButtonProps({
-//                 name: fields.operatingHours.name,
-//               })}
-//             >
-//               Add (Declarative API)
-//             </Button>
-//             <Button
-//               type="submit"
-//               name="intent"
-//               value="user-change-links"
-//               variant="outline"
-//             >
-//               Save
-//             </Button>
-//           </div>
-//           {!hasOperatingHoursItems && <p>No operating hours yet, add one.</p>}
-//           {hasOperatingHoursItems &&
-//             operatingHoursItems.map(operatingHoursItem => (
-//               <li key={operatingHoursItem.key} className="flex gap-2 py-1">
-//                 <OperatingHoursItemFieldset
-//                   config={operatingHoursItem.getFieldset()}
-//                 />
-//                 <p>{operatingHoursItem.name}</p>
-//               </li>
-//             ))}
-//         </FormField>
-//       </fieldset>
-//     </fetcher.Form>
-//   );
-// }
+  const operatingHoursItems = fields.operatingHours.getFieldList();
+  const canAddOperatingHours = operatingHoursItems.length <= 6;
+  return (
+    <form method="PUT" className="space-y-6" {...getFormProps(form)}>
+      <fieldset className="space-y-2 disabled:opacity-80">
+        {/* <input
+          hidden
+          {...getInputProps(fields.id, { type: "text" })}
+          defaultValue={placeData?.id}
+        /> */}
+        <FormLabel id="operatingHours">Operating Hours</FormLabel>
+        <div className="my-4 flex gap-4">
+          <Button
+            {...form.insert.getButtonProps({
+              name: fields.operatingHours.name,
+            })}
+            disabled={!canAddOperatingHours}
+          >
+            Add Operating Hours
+          </Button>
+          <Button type="submit" variant="outline">
+            Save
+          </Button>
+        </div>
+        {operatingHoursItems.length === 0 && (
+          <p>No operating hours yet, add one.</p>
+        )}
 
-// interface OperatingHoursItemFieldsetProps
-//   extends z.infer<typeof OperatingHour> {}
-// function OperatingHoursItemFieldset({ config }: { config: any }) {
-//   return (
-//     <fieldset className="flex w-full flex-col gap-1 sm:flex-row sm:gap-2">
-//       <div>
-//         <Input
-//           placeholder="Day"
-//           className="w-full sm:w-auto"
-//           {...getInputProps(config.day, { type: "text" })}
-//         />
-//         {config.day.error && (
-//           <Alert variant="destructive">{config.day.error}</Alert>
-//         )}
-//       </div>
+        <ul className="space-y-2">
+          {operatingHoursItems.map((item, index) => (
+            <>
+              <li key={item.key} className="flex items-center gap-2">
+                <OperatingHoursItemFieldset
+                  config={item.getFieldset()}
+                  index={index}
+                  form={form}
+                  fields={fields}
+                />
+              </li>
+            </>
+          ))}
+        </ul>
+      </fieldset>
+    </form>
+  );
+}
 
-//       <div>
-//         <Input
-//           placeholder="Opening Time"
-//           className="w-full sm:w-auto"
-//           {...getInputProps(config.openingTime, { type: "text" })}
-//         />
-//         {config.openingTime.error && (
-//           <Alert variant="destructive">{config.openingTime.error}</Alert>
-//         )}
-//       </div>
-//       <div>
-//         <Input
-//           placeholder="Closing Time"
-//           className="w-full sm:w-auto"
-//           {...getInputProps(config.closingTime, { type: "text" })}
-//         />
-//         {config.closingTime.error && (
-//           <Alert variant="destructive">{config.closingTime.error}</Alert>
-//         )}
-//       </div>
-//     </fieldset>
-//   );
-// }
+function OperatingHoursItemFieldset({
+  config,
+  index,
+  form,
+  fields,
+}: {
+  config: any;
+  index: number;
+  form: any;
+  fields: any;
+}) {
+  return (
+    <fieldset className="flex w-full flex-col gap-1 sm:flex-row sm:gap-2">
+      <div className="flex w-full gap-4">
+        {/* Day Selector */}
+        <div>
+          <Label htmlFor={`operatingHours.${index}.day`}>Day</Label>
+          <Select {...getSelectProps(config.day.name)} defaultValue="Monday">
+            <SelectTrigger className="w-full">
+              <SelectValue placeholder="Select a day" />
+            </SelectTrigger>
+            <SelectContent>
+              {daysData.map(day => (
+                <SelectItem key={day} value={day}>
+                  {day}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
+        {/* Open Time Selector */}
+        <div>
+          <Label htmlFor={`operatingHours.${index}.openTime`}>Open</Label>
+          <Select
+            {...getSelectProps(config.openTime.name)}
+            defaultValue="09:00"
+          >
+            <SelectTrigger className="w-full">
+              <SelectValue placeholder="09:00" />
+            </SelectTrigger>
+            <SelectContent>
+              {timeOptions.map(time => (
+                <SelectItem key={time} value={time}>
+                  {time}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
+        {/* Close Time Selector */}
+        <div>
+          <Label htmlFor={`operatingHours.${index}.closeTime`}>Close</Label>
+          <Select
+            {...getSelectProps(config.closeTime.name)}
+            defaultValue="23:00"
+          >
+            <SelectTrigger className="w-full">
+              <SelectValue placeholder="23:00" />
+            </SelectTrigger>
+            <SelectContent>
+              {timeOptions.map(time => (
+                <SelectItem key={time} value={time}>
+                  {time}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
+        {/* Action Buttons */}
+        <div className="flex gap-2 self-end">
+          <Button
+            {...form.reorder.getButtonProps({
+              name: fields.operatingHours.name,
+              from: index,
+              to: index - 1,
+            })}
+          >
+            <ArrowUpIcon />
+          </Button>
+          <Button
+            {...form.reorder.getButtonProps({
+              name: fields.operatingHours.name,
+              from: index,
+              to: index + 1,
+            })}
+          >
+            <ArrowDown />
+          </Button>
+          <Button
+            {...form.remove.getButtonProps({
+              name: fields.operatingHours.name,
+              index,
+            })}
+            variant="destructive"
+          >
+            <TrashIcon />
+          </Button>
+        </div>
+      </div>
+    </fieldset>
+  );
+}
+
+// Action Function
+export async function action({ request, params }: ActionFunctionArgs) {
+  const { id } = params;
+  const formData = await request.formData();
+  console.info(id, "id");
+  console.info(formData, "subs");
+  const submission = parseWithZod(formData, {
+    schema: schemaOperatingHoursPlace,
+  });
+
+  if (submission.status !== "success") {
+    return json(submission.reply(), {
+      status: 400,
+    });
+  }
+
+  // Replace with actual update logic
+  // Example:
+  // const response = await fetch(`${BACKEND_API_URL}/places/${id}`, {
+  //   method: "PATCH",
+  //   headers: { "Content-Type": "application/json" },
+  //   body: JSON.stringify(submission.value),
+  // });
+  // if (!response.ok) {
+  //   throw new Error("Failed to update operating hours");
+  // }
+
+  return null;
+}

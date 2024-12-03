@@ -9,10 +9,19 @@ const OperatingHour = z.object({
   closingTime: z.string(),
 });
 
-const operatingHours = z.array(OperatingHour).optional();
+const operatingHours = z.array(OperatingHour);
 const schemaOperatingHoursPlace = z.object({
-  id,
   operatingHours,
+});
+
+const facility = z.object({
+  facilityId: z.string(),
+  description: z.string().optional(),
+});
+const facilities = z.array(facility);
+
+const schemaFacilities = z.object({
+  placeFacilities: facilities,
 });
 const AddressSchema = z.object({
   street: z.string(),
@@ -77,6 +86,68 @@ const FavoritePlaceSchema = z.object({
   longitude: z.number(),
 });
 
+const EditPlaceSchema = z.object({
+  placePhotos: z.string().min(1).optional(),
+  name: z.string().min(4).max(255),
+  description: z.preprocess(
+    value => (value === "" ? undefined : value),
+    z.string().min(4).max(255).optional(),
+  ),
+  streetAddress: z.string().min(4).max(100),
+  priceRangeMin: z.preprocess(
+    value => (value === "" ? undefined : value),
+    z.number().min(1).optional(),
+  ),
+  priceRangeMax: z.preprocess(
+    value => (value === "" ? undefined : value),
+    z.number().min(1).optional(),
+  ),
+  latitude: z
+    .number()
+    .min(-90, { message: "Latitude must be between -90 and 90." }),
+  longitude: z
+    .number()
+    .min(-180, { message: "Longitude must be between -180 and 180." }),
+  cityId: z.string().min(4),
+
+  // operatingHours: z
+  //   .array(
+  //     z
+  //       .object({
+  //         day: z.string(),
+  //         openingTime: z
+  //           .string()
+  //           .regex(/^([01]\d|2[0-3]):([0-5]\d)$/, {
+  //             message: "Invalid time format (HH:mm).",
+  //           })
+  //           .optional(),
+  //         closingTime: z
+  //           .string()
+  //           .regex(/^([01]\d|2[0-3]):([0-5]\d)$/, {
+  //             message: "Invalid time format (HH:mm).",
+  //           })
+  //           .optional(),
+  //       })
+  //       .refine(data => !data.day || (data.openingTime && data.closingTime), {
+  //         message:
+  //           "If a day is selected, both openingTime and closingTime must be provided.",
+  //         path: ["openingTime", "closingTime"], // Error message targets both fields
+  //       }),
+  //   )
+  //   .optional(),
+
+  // placeFacilities: z
+  //   .array(
+  //     z.object({
+  //       facilityId: z
+  //         .string()
+  //         .nonempty({ message: "Facility ID cannot be empty." }),
+  //       description: z.string().optional(),
+  //     }),
+  //   )
+  //   .optional(),
+});
+
 export {
   OperatingHour,
   AddressSchema,
@@ -86,4 +157,7 @@ export {
   FavoritePlaceSchema,
   PlacesSchema,
   schemaOperatingHoursPlace,
+  EditPlaceSchema,
+  operatingHours,
+  schemaFacilities,
 };
