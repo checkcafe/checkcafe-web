@@ -99,6 +99,7 @@ export default function PlaceFilter() {
 
       if (value && value !== "none") {
         searchParams.set(param, value);
+        searchParams.delete("limit");
       } else {
         searchParams.delete(param);
       }
