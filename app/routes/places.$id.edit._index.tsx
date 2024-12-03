@@ -12,7 +12,7 @@ import {
   LoaderFunctionArgs,
   redirect,
 } from "@remix-run/node";
-import { Form, Link, useLoaderData } from "@remix-run/react";
+import { Form, Link, useLoaderData, useNavigation } from "@remix-run/react";
 
 import "mapbox-gl/dist/mapbox-gl.css";
 import "@mapbox/mapbox-gl-geocoder/dist/mapbox-gl-geocoder.css";
@@ -38,9 +38,23 @@ import {
 import { z } from "zod";
 
 import { Combobox } from "~/components/shared/form-input/combobox";
+import { MultipleFacilities } from "~/components/shared/form-input/multiple-input-facilities";
+import { MultipleOperatingHoursUpdate } from "~/components/shared/form-input/multiple-input-operating-hours-updated";
+import LoadingSpinner from "~/components/shared/loader-spinner";
 // import { MultipleOperatingHoursUpdate } from "~/components/shared/form-input/multiple-input-operating-hours-updated";
 // import { OperatingHoursForm } from "~/components/shared/form-input/operating-hours-form";
 import { Sliders } from "~/components/shared/sliders";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "~/components/ui/alert-dialog";
 import { Button } from "~/components/ui/button";
 import { Input } from "~/components/ui/input";
 import { Label } from "~/components/ui/label";
@@ -54,6 +68,7 @@ import {
 } from "~/lib/env";
 import { getAccessToken } from "~/lib/token";
 import { cn } from "~/lib/utils";
+import { EditPlaceSchema } from "~/schemas/places";
 import { City, Place } from "~/types/model";
 
 React.useLayoutEffect = React.useEffect;
@@ -61,32 +76,6 @@ React.useLayoutEffect = React.useEffect;
 const uploadcareSimpleAuthSchema = new UploadcareSimpleAuthSchema({
   publicKey: UPLOADCARE_PUBLIC_KEY,
   secretKey: UPLOADCARE_SECRET_KEY,
-});
-
-const EditPlaceSchema = z.object({
-  placePhotos: z.string().min(1).optional(),
-  name: z.string().min(4).max(255),
-  description: z.preprocess(
-    value => (value === "" ? undefined : value),
-    z.string().min(4).max(255).optional(),
-  ),
-  streetAddress: z.string().min(4).max(100),
-  priceRangeMin: z.preprocess(
-    value => (value === "" ? undefined : value),
-    z.number().min(1).optional(),
-  ),
-  priceRangeMax: z.preprocess(
-    value => (value === "" ? undefined : value),
-    z.number().min(1).optional(),
-  ),
-
-  latitude: z
-    .number()
-    .min(-90, { message: "Latitude must be between -90 and 90." }),
-  longitude: z
-    .number()
-    .min(-180, { message: "Longitude must be between -180 and 180." }),
-  cityId: z.string().min(4),
 });
 
 export async function loader({ params }: LoaderFunctionArgs) {
@@ -122,8 +111,10 @@ type Marker = {
 } | null;
 
 export default function EditPlace() {
+  const navigation = useNavigation();
   const { place, city } = useLoaderData<typeof loader>();
   const [cityId, setCityId] = useState(place.address.cityId);
+  const [open, setOpen] = useState<boolean>();
   const [marker, setMarker] = useState<Marker>(
     place.latitude && place.longitude
       ? { latitude: place.latitude, longitude: place.longitude }
@@ -204,21 +195,55 @@ export default function EditPlace() {
   async function deleteFiles(uuid: string) {
     await deleteFile({ uuid }, { authSchema: uploadcareSimpleAuthSchema });
   }
+
+  // console.log(place, "plcae");
   return (
     <div className="flex justify-center">
       <div className="w-full max-w-3xl space-y-8 px-4 py-20">
         <section className="container-button flex justify-between">
           <div className="container-action-button">
-            <Form method="post" id="user-delete-place-by-id">
-              <input type="hidden" name="action" value="delete" readOnly />
-              <input type="hidden" name="placeId" value={place.id} readOnly />
-              <Button variant={"destructive"} type="submit">
-                <span className="flex items-center gap-2">
-                  <TrashIcon />
-                  <p>Delete</p>
-                </span>
-              </Button>
-            </Form>
+            {/* <input type="hidden" name="placeId" value={place.} readOnly /> */}
+            <AlertDialog open={open} onOpenChange={setOpen}>
+              <AlertDialogTrigger asChild>
+                <Button variant="destructive">Delete</Button>
+              </AlertDialogTrigger>
+              <AlertDialogContent>
+                <AlertDialogHeader>
+                  <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
+                  <AlertDialogDescription>
+                    This action cannot be undone. This will permanently delete
+                    your place data and remove your data from our servers.
+                  </AlertDialogDescription>
+                </AlertDialogHeader>
+                <AlertDialogFooter>
+                  <AlertDialogCancel>Cancel</AlertDialogCancel>
+                  <Form method="post" id="user-delete-place-by-id">
+                    <input
+                      type="hidden"
+                      name="action"
+                      value="delete"
+                      readOnly
+                    />
+                    <input
+                      type="hidden"
+                      name="placeId"
+                      value={place.id}
+                      readOnly
+                    />{" "}
+                    <Button
+                      variant={"destructive"}
+                      type="submit"
+                      onClick={() => setOpen(false)}
+                    >
+                      <span className="flex items-center gap-2">
+                        <TrashIcon />
+                        <p>Delete Places</p>
+                      </span>
+                    </Button>
+                  </Form>
+                </AlertDialogFooter>
+              </AlertDialogContent>
+            </AlertDialog>
           </div>
           <div className="container-publish-button flex gap-4">
             <Button variant={"outline"} type="submit">
@@ -230,8 +255,8 @@ export default function EditPlace() {
               </Link>
             </Button>
             <Form method="post" id="change-status-publish">
-              <input type="hidden" name="action" value="isPublish" />
-              <input type="hidden" name="placeId" value={place.id} />
+              <input type="hidden" name="action" value="isPublish" readOnly />
+              <input type="hidden" name="placeId" value={place.id} readOnly />
               <Button type="submit">
                 {place?.isPublished ? "Unpublish" : "Publish"}
               </Button>
@@ -254,7 +279,6 @@ export default function EditPlace() {
             {...getInputProps(fields.placePhotos, { type: "text" })}
             hidden
             value={JSON.stringify(imageUrls) || "[]"}
-            readOnly
           />
 
           <div>
@@ -318,7 +342,7 @@ export default function EditPlace() {
               {...getInputProps(fields.streetAddress, { type: "text" })}
               type="text"
               id="streetAddress"
-              placeholder="Enter your streetAddress or email"
+              placeholder="Enter your streetAddress "
               className={cn(
                 "mt-1 rounded-md border p-2",
                 fields.streetAddress.errors
@@ -472,16 +496,74 @@ export default function EditPlace() {
             hidden
             name="latitude"
             value={marker ? String(marker.latitude) : ""}
+            readOnly
           />
           <input
             type="number"
             hidden
             name="longitude"
             value={marker ? marker.longitude : ""}
+            readOnly
           />
+          <div>
+            {/* <h2 className="text-lg font-semibold text-gray-800">
+              Operating Hours
+            </h2>
+            {operatingHoursItem.map(item => (
+              <pre key={item.key}>{JSON.stringify(item, null, 2)}</pre>
+            ))} */}
+
+            {/* {operatingHoursItem.map((item, index) => (
+              <div key={item.} className="space-y-4">
+                <div>
+                  <Label
+                    htmlFor={`operatingHours.${index}.day`}
+                    className="block text-sm font-medium text-gray-700"
+                  >
+                    {item.day}
+                  </Label>
+
+                  <Input
+                    {...fields.operatingHours?.field(index)?.day}
+                    disabled
+                    className="mt-1 rounded-md border bg-gray-100 p-2 text-gray-500"
+                  />
+                </div> */}
+
+            {/* Opening Time */}
+            {/* <div>
+                  <Label
+                    htmlFor={`operatingHours.${index}.openingTime`}
+                    className="block text-sm font-medium text-gray-700"
+                  >
+                    Opening Time
+                  </Label>
+                  <SelectHour
+                    {...fields.operatingHours?.field(index)?.openingTime}
+                    defaultValue={day.openingTime}
+                    className={`mt-1 rounded-md border p-2 ${fields.operatingHours?.field(index)?.openingTime?.errors ? "border-red-500" : "border-gray-300"}`}
+                  />
+                  {fields.operatingHours?.field(index)?.openingTime?.errors && (
+                    <p className="mt-1 text-sm text-red-700">
+                      {
+                        fields.operatingHours?.field(index)?.openingTime?.errors
+                          ?.message
+                      }
+                    </p>
+                  )}
+                </div> */}
+            {/* </div>
+            ))} */}
+          </div>
 
           <div>
-            <Button type="submit">Save Place</Button>
+            <Button type="submit">
+              {navigation.state === "submitting" ? (
+                <LoadingSpinner />
+              ) : (
+                "Save Place"
+              )}
+            </Button>
           </div>
         </Form>
 
@@ -493,10 +575,16 @@ export default function EditPlace() {
             operatingHours: place.operatingHours ?? [],
           }}
         /> */}
-        {/* <MultipleOperatingHoursUpdate
+        <MultipleOperatingHoursUpdate
           placeData={{
             id: place.id,
             operatingHours: place.operatingHours ?? [],
+          }}
+        />
+        {/* <MultipleFacilities
+          placeData={{
+            id: place.id,
+            placeFacilities: place.placeFacilities ?? [],
           }}
         /> */}
       </div>

@@ -12,21 +12,20 @@ interface SelectHourProps {
   defaultCloseTime: string;
 }
 
+export const generateTimeOptions = (): Array<string> => {
+  const options = [];
+  for (let hour = 0; hour < 24; hour++) {
+    for (let minute = 0; minute < 60; minute += 30) {
+      const time = `${hour.toString().padStart(2, "0")}:${minute.toString().padStart(2, "0")}`;
+      options.push(time);
+    }
+  }
+  return options;
+};
 export default function SelectHour({
   defaultOpenTime,
   defaultCloseTime,
 }: SelectHourProps) {
-  const generateTimeOptions = () => {
-    const options = [];
-    for (let hour = 0; hour < 24; hour++) {
-      for (let minute = 0; minute < 60; minute += 30) {
-        const time = `${hour.toString().padStart(2, "0")}:${minute.toString().padStart(2, "0")}`;
-        options.push(time);
-      }
-    }
-    return options;
-  };
-
   const timeOptions = generateTimeOptions();
 
   return (
