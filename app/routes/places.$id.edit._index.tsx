@@ -12,13 +12,19 @@ import {
   LoaderFunctionArgs,
   redirect,
 } from "@remix-run/node";
-import { Form, Link, useLoaderData, useNavigation } from "@remix-run/react";
+import {
+  Form,
+  Link,
+  useActionData,
+  useLoaderData,
+  useNavigation,
+} from "@remix-run/react";
 
 import "mapbox-gl/dist/mapbox-gl.css";
 import "@mapbox/mapbox-gl-geocoder/dist/mapbox-gl-geocoder.css";
 
 import { FileUploaderRegular } from "@uploadcare/react-uploader";
-import React, { useRef } from "react";
+import React, { useEffect, useRef } from "react";
 
 import "@uploadcare/react-uploader/core.css";
 
@@ -27,6 +33,7 @@ import {
   UploadcareSimpleAuthSchema,
 } from "@uploadcare/rest-client";
 import { TrashIcon } from "lucide-react";
+import { c } from "node_modules/vite/dist/node/types.d-aGj9QkWt";
 import { useState } from "react";
 import {
   Map,
@@ -40,13 +47,13 @@ import { z } from "zod";
 import { Combobox } from "~/components/shared/form-input/combobox";
 import { MultipleFacilities } from "~/components/shared/form-input/multiple-input-facilities";
 import { MultipleOperatingHoursUpdate } from "~/components/shared/form-input/multiple-input-operating-hours-updated";
+// import Tasks from "~/components/shared/form-input/try-array-nested";
 import LoadingSpinner from "~/components/shared/loader-spinner";
 // import { MultipleOperatingHoursUpdate } from "~/components/shared/form-input/multiple-input-operating-hours-updated";
 // import { OperatingHoursForm } from "~/components/shared/form-input/operating-hours-form";
 import { Sliders } from "~/components/shared/sliders";
 import {
   AlertDialog,
-  AlertDialogAction,
   AlertDialogCancel,
   AlertDialogContent,
   AlertDialogDescription,
@@ -69,7 +76,7 @@ import {
 import { getAccessToken } from "~/lib/token";
 import { cn } from "~/lib/utils";
 import { EditPlaceSchema } from "~/schemas/places";
-import { City, Place } from "~/types/model";
+import { City, Facility, Place } from "~/types/model";
 
 React.useLayoutEffect = React.useEffect;
 
@@ -97,7 +104,13 @@ export async function loader({ params }: LoaderFunctionArgs) {
   if (!city) {
     throw new Response(null, { status: 404, statusText: "City Not Found" });
   }
-  return json({ place, city });
+  const responseFacilities = await fetch(`${BACKEND_API_URL}/facilities`);
+
+  const facilities: Facility[] = await responseFacilities.json();
+  if (!facilities) {
+    throw new Response(null, { status: 404, statusText: "Facility Not Found" });
+  }
+  return json({ place, city, facilities });
 }
 
 type placePhotosData = {
@@ -112,7 +125,7 @@ type Marker = {
 
 export default function EditPlace() {
   const navigation = useNavigation();
-  const { place, city } = useLoaderData<typeof loader>();
+  const { place, city, facilities } = useLoaderData<typeof loader>();
   const [cityId, setCityId] = useState(place.address.cityId);
   const [open, setOpen] = useState<boolean>();
   const [marker, setMarker] = useState<Marker>(
@@ -120,8 +133,10 @@ export default function EditPlace() {
       ? { latitude: place.latitude, longitude: place.longitude }
       : null,
   );
-  const mapRef = useRef<MapRef | null>(null);
+  // const actionData = useActionData<typeof action>();
 
+  console.log(place.submitter.name, "action");
+  const mapRef = useRef<MapRef | null>(null);
   const handleMapClick = (event: MapMouseEvent) => {
     const { lngLat } = event;
     setMarker({
@@ -220,6 +235,12 @@ export default function EditPlace() {
                   <Form method="post" id="user-delete-place-by-id">
                     <input
                       type="hidden"
+                      name="username"
+                      value={place.submitter.username}
+                      readOnly
+                    />{" "}
+                    <input
+                      type="hidden"
                       name="action"
                       value="delete"
                       readOnly
@@ -256,6 +277,7 @@ export default function EditPlace() {
             </Button>
             <Form method="post" id="change-status-publish">
               <input type="hidden" name="action" value="isPublish" readOnly />
+
               <input type="hidden" name="placeId" value={place.id} readOnly />
               <Button type="submit">
                 {place?.isPublished ? "Unpublish" : "Publish"}
@@ -264,8 +286,19 @@ export default function EditPlace() {
           </div>
         </section>
         <Form method="post" className="space-y-4" {...getFormProps(form)}>
-          <h1 className="text-2xl font-bold">Edit Place</h1>
-
+          <input
+            type="hidden"
+            name="username"
+            value={place.submitter.username}
+            readOnly
+          />{" "}
+          <h1 className="text-2xl font-bold">Create Place</h1>
+          <Label
+            htmlFor="priceRangeMin"
+            className="block text-sm font-medium text-gray-700"
+          >
+            Add picture
+          </Label>
           {imageUrls && imageUrls.length > 0 && (
             <Sliders
               imageSlides={imageUrls.map((imageUrl: { url: string }) => ({
@@ -274,13 +307,11 @@ export default function EditPlace() {
               widthImage={200}
             />
           )}
-
           <input
             {...getInputProps(fields.placePhotos, { type: "text" })}
             hidden
             value={JSON.stringify(imageUrls) || "[]"}
           />
-
           <div>
             <FileUploaderRegular
               ctxName="checkcafe"
@@ -312,7 +343,6 @@ export default function EditPlace() {
               // className="hidden"
             />
           </div>
-
           <div>
             <Label
               htmlFor="name"
@@ -356,7 +386,6 @@ export default function EditPlace() {
               </p>
             )}
           </div>
-
           <div>
             <Label
               htmlFor="cityId"
@@ -398,7 +427,6 @@ export default function EditPlace() {
               </p>
             )}
           </div>
-
           <div className="flex flex-col gap-2">
             <h2 className="text-lg font-semibold text-gray-800">
               Average Price Range for Food and Beverage
@@ -458,7 +486,6 @@ export default function EditPlace() {
               </div>
             </div>
           </div>
-
           <Label className="block text-sm font-medium text-gray-700">
             Set Point Location
           </Label>
@@ -490,7 +517,6 @@ export default function EditPlace() {
             )}
             <NavigationControl />
           </Map>
-
           <input
             type="number"
             hidden
@@ -555,7 +581,6 @@ export default function EditPlace() {
             {/* </div>
             ))} */}
           </div>
-
           <div>
             <Button type="submit">
               {navigation.state === "submitting" ? (
@@ -575,18 +600,20 @@ export default function EditPlace() {
             operatingHours: place.operatingHours ?? [],
           }}
         /> */}
-        <MultipleOperatingHoursUpdate
+        {/* <MultipleOperatingHoursUpdate
           placeData={{
             id: place.id,
             operatingHours: place.operatingHours ?? [],
           }}
-        />
+        /> */}
         {/* <MultipleFacilities
           placeData={{
             id: place.id,
             placeFacilities: place.placeFacilities ?? [],
           }}
+          dataFacilities={facilities}
         /> */}
+        {/* <Tasks /> */}
       </div>
     </div>
   );
@@ -599,6 +626,7 @@ export async function action({ request, params }: ActionFunctionArgs) {
   const { accessToken } = await getAccessToken(request);
   const formData = await request.formData();
   const placeId = formData.get("placeId");
+  const username = formData.get("username");
   const action = formData.get("action");
   if (!action) {
     const submission = parseWithZod(formData, { schema: EditPlaceSchema });
@@ -636,6 +664,8 @@ export async function action({ request, params }: ActionFunctionArgs) {
     if (!place) {
       throw new Response(null, { status: 404, statusText: "Place Not Found" });
     }
+
+    return redirect(`/dashboard/${username}`);
   } else if (action === "delete") {
     const responseDelete = await fetch(`${BACKEND_API_URL}/places/${placeId}`, {
       method: "DELETE",
@@ -648,7 +678,7 @@ export async function action({ request, params }: ActionFunctionArgs) {
     if (!result) {
       throw new Response(null, { status: 404, statusText: "Place Not Found" });
     }
-    return redirect("/");
+    return redirect(`/dashboard/${username}`);
   } else if (action === "isPublish") {
     const responseDelete = await fetch(
       `${BACKEND_API_URL}/places/${id}/isPublished`,
