@@ -44,7 +44,7 @@ export function loader() {
     {
       name: "Naswa",
       image:
-        "https://ucarecdn.com/76c1e196-4da8-4a10-b766-9e7f501804c4/naswa.jpg",
+        "https://ucarecdn.com/16b5b96c-d019-44a6-b50b-66ff04eaebc5/naswa1111.png",
       role: "Frontend Developer",
       linkedIn: "https://www.linkedin.com/in/naswa-wilantama",
       github: "https://github.com/Endabelyu",
