@@ -331,7 +331,7 @@ export default function PlaceSlug() {
                   openingTime,
                   closingTime,
                 }) => (
-                  <Link to={`places/${slug}`} key={id}>
+                  <Link to={`/places/${slug}`} key={id}>
                     <Card className="h-80 w-56 shadow-lg hover:cursor-pointer hover:opacity-50">
                       <CardContent className="flex flex-col px-5 py-5">
                         <img

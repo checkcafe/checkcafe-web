@@ -37,7 +37,7 @@ export default function SelectHour({
             <SelectValue placeholder="09:00" />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value="none" className="hidden"></SelectItem>
+            <SelectItem value="none">Select hour</SelectItem>
             {timeOptions.map(time => (
               <SelectItem key={time} value={time}>
                 {time}
@@ -54,7 +54,7 @@ export default function SelectHour({
             <SelectValue placeholder="22:00" />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value="none" className="hidden"></SelectItem>
+            <SelectItem value="none">Select hour</SelectItem>
             {timeOptions.map(time => (
               <SelectItem key={time} value={time}>
                 {time}
