@@ -15,6 +15,7 @@ import {
   useLoaderData,
   useRouteError,
 } from "@remix-run/react";
+import { Analytics } from "@vercel/analytics/remix";
 import { FaHouse } from "react-icons/fa6";
 
 import { Footer } from "~/components/shared/footer";
@@ -109,10 +110,10 @@ export function Layout({ children }: { children: React.ReactNode }) {
         <Navbar user={user} />
         <div className="min-h-screen">{children}</div>
         <Footer />
-
         <ScrollRestoration />
         <Toaster />
         <Scripts />
+        <Analytics />
       </body>
     </html>
   );
