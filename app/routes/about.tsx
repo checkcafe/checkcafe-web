@@ -18,7 +18,7 @@ export const meta: MetaFunction = () => {
 export function loader() {
   const teamMembers = [
     {
-      name: "Haidar",
+      name: "M Haidar Hanif",
       image:
         "https://ucarecdn.com/904d367c-12ce-4afa-af7d-50cfd376b982/haidar.jpg",
       role: "Project Manager",
@@ -26,7 +26,7 @@ export function loader() {
       github: "https://github.com/mhaidarhanif",
     },
     {
-      name: "Zaky",
+      name: "B. Achmad Zaky",
       image:
         "https://ucarecdn.com/c2e78afc-c0f7-495d-8141-f47cb39ab1a9/zaky.png",
       role: "Tech Lead & Backend Developer",
@@ -34,7 +34,7 @@ export function loader() {
       github: "https://github.com/zckyachmd",
     },
     {
-      name: "Aan",
+      name: "M Farhan (Aan)",
       image:
         "https://ucarecdn.com/0751c3e3-f417-4cc1-8aa5-6596248c5829/aan.png",
       role: "Backend Developer",
@@ -42,15 +42,15 @@ export function loader() {
       github: "https://github.com/aan-cloud",
     },
     {
-      name: "Naswa",
+      name: "Naswa Wilantama",
       image:
-        "https://ucarecdn.com/16b5b96c-d019-44a6-b50b-66ff04eaebc5/naswa1111.png",
+        "https://ucarecdn.com/76c1e196-4da8-4a10-b766-9e7f501804c4/naswa.jpg",
       role: "Frontend Developer",
       linkedIn: "https://www.linkedin.com/in/naswa-wilantama",
       github: "https://github.com/Endabelyu",
     },
     {
-      name: "Iqbal",
+      name: "Iqbal Chaidir",
       image:
         "https://ucarecdn.com/a00145aa-8ca1-429f-a7df-bbecdd6b17e8/iqbal.jpg",
       role: "Frontend Developer",
@@ -58,7 +58,7 @@ export function loader() {
       github: "https://github.com/IQchaidir",
     },
     {
-      name: "Difa",
+      name: "M Difa Sulthon Diani",
       image:
         "https://ucarecdn.com/1e4649ed-bf02-4566-baa4-79dd1e2ead2f/difa.png",
       role: "Frontend Developer & UI/UX Designer",
