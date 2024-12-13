@@ -6,7 +6,11 @@
  */
 export const formatTime = (time: string) => {
   const date = new Date(time);
-  return date.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
+  const hours = String(date.getUTCHours()).padStart(2, "0");
+  const minutes = String(date.getUTCMinutes()).padStart(2, "0");
+  const formattedTime = `${hours}:${minutes}`;
+
+  return formattedTime;
 };
 
 /**
