@@ -1,6 +1,6 @@
 import { z } from "zod";
 
-import { id } from "./general";
+// import { id } from "./general";
 import { UserSchema } from "./user";
 
 const OperatingHour = z.object({
@@ -103,38 +103,47 @@ const EditPlaceSchema = z.object({
     z.number().min(1).optional(),
   ),
   latitude: z
-    .number()
+    .number({
+      required_error: "Please pinpoint cafe location",
+      invalid_type_error: "latitude must be a number",
+    })
     .min(-90, { message: "Latitude must be between -90 and 90." }),
   longitude: z
-    .number()
+    .number({
+      invalid_type_error: "longitude must be a number",
+    })
     .min(-180, { message: "Longitude must be between -180 and 180." }),
-  cityId: z.string().min(4),
+  cityId: z
+    .string({
+      required_error: "Please select city",
+      invalid_type_error: "Name must be a string",
+    })
+    .min(4, { message: "Please select city" }),
 
-  // operatingHours: z
-  //   .array(
-  //     z
-  //       .object({
-  //         day: z.string(),
-  //         openingTime: z
-  //           .string()
-  //           .regex(/^([01]\d|2[0-3]):([0-5]\d)$/, {
-  //             message: "Invalid time format (HH:mm).",
-  //           })
-  //           .optional(),
-  //         closingTime: z
-  //           .string()
-  //           .regex(/^([01]\d|2[0-3]):([0-5]\d)$/, {
-  //             message: "Invalid time format (HH:mm).",
-  //           })
-  //           .optional(),
-  //       })
-  //       .refine(data => !data.day || (data.openingTime && data.closingTime), {
-  //         message:
-  //           "If a day is selected, both openingTime and closingTime must be provided.",
-  //         path: ["openingTime", "closingTime"], // Error message targets both fields
-  //       }),
-  //   )
-  //   .optional(),
+  operatingHours: z
+    .array(
+      z.object({
+        day: z.string(),
+        openingTime: z
+          .string()
+          .regex(/^([01]\d|2[0-3]):([0-5]\d)$/, {
+            message: "Invalid time format (HH:mm).",
+          })
+          .optional(),
+        closingTime: z
+          .string()
+          .regex(/^([01]\d|2[0-3]):([0-5]\d)$/, {
+            message: "Invalid time format (HH:mm).",
+          })
+          .optional(),
+      }),
+      // .refine(data => !data.day || (data.openingTime && data.closingTime), {
+      //   message:
+      //     "If a day is selected, both openingTime and closingTime must be provided.",
+      //   path: ["openingTime", "closingTime"], // Error message targets both fields
+      // }),
+    )
+    .optional(),
 
   // placeFacilities: z
   //   .array(
