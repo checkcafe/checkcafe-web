@@ -1,6 +1,7 @@
 import {
   getFormProps,
   getInputProps,
+  getSelectProps,
   getTextareaProps,
   useForm,
 } from "@conform-to/react";
@@ -32,8 +33,7 @@ import {
   deleteFile,
   UploadcareSimpleAuthSchema,
 } from "@uploadcare/rest-client";
-import { TrashIcon } from "lucide-react";
-import { c } from "node_modules/vite/dist/node/types.d-aGj9QkWt";
+import { ArrowDown, ArrowUpIcon, TrashIcon } from "lucide-react";
 import { useState } from "react";
 import {
   Map,
@@ -42,13 +42,12 @@ import {
   Marker,
   NavigationControl,
 } from "react-map-gl";
-import { z } from "zod";
 
 import { Combobox } from "~/components/shared/form-input/combobox";
-import { MultipleFacilities } from "~/components/shared/form-input/multiple-input-facilities";
-import { MultipleOperatingHoursUpdate } from "~/components/shared/form-input/multiple-input-operating-hours-updated";
 // import Tasks from "~/components/shared/form-input/try-array-nested";
 import LoadingSpinner from "~/components/shared/loader-spinner";
+import MapWithGeocoder from "~/components/shared/searchbox/searchbox.client";
+import { generateTimeOptions } from "~/components/shared/select-hour";
 // import { MultipleOperatingHoursUpdate } from "~/components/shared/form-input/multiple-input-operating-hours-updated";
 // import { OperatingHoursForm } from "~/components/shared/form-input/operating-hours-form";
 import { Sliders } from "~/components/shared/sliders";
@@ -65,6 +64,13 @@ import {
 import { Button } from "~/components/ui/button";
 import { Input } from "~/components/ui/input";
 import { Label } from "~/components/ui/label";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "~/components/ui/select";
 import { Separator } from "~/components/ui/separator";
 import { Textarea } from "~/components/ui/textarea";
 import {
@@ -122,7 +128,15 @@ type Marker = {
   longitude: number;
   latitude: number;
 } | null;
-
+const DAYS_OF_WEEK = [
+  "Monday",
+  "Tuesday",
+  "Wednesday",
+  "Thursday",
+  "Friday",
+  "Saturday",
+  "Sunday",
+];
 export default function EditPlace() {
   const navigation = useNavigation();
   const { place, city, facilities } = useLoaderData<typeof loader>();
@@ -151,26 +165,14 @@ export default function EditPlace() {
       const geocoder = new MapboxGeocoder({
         accessToken: MAPBOX_ACCESS_TOKEN,
         marker: false,
+        autocomplete: true,
+        mode: "mapbox.places",
       });
       map.addControl(geocoder, "top-left");
     }
   };
 
   const [imageUrls, setImageUrls] = useState<placePhotosData[]>(place.photos);
-  // const [form, fields] = useForm({
-  //   shouldValidate: "onBlur",
-  //   onValidate({ formData }) {
-  //     return parse(formData, { schema: EditPlaceSchema });
-  //   },
-  //   defaultValue: {
-  //     imageUrls: place.photos,
-  //     name: place.name,
-  //     streetAddress: place.address.street,
-  //     description: place.description,
-  //     priceRangeMin: place.priceRangeMin,
-  //     priceRangeMax: place.priceRangeMax,
-  //   },
-  // });
 
   const [form, fields] = useForm({
     shouldValidate: "onBlur",
@@ -189,6 +191,7 @@ export default function EditPlace() {
       priceRangeMax: place.priceRangeMax,
       latitude: place.latitude,
       longitude: place.longitude,
+      operatingHours: place.operatingHours || [],
     },
   });
   function handleSetImageUrls(data: string[]) {
@@ -211,7 +214,8 @@ export default function EditPlace() {
     await deleteFile({ uuid }, { authSchema: uploadcareSimpleAuthSchema });
   }
 
-  // console.log(place, "plcae");
+  const operatingHoursItems = fields.operatingHours.getFieldList();
+  const canAddOperatingHour = operatingHoursItems.length < DAYS_OF_WEEK.length;
   return (
     <div className="flex justify-center">
       <div className="w-full max-w-3xl space-y-8 px-4 py-20">
@@ -295,7 +299,7 @@ export default function EditPlace() {
           <h1 className="text-2xl font-bold">Create Place</h1>
           <Label
             htmlFor="priceRangeMin"
-            className="block text-sm font-medium text-gray-700"
+            className="block text-sm font-bold text-gray-700"
           >
             Add picture
           </Label>
@@ -310,7 +314,7 @@ export default function EditPlace() {
           <input
             {...getInputProps(fields.placePhotos, { type: "text" })}
             hidden
-            value={JSON.stringify(imageUrls) || "[]"}
+            defaultValue={JSON.stringify(imageUrls) || "[]"}
           />
           <div>
             <FileUploaderRegular
@@ -346,7 +350,7 @@ export default function EditPlace() {
           <div>
             <Label
               htmlFor="name"
-              className="block text-sm font-medium text-gray-700"
+              className="block text-sm font-bold text-gray-700"
             >
               Name
             </Label>
@@ -364,7 +368,7 @@ export default function EditPlace() {
           <div>
             <Label
               htmlFor="streetAddress"
-              className="block text-sm font-medium text-gray-700"
+              className="block text-sm font-bold text-gray-700"
             >
               Street Address
             </Label>
@@ -389,7 +393,7 @@ export default function EditPlace() {
           <div>
             <Label
               htmlFor="cityId"
-              className="block text-sm font-medium text-gray-700"
+              className="block text-sm font-bold text-gray-700"
             >
               City
             </Label>
@@ -397,7 +401,7 @@ export default function EditPlace() {
               {...getInputProps(fields.cityId, { type: "text" })}
               name={fields.cityId.name}
               hidden
-              value={cityId}
+              defaultValue={cityId}
             />
             <Combobox cities={city} setCityId={setCityId} cityId={cityId} />
 
@@ -410,7 +414,7 @@ export default function EditPlace() {
           <div>
             <Label
               htmlFor="description"
-              className="block text-sm font-medium text-gray-700"
+              className="block text-sm font-bold text-gray-700"
             >
               Description
             </Label>
@@ -486,7 +490,7 @@ export default function EditPlace() {
               </div>
             </div>
           </div>
-          <Label className="block text-sm font-medium text-gray-700">
+          <Label className="block text-sm font-bold text-gray-700">
             Set Point Location
           </Label>
           {fields.latitude.errors && (
@@ -494,7 +498,9 @@ export default function EditPlace() {
               {fields.latitude.errors}
             </p>
           )}
-          <Map
+          <MapWithGeocoder coordinate={marker} setCoordinates={setMarker} />
+          {/* <Map
+            renderWorldCopies={true}
             mapboxAccessToken={MAPBOX_ACCESS_TOKEN}
             initialViewState={{
               longitude: place.longitude ?? 118.64493557421042,
@@ -502,7 +508,7 @@ export default function EditPlace() {
               zoom: place.latitude && place.longitude ? 10 : 3,
             }}
             style={{ width: "100%", height: "50vh", borderRadius: 5 }}
-            mapStyle="mapbox://styles/mapbox/streets-v9"
+            mapStyle="mapbox://styles/mapbox/streets-v12"
             onClick={handleMapClick}
             ref={mapRef}
             onLoad={handleMapLoad}
@@ -516,7 +522,7 @@ export default function EditPlace() {
               />
             )}
             <NavigationControl />
-          </Map>
+          </Map> */}
           <input
             type="number"
             hidden
@@ -582,6 +588,43 @@ export default function EditPlace() {
             ))} */}
           </div>
           <div>
+            <div className="my-4">
+              <Label
+                htmlFor="operatingHour"
+                className="block text-sm font-bold text-gray-700"
+              >
+                Operating Hours{" "}
+              </Label>{" "}
+              <div className="my-4 flex gap-4">
+                <Button
+                  {...form.insert.getButtonProps({
+                    name: fields.operatingHours.name,
+                  })}
+                  disabled={!canAddOperatingHour}
+                >
+                  Add Operating Hour
+                </Button>
+              </div>
+              {operatingHoursItems.length === 0 && (
+                <p>No operating hour yet, add one.</p>
+              )}
+              <ul className="space-y-2">
+                {operatingHoursItems.map((item, index) => {
+                  const operatingHourFields = item.getFieldset();
+                  return (
+                    <li key={item.key} className="flex items-center gap-2">
+                      <OperatingHoursItemFieldset
+                        config={operatingHourFields}
+                        index={index}
+                        form={form}
+                        fields={fields}
+                        itemLength={operatingHoursItems.length}
+                      />
+                    </li>
+                  );
+                })}
+              </ul>
+            </div>
             <Button type="submit">
               {navigation.state === "submitting" ? (
                 <LoadingSpinner />
@@ -622,7 +665,6 @@ export default function EditPlace() {
 export async function action({ request, params }: ActionFunctionArgs) {
   const { id } = params;
   if (!id) return redirect("/");
-
   const { accessToken } = await getAccessToken(request);
   const formData = await request.formData();
   const placeId = formData.get("placeId");
@@ -631,6 +673,7 @@ export async function action({ request, params }: ActionFunctionArgs) {
   if (!action) {
     const submission = parseWithZod(formData, { schema: EditPlaceSchema });
     const placePhotosData = JSON.parse(String(submission.payload.placePhotos));
+    console.info({ ...submission.payload }, "submission");
     // console.info(
     //   placePhotosData,
     //   "placePhotosData",
@@ -701,4 +744,138 @@ export async function action({ request, params }: ActionFunctionArgs) {
   }
 
   return null;
+}
+
+function OperatingHoursItemFieldset({
+  config,
+  index,
+  form,
+  fields,
+  itemLength,
+}: {
+  config: any;
+  index: number;
+  form: any;
+  fields: any;
+  itemLength: number;
+}) {
+  const timeOptions = generateTimeOptions();
+
+  return (
+    <fieldset className="flex w-full flex-col gap-1 sm:flex-row sm:gap-2">
+      <div className="flex w-full gap-4">
+        {/* Day Select Dropdown */}
+        <div className="w-full">
+          <Label htmlFor={`operatingHours.${index}.day`}>Day</Label>
+          <Select
+            {...getSelectProps(config.day)}
+            key={config.day.key} // Pass key explicitly
+            defaultValue="Monday"
+            // onValueChange={value => {
+            //   console.log(value, "vallsss");
+            // }}
+          >
+            <SelectTrigger className="w-full">
+              <SelectValue placeholder="Select a day" />
+            </SelectTrigger>
+            <SelectContent>
+              {DAYS_OF_WEEK.map(day => (
+                <SelectItem key={day} value={day}>
+                  {day}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>{" "}
+          {config.day.errors && (
+            <p className="mt-1 text-sm text-red-700">{config.day.errors}</p>
+          )}
+        </div>
+
+        {/* Open Time Select Dropdown */}
+        <div className="w-full">
+          <Label htmlFor={`operatingHours.${index}.open`}>Open Time</Label>
+          <Select
+            {...getSelectProps(config.openingTime)}
+            defaultValue="09:00"
+            key={config.openTime.key} // Pass key explicitly
+          >
+            <SelectTrigger className="w-full">
+              <SelectValue placeholder="09:00" />
+            </SelectTrigger>
+            <SelectContent>
+              {timeOptions.map(time => (
+                <SelectItem key={time} value={time}>
+                  {time}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+          {config.openTime.errors && (
+            <p className="mt-1 text-sm text-red-700">
+              {config.openTime.errors}
+            </p>
+          )}
+        </div>
+
+        {/* Close Time Select Dropdown */}
+        <div className="w-full">
+          <Label htmlFor={`operatingHours.${index}.close`}>Close Time</Label>
+          <Select
+            {...getSelectProps(config.closingTime)}
+            defaultValue="23:00"
+            key={config.closeTime.key} // Pass key explicitly
+          >
+            <SelectTrigger className="w-full">
+              <SelectValue placeholder="23:00" />
+            </SelectTrigger>
+            <SelectContent>
+              {timeOptions.map(time => (
+                <SelectItem key={time} value={time}>
+                  {time}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+          {config.closeTime.errors && (
+            <p className="mt-1 text-sm text-red-700">
+              {config.closeTime.errors}
+            </p>
+          )}{" "}
+        </div>
+
+        {/* Action Buttons */}
+        <div className="flex gap-2 self-end">
+          <Button
+            {...form.reorder.getButtonProps({
+              name: fields.operatingHours.name,
+              from: index,
+              to: Math.max(0, index - 1),
+            })}
+            disabled={index === 0}
+          >
+            <ArrowUpIcon />
+          </Button>
+          <Button
+            {...form.reorder.getButtonProps({
+              name: fields.operatingHours.name,
+              from: index,
+              to: Math.min(itemLength - 1, index + 1),
+            })}
+            disabled={index === itemLength - 1}
+          >
+            <ArrowDown />
+          </Button>
+          <Button
+            {...form.remove.getButtonProps({
+              name: fields.operatingHours.name,
+              index,
+            })}
+            variant="destructive"
+          >
+            <TrashIcon />
+          </Button>
+        </div>
+      </div>
+    </fieldset>
+  );
 }
