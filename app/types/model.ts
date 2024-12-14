@@ -37,8 +37,12 @@ export type PlaceItem = {
 };
 
 export type PlaceFacility = {
-  facility: string;
-  description: string;
+  id?: string;
+  description?: string;
+  facilityId: string;
+  placeId?: string;
+  // createdAt?: Date;
+  // updatedAt?: Date;
 };
 
 export type Place = {
@@ -94,4 +98,16 @@ export type City = {
       code: string;
     };
   };
+};
+
+type FacilityCategory = {
+  name: string;
+  description: string;
+};
+
+export type Facility = {
+  id: string;
+  name: string;
+  description: string;
+  facilityCategory: FacilityCategory;
 };

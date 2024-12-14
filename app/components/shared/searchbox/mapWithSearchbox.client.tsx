@@ -1,6 +1,6 @@
 import { SearchBox } from "@mapbox/search-js-react";
 import mapboxgl from "mapbox-gl";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useLayoutEffect, useRef, useState } from "react";
 
 import "mapbox-gl/dist/mapbox-gl.css";
 
@@ -12,7 +12,7 @@ type Marker = {
   latitude: number;
 } | null;
 
-export default function MapWithGeocoder({
+export default function MapWithSearchbox({
   coordinate,
   setCoordinates,
 }: {
@@ -24,9 +24,9 @@ export default function MapWithGeocoder({
   const mapInstanceRef = useRef<mapboxgl.Map | undefined>(undefined);
   const [mapLoaded, setMapLoaded] = useState(false);
   const [inputValue, setInputValue] = useState("");
-  console.log(coordinate, "coordinate");
   useEffect(() => {
     // Create the Map instance
+    console.log(coordinate, "coordinate");
     const map = new mapboxgl.Map({
       attributionControl: false,
       container: mapContainerRef.current || "", // container ID
@@ -36,8 +36,6 @@ export default function MapWithGeocoder({
       style: "mapbox://styles/mapbox/streets-v12",
     });
     mapInstanceRef.current = map;
-    // Add navigation control and marker
-    map.addControl(new mapboxgl.NavigationControl());
     new mapboxgl.Marker({
       draggable: true,
     })
@@ -47,43 +45,21 @@ export default function MapWithGeocoder({
           : [118.64493557421042, 0.1972476798250682],
       )
       .on("dragend", e => {
-        console.log(
-          e.target._lngLat,
-          e.target._lngLat.lat,
-          e.target._lngLat.lng,
-        ),
-          "dragend";
+        "dragend";
         const { lng, lat } = e.target._lngLat;
         setCoordinates({
           longitude: lng,
           latitude: lat,
         });
       })
-      .addTo(map);
+      .addTo(map); // Add navigation control and marker
+    map.addControl(new mapboxgl.NavigationControl());
+
     map.jumpTo({
       center: coordinate
-        ? [coordinate.longitude, coordinate.latitude]
+        ? [Number(coordinate.longitude), Number(coordinate.latitude)]
         : [118.64493557421042, 0.1972476798250682],
       zoom: coordinate ? 17 : 3,
-      //   speed: 4,
-      //     //   curve: 0.7,
-      //     //   easing: t => t,
-      //     //   essential: true,
-      //     // noMoveStart: true,
-      //   duration: 1000,
-    });
-    //   ._addMarker(
-    //     new mapboxgl.Marker()
-    //       .setLngLat(
-    //         coordinate
-    //           ? [coordinate.longitude, coordinate.latitude]
-    //           : [118.64493557421042, 0.1972476798250682],
-    //       )
-    //       .addTo(map),
-    //   );
-    // Set map loaded state
-    map.on("load", () => {
-      setMapLoaded(true);
     });
 
     // Cleanup on unmount
@@ -91,6 +67,23 @@ export default function MapWithGeocoder({
       map.remove();
     };
   }, [coordinate]);
+
+  // useEffect(() => {
+  //   // Create the Map instance
+  //   const map = new mapboxgl.Map({
+  //     attributionControl: false,
+  //     container: mapContainerRef.current || "", // container ID
+  //     center: coordinate
+  //       ? [Number(coordinate.longitude), Number(coordinate.latitude)]
+  //       : [118.64493557421042, 0.1972476798250682], // starting position [lng, lat]
+  //     zoom: coordinate ? 17 : 3, // starting zoom
+  //     accessToken: MAPBOX_ACCESS_TOKEN,
+  //     style: "mapbox://styles/mapbox/streets-v12",
+  //   });
+  //   map.on("load", () => {
+  //     setMapLoaded(true);
+  //   });
+  // }, []);
 
   return (
     <>

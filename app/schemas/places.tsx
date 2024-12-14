@@ -89,7 +89,7 @@ const FavoritePlaceSchema = z.object({
 const EditPlaceSchema = z.object({
   placePhotos: z.string().min(1).optional(),
   name: z.string().min(4).max(255),
-  description: z.preprocess(
+  descriptionPlace: z.preprocess(
     value => (value === "" ? undefined : value),
     z.string().min(4).max(255).optional(),
   ),
@@ -145,16 +145,14 @@ const EditPlaceSchema = z.object({
     )
     .optional(),
 
-  // placeFacilities: z
-  //   .array(
-  //     z.object({
-  //       facilityId: z
-  //         .string()
-  //         .nonempty({ message: "Facility ID cannot be empty." }),
-  //       description: z.string().optional(),
-  //     }),
-  //   )
-  //   .optional(),
+  placeFacilities: z
+    .array(
+      z.object({
+        facilityId: z.string(),
+        description: z.string().optional(),
+      }),
+    )
+    .optional(),
 });
 
 export {
