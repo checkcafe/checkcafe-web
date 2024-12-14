@@ -4,14 +4,14 @@
  * @param time - The time string to be formatted.
  * @returns A formatted time string in "HH:MM" format.
  */
-export const formatTime = (time: string) => {
+export function formatTime(time: string): string {
   const date = new Date(time);
   const hours = String(date.getUTCHours()).padStart(2, "0");
   const minutes = String(date.getUTCMinutes()).padStart(2, "0");
-  const formattedTime = `${hours}:${minutes}`;
-
+  // console.log(hours, minutes, "date");
+  const formattedTime = String(`${hours}:${minutes}`);
   return formattedTime;
-};
+}
 
 /**
  * Formats a given price amount into a string, using the Indonesian locale.
