@@ -46,7 +46,7 @@ import {
 import { Combobox } from "~/components/shared/form-input/combobox";
 // import Tasks from "~/components/shared/form-input/try-array-nested";
 import LoadingSpinner from "~/components/shared/loader-spinner";
-import MapWithGeocoder from "~/components/shared/searchbox/searchbox.client";
+import MapWithSearchbox from "~/components/shared/searchbox/mapWithSearchbox.client";
 import { generateTimeOptions } from "~/components/shared/select-hour";
 // import { MultipleOperatingHoursUpdate } from "~/components/shared/form-input/multiple-input-operating-hours-updated";
 // import { OperatingHoursForm } from "~/components/shared/form-input/operating-hours-form";
@@ -83,6 +83,7 @@ import { getAccessToken } from "~/lib/token";
 import { cn } from "~/lib/utils";
 import { EditPlaceSchema } from "~/schemas/places";
 import { City, Facility, Place } from "~/types/model";
+import { formatTime } from "~/utils/formatter";
 
 React.useLayoutEffect = React.useEffect;
 
@@ -149,7 +150,6 @@ export default function EditPlace() {
   );
   // const actionData = useActionData<typeof action>();
 
-  console.log(place.submitter.name, "action");
   const mapRef = useRef<MapRef | null>(null);
   const handleMapClick = (event: MapMouseEvent) => {
     const { lngLat } = event;
@@ -186,12 +186,13 @@ export default function EditPlace() {
       // imageUrls: place.photos,
       name: place.name,
       streetAddress: place.address.street,
-      description: place.description,
+      descriptionPlace: place.description,
       priceRangeMin: place.priceRangeMin,
       priceRangeMax: place.priceRangeMax,
       latitude: place.latitude,
       longitude: place.longitude,
       operatingHours: place.operatingHours || [],
+      placeFacilities: place.placeFacilities || [],
     },
   });
   function handleSetImageUrls(data: string[]) {
@@ -216,6 +217,8 @@ export default function EditPlace() {
 
   const operatingHoursItems = fields.operatingHours.getFieldList();
   const canAddOperatingHour = operatingHoursItems.length < DAYS_OF_WEEK.length;
+  const facilitiesItem = fields.placeFacilities.getFieldList();
+  console.log(place.placeFacilities, "placefacilities");
   return (
     <div className="flex justify-center">
       <div className="w-full max-w-3xl space-y-8 px-4 py-20">
@@ -413,21 +416,21 @@ export default function EditPlace() {
           </div>
           <div>
             <Label
-              htmlFor="description"
+              htmlFor="descriptionPlace"
               className="block text-sm font-bold text-gray-700"
             >
               Description
             </Label>
             <Textarea
-              {...getTextareaProps(fields.description)}
+              {...getTextareaProps(fields.descriptionPlace)}
               id="description"
-              name={fields.description.name}
+              name={fields.descriptionPlace.name}
               placeholder="Description of the place"
-              className={`mt-1 rounded-md border p-2 ${fields.description.errors ? "border-red-500" : "border-gray-300"}`}
+              className={`mt-1 rounded-md border p-2 ${fields.descriptionPlace.errors ? "border-red-500" : "border-gray-300"}`}
             />
-            {fields.description.errors && (
+            {fields.descriptionPlace.errors && (
               <p className="mt-1 text-sm text-red-700">
-                {fields.description.errors}
+                {fields.descriptionPlace.errors}
               </p>
             )}
           </div>
@@ -498,7 +501,7 @@ export default function EditPlace() {
               {fields.latitude.errors}
             </p>
           )}
-          <MapWithGeocoder coordinate={marker} setCoordinates={setMarker} />
+          <MapWithSearchbox coordinate={marker} setCoordinates={setMarker} />
           {/* <Map
             renderWorldCopies={true}
             mapboxAccessToken={MAPBOX_ACCESS_TOKEN}
@@ -537,94 +540,79 @@ export default function EditPlace() {
             value={marker ? marker.longitude : ""}
             readOnly
           />
-          <div>
-            {/* <h2 className="text-lg font-semibold text-gray-800">
-              Operating Hours
-            </h2>
-            {operatingHoursItem.map(item => (
-              <pre key={item.key}>{JSON.stringify(item, null, 2)}</pre>
-            ))} */}
-
-            {/* {operatingHoursItem.map((item, index) => (
-              <div key={item.} className="space-y-4">
-                <div>
-                  <Label
-                    htmlFor={`operatingHours.${index}.day`}
-                    className="block text-sm font-medium text-gray-700"
-                  >
-                    {item.day}
-                  </Label>
-
-                  <Input
-                    {...fields.operatingHours?.field(index)?.day}
-                    disabled
-                    className="mt-1 rounded-md border bg-gray-100 p-2 text-gray-500"
-                  />
-                </div> */}
-
-            {/* Opening Time */}
-            {/* <div>
-                  <Label
-                    htmlFor={`operatingHours.${index}.openingTime`}
-                    className="block text-sm font-medium text-gray-700"
-                  >
-                    Opening Time
-                  </Label>
-                  <SelectHour
-                    {...fields.operatingHours?.field(index)?.openingTime}
-                    defaultValue={day.openingTime}
-                    className={`mt-1 rounded-md border p-2 ${fields.operatingHours?.field(index)?.openingTime?.errors ? "border-red-500" : "border-gray-300"}`}
-                  />
-                  {fields.operatingHours?.field(index)?.openingTime?.errors && (
-                    <p className="mt-1 text-sm text-red-700">
-                      {
-                        fields.operatingHours?.field(index)?.openingTime?.errors
-                          ?.message
-                      }
-                    </p>
-                  )}
-                </div> */}
-            {/* </div>
-            ))} */}
+          <div className="my-4">
+            <Label
+              htmlFor="operatingHour"
+              className="block text-sm font-bold text-gray-700"
+            >
+              Operating Hours{" "}
+            </Label>{" "}
+            <div className="my-4 flex gap-4">
+              <Button
+                {...form.insert.getButtonProps({
+                  name: fields.operatingHours.name,
+                })}
+                disabled={!canAddOperatingHour}
+              >
+                Add Operating Hour
+              </Button>
+            </div>
+            {operatingHoursItems.length === 0 && (
+              <p>No operating hour yet, add one.</p>
+            )}
+            <ul className="space-y-2">
+              {operatingHoursItems.map((item, index) => {
+                const operatingHourFields = item.getFieldset();
+                return (
+                  <li key={item.key} className="flex items-center gap-2">
+                    <OperatingHoursItemFieldset
+                      config={operatingHourFields}
+                      index={index}
+                      form={form}
+                      fields={fields}
+                      itemLength={operatingHoursItems.length}
+                    />
+                  </li>
+                );
+              })}
+            </ul>
+          </div>
+          <div className="my-4">
+            <Label
+              htmlFor="placeFacilities"
+              className="block text-sm font-bold text-gray-700"
+            >
+              Place Facilities{" "}
+            </Label>{" "}
+            <div className="my-4 flex gap-4">
+              <Button
+                {...form.insert.getButtonProps({
+                  name: fields.placeFacilities.name,
+                })}
+              >
+                Add Facility
+              </Button>
+            </div>
+            {facilitiesItem.length === 0 && <p>No facility yet, add one.</p>}
+            <ul className="space-y-2">
+              {facilitiesItem.map((item, index) => {
+                const facilityFields = item.getFieldset();
+                return (
+                  <li key={item.key} className="flex items-center gap-2">
+                    <FacilitiesItemFieldset
+                      config={facilityFields}
+                      index={index}
+                      form={form}
+                      fields={fields}
+                      facilities={facilities}
+                      itemLength={facilitiesItem.length}
+                    />
+                  </li>
+                );
+              })}
+            </ul>
           </div>
           <div>
-            <div className="my-4">
-              <Label
-                htmlFor="operatingHour"
-                className="block text-sm font-bold text-gray-700"
-              >
-                Operating Hours{" "}
-              </Label>{" "}
-              <div className="my-4 flex gap-4">
-                <Button
-                  {...form.insert.getButtonProps({
-                    name: fields.operatingHours.name,
-                  })}
-                  disabled={!canAddOperatingHour}
-                >
-                  Add Operating Hour
-                </Button>
-              </div>
-              {operatingHoursItems.length === 0 && (
-                <p>No operating hour yet, add one.</p>
-              )}
-              <ul className="space-y-2">
-                {operatingHoursItems.map((item, index) => {
-                  const operatingHourFields = item.getFieldset();
-                  return (
-                    <li key={item.key} className="flex items-center gap-2">
-                      <OperatingHoursItemFieldset
-                        config={operatingHourFields}
-                        index={index}
-                        form={form}
-                        fields={fields}
-                        itemLength={operatingHoursItems.length}
-                      />
-                    </li>
-                  );
-                })}
-              </ul>
-            </div>
             <Button type="submit">
               {navigation.state === "submitting" ? (
                 <LoadingSpinner />
@@ -634,29 +622,6 @@ export default function EditPlace() {
             </Button>
           </div>
         </Form>
-
-        <Separator />
-
-        {/* <OperatingHoursForm
-          placeData={{
-            id: place.id,
-            operatingHours: place.operatingHours ?? [],
-          }}
-        /> */}
-        {/* <MultipleOperatingHoursUpdate
-          placeData={{
-            id: place.id,
-            operatingHours: place.operatingHours ?? [],
-          }}
-        /> */}
-        {/* <MultipleFacilities
-          placeData={{
-            id: place.id,
-            placeFacilities: place.placeFacilities ?? [],
-          }}
-          dataFacilities={facilities}
-        /> */}
-        {/* <Tasks /> */}
       </div>
     </div>
   );
@@ -674,12 +639,6 @@ export async function action({ request, params }: ActionFunctionArgs) {
     const submission = parseWithZod(formData, { schema: EditPlaceSchema });
     const placePhotosData = JSON.parse(String(submission.payload.placePhotos));
     console.info({ ...submission.payload }, "submission");
-    // console.info(
-    //   placePhotosData,
-    //   "placePhotosData",
-    //   JSON.parse(String(submission.value?.placePhotos)),
-    // );
-    // console.dir({ placePhotosData }, { depth: null });
 
     // Send the submission back to the client if the status is not successful
     // if (submission.intent !== "submit" || !submission.value) {
@@ -700,6 +659,7 @@ export async function action({ request, params }: ActionFunctionArgs) {
       },
       body: JSON.stringify({
         ...submission.value,
+        description: submission.value.descriptionPlace,
         placePhotos: placePhotosData,
       }),
     });
@@ -707,7 +667,6 @@ export async function action({ request, params }: ActionFunctionArgs) {
     if (!place) {
       throw new Response(null, { status: 404, statusText: "Place Not Found" });
     }
-
     return redirect(`/dashboard/${username}`);
   } else if (action === "delete") {
     const responseDelete = await fetch(`${BACKEND_API_URL}/places/${placeId}`, {
@@ -760,7 +719,6 @@ function OperatingHoursItemFieldset({
   itemLength: number;
 }) {
   const timeOptions = generateTimeOptions();
-
   return (
     <fieldset className="flex w-full flex-col gap-1 sm:flex-row sm:gap-2">
       <div className="flex w-full gap-4">
@@ -770,10 +728,12 @@ function OperatingHoursItemFieldset({
           <Select
             {...getSelectProps(config.day)}
             key={config.day.key} // Pass key explicitly
-            defaultValue="Monday"
-            // onValueChange={value => {
-            //   console.log(value, "vallsss");
-            // }}
+            defaultValue={
+              typeof config.day.initialValue === "string"
+                ? config.day.initialValue
+                : "Monday"
+            }
+            // value={config.day.initialValue}
           >
             <SelectTrigger className="w-full">
               <SelectValue placeholder="Select a day" />
@@ -796,18 +756,25 @@ function OperatingHoursItemFieldset({
           <Label htmlFor={`operatingHours.${index}.open`}>Open Time</Label>
           <Select
             {...getSelectProps(config.openingTime)}
-            defaultValue="09:00"
-            key={config.openTime.key} // Pass key explicitly
+            key={config.openingTime.key} // Pass key explicitly
+            defaultValue={
+              typeof config.openingTime.initialValue === "string"
+                ? formatTime(config.openingTime.initialValue)
+                : "09:00"
+            }
+            // value={formatTime(config.openingTime.initialValue)}
           >
             <SelectTrigger className="w-full">
               <SelectValue placeholder="09:00" />
             </SelectTrigger>
             <SelectContent>
-              {timeOptions.map(time => (
-                <SelectItem key={time} value={time}>
-                  {time}
-                </SelectItem>
-              ))}
+              {timeOptions.map(time => {
+                return (
+                  <SelectItem key={time} value={time}>
+                    {time}
+                  </SelectItem>
+                );
+              })}
             </SelectContent>
           </Select>
           {config.openTime.errors && (
@@ -822,8 +789,13 @@ function OperatingHoursItemFieldset({
           <Label htmlFor={`operatingHours.${index}.close`}>Close Time</Label>
           <Select
             {...getSelectProps(config.closingTime)}
-            defaultValue="23:00"
-            key={config.closeTime.key} // Pass key explicitly
+            key={config.closingTime.key} // Pass key explicitly
+            defaultValue={
+              typeof config.openingTime.initialValue === "string"
+                ? formatTime(config.closingTime.initialValue)
+                : "23:00"
+            }
+            // value={formatTime(config.closingTime.initialValue)}
           >
             <SelectTrigger className="w-full">
               <SelectValue placeholder="23:00" />
@@ -868,6 +840,105 @@ function OperatingHoursItemFieldset({
           <Button
             {...form.remove.getButtonProps({
               name: fields.operatingHours.name,
+              index,
+            })}
+            variant="destructive"
+          >
+            <TrashIcon />
+          </Button>
+        </div>
+      </div>
+    </fieldset>
+  );
+}
+
+function FacilitiesItemFieldset({
+  config,
+  index,
+  form,
+  fields,
+  facilities,
+  itemLength,
+}: {
+  config: any;
+  index: number;
+  form: any;
+  fields: any;
+  facilities: Facility[];
+  itemLength: number;
+}) {
+  return (
+    <fieldset className="flex w-full flex-col gap-1 sm:flex-row sm:gap-2">
+      <div className="flex w-full gap-4">
+        {/* Day Selector */}
+        <div>
+          <Label htmlFor={`Facilities.${index}`}>Facility</Label>
+          <Select
+            {...getSelectProps(config.facilityId)}
+            value={config.facilityId.defaultValue}
+            key={config.facilityId.key} // Pass key explicitly
+          >
+            <SelectTrigger className="w-full">
+              <SelectValue placeholder="Select facility" />
+            </SelectTrigger>
+            <SelectContent>
+              {facilities.map(facility => (
+                <SelectItem key={facility.id} value={facility.id}>
+                  {facility.name}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+          {fields.facilityId.errors && (
+            <p className="mt-1 text-sm text-red-700">
+              {fields.facilityId.errors}
+            </p>
+          )}
+        </div>
+        <div>
+          <Label htmlFor={`description.${index}.facilities`}>Description</Label>
+          <Input
+            {...getInputProps(config.description, { type: "text" })}
+            name={config.description.name}
+            type="text"
+            id="description"
+            min={0}
+            placeholder="Enter facility description"
+            className={`mt-1 rounded-md border p-2 ${
+              config.description.errors ? "border-red-500" : "border-gray-300"
+            }`}
+          />
+          {config.description.errors && (
+            <p className="mt-1 text-sm text-red-700">
+              {config.description.errors}
+            </p>
+          )}
+        </div>
+
+        {/* Action Buttons */}
+        <div className="flex gap-2 self-end">
+          <Button
+            {...form.reorder.getButtonProps({
+              from: index,
+              to: Math.max(0, index - 1),
+            })}
+            disabled={index === 0}
+          >
+            <ArrowUpIcon />
+          </Button>
+          <Button
+            {...form.reorder.getButtonProps({
+              name: fields.placeFacilities.name,
+              from: index,
+              to: Math.min(itemLength - 1, index + 1),
+            })}
+            disabled={index === itemLength - 1}
+          >
+            <ArrowDown />
+          </Button>
+          <Button
+            {...form.remove.getButtonProps({
+              name: fields.placeFacilities.name,
               index,
             })}
             variant="destructive"
