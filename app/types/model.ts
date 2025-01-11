@@ -34,6 +34,7 @@ export type PlaceItem = {
   closingTime: string;
   thumbnailUrl: string;
   submitter: User;
+  favoriteCount: number | null;
 };
 
 export type PlaceFacility = {

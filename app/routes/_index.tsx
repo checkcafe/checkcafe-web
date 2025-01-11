@@ -23,14 +23,13 @@ export const meta: MetaFunction = () => {
 
 export async function loader() {
   try {
-    const response = await fetch(`${BACKEND_API_URL}/places?limit=7`);
+    const response = await fetch(`${BACKEND_API_URL}/places/favorite`);
 
     if (!response.ok) {
       throw new Error(response.statusText || "Failed to fetch places");
     }
 
     const places: PlaceItem[] = await response.json();
-
     return json({ places });
   } catch (error: any) {
     return json({ places: [], error: error.message });
