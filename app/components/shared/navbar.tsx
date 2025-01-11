@@ -7,7 +7,21 @@ import {
 } from "@remix-run/react";
 import { MenuIcon, SearchIcon, XIcon } from "lucide-react";
 import { FormEvent, useEffect, useState } from "react";
-import { FaPlus, FaSignOutAlt, FaUser } from "react-icons/fa";
+import {
+  Fa,
+  FaArrowDown,
+  FaCaretDown,
+  FaCartArrowDown,
+  FaPlus,
+  FaSignOutAlt,
+  FaUser,
+} from "react-icons/fa";
+import {
+  FaArrowDown19,
+  FaArrowDown91,
+  FaArrowDownUpAcrossLine,
+  FaCaretUp,
+} from "react-icons/fa6";
 
 import { SelectCity } from "~/components/shared/select-city";
 import { Avatar, AvatarFallback, AvatarImage } from "~/components/ui/avatar";
@@ -180,7 +194,7 @@ export function Navbar({ user }: { user: AuthUser }) {
                   className="flex items-center gap-2 p-2 text-primary transition-colors duration-200 hover:rounded hover:bg-primary hover:text-white"
                   onClick={closeAllMenus}
                 >
-                  <FaPlus size={14} /> New Place
+                  <FaPlus size={14} /> <p>New Place</p>
                 </Link>
                 <div className="my-1 border-t"></div>
                 <Button asChild className="w-full text-left">
@@ -241,16 +255,15 @@ export function Navbar({ user }: { user: AuthUser }) {
             >
               Places
             </Link>
-
+            <Link
+              to="/places/new"
+              className="gap-4rounded-md flex w-full items-center gap-2 py-2 pl-4 text-left hover:bg-slate-100"
+              onClick={closeAllMenus}
+            >
+              <FaPlus size={14} /> New Places
+            </Link>
             {user && user.name ? (
               <>
-                <Link
-                  to="/places/new"
-                  className="w-full rounded-md py-2 pl-4 text-left hover:bg-slate-100"
-                  onClick={closeAllMenus}
-                >
-                  New Places
-                </Link>
                 <div className="flex flex-col gap-1">
                   <button
                     onClick={() =>
@@ -259,9 +272,14 @@ export function Navbar({ user }: { user: AuthUser }) {
                         isAccountOpen: !prev.isAccountOpen,
                       }))
                     }
-                    className="w-full rounded-md py-2 pl-4 text-left text-primary hover:bg-slate-100"
+                    className="flex w-full justify-between rounded-md py-2 pl-4 text-left text-primary hover:bg-slate-100"
                   >
-                    My Account
+                    <p>My Account</p>{" "}
+                    {menuState.isAccountOpen ? (
+                      <FaCaretUp size={14} />
+                    ) : (
+                      <FaCaretDown size={14} />
+                    )}
                   </button>
 
                   {menuState.isAccountOpen && (
@@ -274,23 +292,23 @@ export function Navbar({ user }: { user: AuthUser }) {
                         Profile
                       </Link>
                       <Link
-                        to="/places/new"
+                        to={`/dashboard/${user.username}`}
                         className="w-full rounded-md py-2 text-primary hover:bg-slate-100"
                         onClick={closeAllMenus}
                       >
-                        New Place
+                        Dashboard
                       </Link>
-                      <Button asChild>
-                        <Link
-                          to="/logout"
-                          className="w-full rounded-md py-2 text-primary hover:bg-slate-100"
-                          onClick={closeAllMenus}
-                        >
-                          Logout
-                        </Link>
-                      </Button>
                     </div>
                   )}
+                  <Button asChild className="w-full text-left">
+                    <Link
+                      to="/logout"
+                      className="flex items-center gap-2 p-2 text-primary transition-colors duration-200 hover:rounded hover:bg-red-600 hover:text-white"
+                      onClick={closeAllMenus}
+                    >
+                      <FaSignOutAlt size={14} /> Logout
+                    </Link>
+                  </Button>
                 </div>
               </>
             ) : (
