@@ -218,7 +218,6 @@ export default function EditPlace() {
   const operatingHoursItems = fields.operatingHours.getFieldList();
   const canAddOperatingHour = operatingHoursItems.length < DAYS_OF_WEEK.length;
   const facilitiesItem = fields.placeFacilities.getFieldList();
-  console.log(place.placeFacilities, "placefacilities");
   return (
     <div className="flex justify-center">
       <div className="w-full max-w-3xl space-y-8 px-4 py-20">
@@ -317,7 +316,8 @@ export default function EditPlace() {
           <input
             {...getInputProps(fields.placePhotos, { type: "text" })}
             hidden
-            defaultValue={JSON.stringify(imageUrls) || "[]"}
+            value={JSON.stringify(imageUrls) || "[]"}
+            readOnly
           />
           <div>
             <FileUploaderRegular
