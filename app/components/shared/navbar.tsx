@@ -121,7 +121,7 @@ export function Navbar({ user }: { user: AuthUser }) {
 
       {/* Links for desktop */}
       <div className="hidden items-center gap-8 text-base font-semibold md:flex">
-        {user && user.name ? (
+        {user && user.name && !location.pathname.includes("edit") ? (
           <Button asChild>
             <Link to="/places/new" className="text-primary">
               <FaPlus size={14} /> New Place
@@ -189,13 +189,16 @@ export function Navbar({ user }: { user: AuthUser }) {
                 >
                   Dashboard
                 </Link>
-                <Link
-                  to="/places/new"
-                  className="flex items-center gap-2 p-2 text-primary transition-colors duration-200 hover:rounded hover:bg-primary hover:text-white"
-                  onClick={closeAllMenus}
-                >
-                  <FaPlus size={14} /> <p>New Place</p>
-                </Link>
+                {!location.pathname.includes("edit") && (
+                  <Link
+                    to="/places/new"
+                    className="flex items-center gap-2 p-2 text-primary transition-colors duration-200 hover:rounded hover:bg-primary hover:text-white"
+                    onClick={closeAllMenus}
+                  >
+                    <FaPlus size={14} /> <p>New Place</p>
+                  </Link>
+                )}
+
                 <div className="my-1 border-t"></div>
                 <Button asChild className="w-full text-left">
                   <Link
@@ -255,13 +258,15 @@ export function Navbar({ user }: { user: AuthUser }) {
             >
               Places
             </Link>
-            <Link
-              to="/places/new"
-              className="gap-4rounded-md flex w-full items-center gap-2 py-2 pl-4 text-left hover:bg-slate-100"
-              onClick={closeAllMenus}
-            >
-              <FaPlus size={14} /> New Places
-            </Link>
+            {!location.pathname.includes("edit") && (
+              <Link
+                to="/places/new"
+                className="gap-4rounded-md flex w-full items-center gap-2 py-2 pl-4 text-left hover:bg-slate-100"
+                onClick={closeAllMenus}
+              >
+                <FaPlus size={14} /> New Places
+              </Link>
+            )}
             {user && user.name ? (
               <>
                 <div className="flex flex-col gap-1">
