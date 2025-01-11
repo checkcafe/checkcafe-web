@@ -28,12 +28,10 @@ type UserPlaceFavorites =
   paths["/users/{username}"]["get"]["responses"][200]["content"]["application/json"]["placeFavorites"];
 
 export async function loader({ params, request }: LoaderFunctionArgs) {
-  // TODO: Get authenticated user
   const { username } = params;
-  const { accessToken } = await getAccessToken(request);
+  const { accessToken, headers } = await getAccessToken(request);
 
   try {
-    // TODO: Get private user profile with unpublished places
     const response = await fetch(
       `${BACKEND_API_URL}/users/${username}/dashboard`,
       {
@@ -51,7 +49,12 @@ export async function loader({ params, request }: LoaderFunctionArgs) {
 
     const user: UserSuccessResponse = await response.json();
 
-    return json({ user });
+    return json(
+      { user },
+      {
+        headers,
+      },
+    );
   } catch (error) {
     throw new Error(
       error instanceof Error ? error.message : "An unexpected error occurred.",

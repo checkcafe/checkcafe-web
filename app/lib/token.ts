@@ -26,6 +26,7 @@ const getExpirationDate = (token: string): number => {
  */
 const isTokenExpired = (token: string): boolean => {
   if (!token) return true;
+  // console.log(getExpirationDate(token), "gettime");
   return getExpirationDate(token) < Date.now() / 1000;
 };
 
@@ -58,19 +59,15 @@ const handleSessionDestruction = async (session: any) => {
 export const getAccessToken = async (request: Request) => {
   const session = await getSession(request.headers.get("Cookie"));
   const { accessToken, refreshToken } = session.get("authToken") || {};
-
   if (!accessToken || isTokenExpired(accessToken)) {
     if (!refreshToken || isTokenExpired(refreshToken)) {
       return handleSessionDestruction(session);
     }
-
     const newTokenData = await refreshAccessToken(refreshToken);
     if (!newTokenData) {
       return handleSessionDestruction(session);
     }
-
     session.set("authToken", newTokenData);
-
     return {
       accessToken: newTokenData.accessToken,
       headers: {
@@ -78,7 +75,6 @@ export const getAccessToken = async (request: Request) => {
       },
     };
   }
-
   return {
     accessToken,
     headers: {

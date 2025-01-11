@@ -630,7 +630,7 @@ export default function EditPlace() {
 export async function action({ request, params }: ActionFunctionArgs) {
   const { id } = params;
   if (!id) return redirect("/");
-  const { accessToken } = await getAccessToken(request);
+  const { accessToken, headers } = await getAccessToken(request);
   const formData = await request.formData();
   const placeId = formData.get("placeId");
   const username = formData.get("username");
@@ -667,7 +667,7 @@ export async function action({ request, params }: ActionFunctionArgs) {
     if (!place) {
       throw new Response(null, { status: 404, statusText: "Place Not Found" });
     }
-    return redirect(`/dashboard/${username}`);
+    return redirect(`/dashboard/${username}`, { headers });
   } else if (action === "delete") {
     const responseDelete = await fetch(`${BACKEND_API_URL}/places/${placeId}`, {
       method: "DELETE",
@@ -680,7 +680,7 @@ export async function action({ request, params }: ActionFunctionArgs) {
     if (!result) {
       throw new Response(null, { status: 404, statusText: "Place Not Found" });
     }
-    return redirect(`/dashboard/${username}`);
+    return redirect(`/dashboard/${username}`, { headers });
   } else if (action === "isPublish") {
     const responseDelete = await fetch(
       `${BACKEND_API_URL}/places/${id}/isPublished`,
@@ -696,7 +696,7 @@ export async function action({ request, params }: ActionFunctionArgs) {
     if (!result) {
       throw new Response(null, {
         status: 404,
-        statusText: "Chage Status Failed",
+        statusText: "Change Status Failed",
       });
     }
     return null;
