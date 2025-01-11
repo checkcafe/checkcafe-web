@@ -1,4 +1,5 @@
 import { Link } from "@remix-run/react";
+import { FaHeart } from "react-icons/fa";
 import { FaClock, FaDollarSign } from "react-icons/fa6";
 
 import { Card, CardContent } from "~/components/ui/card";
@@ -30,6 +31,7 @@ export default function PopularPlaces({ places }: Props) {
               priceRangeMax,
               openingTime,
               closingTime,
+              favoriteCount,
             }) => (
               <Link to={`places/${slug}`} key={id}>
                 <Card className="h-80 w-56 shadow-lg hover:cursor-pointer hover:opacity-50">
@@ -42,7 +44,7 @@ export default function PopularPlaces({ places }: Props) {
                       alt="cafe-image"
                       className="h-40 w-full rounded-md rounded-b-none object-cover"
                     />
-                    <div className="mt-2 flex flex-col justify-between gap-4">
+                    <div className="mt-2 flex flex-col justify-between gap-2">
                       <div className="flex flex-col">
                         <p className="max-w-full truncate text-base font-medium text-[#372816]">
                           {name}
@@ -51,6 +53,11 @@ export default function PopularPlaces({ places }: Props) {
                           {city}
                         </p>
                       </div>
+                      <span>
+                        <p className="flex items-center gap-x-2 text-sm font-normal text-[#9BA0A7]">
+                          <FaHeart size={16} color="#FF9129" /> {favoriteCount}
+                        </p>
+                      </span>
                       <div className="flex flex-col gap-1">
                         {currency && (priceRangeMin || priceRangeMax) && (
                           <div className="flex items-center gap-2">
