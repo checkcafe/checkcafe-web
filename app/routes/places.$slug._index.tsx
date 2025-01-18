@@ -137,7 +137,12 @@ export default function PlaceSlug() {
 
   return (
     <div className="px-4 py-8 md:px-32 md:py-10">
-      <div className="mb-4 flex flex-row justify-between">
+      <div className="mb-4 flex flex-row justify-between gap-4">
+        <Button asChild className="">
+          <Link to={`/places`} className="bg-amber-950 text-primary">
+            Back
+          </Link>
+        </Button>{" "}
         <Button
           onClick={() => setShowMap((prev: boolean) => !prev)}
           variant="outline"
@@ -226,33 +231,33 @@ export default function PlaceSlug() {
           <p className="mb-5 mt-2 text-base font-normal">
             {place.description || "Description is not available"}
           </p>
-          <span className="mt-2 flex flex-row items-center gap-2">
-            <div className="flex h-8 w-8 items-center justify-center rounded-full bg-amber-500">
+          <div className="mt-2 flex flex-row items-center gap-2">
+            <div className="flex h-8 w-8 items-center justify-center rounded-full bg-amber-500 p-1">
               <Receipt size={24} color="white" />
             </div>
             <p className="text-sm font-medium text-amber-950">
               {place.currency || "IDR"}{" "}
               {formatPriceRange(place.priceRangeMin, place.priceRangeMax)}
             </p>
-          </span>
+          </div>
           {place.address ? (
-            <span className="mt-4 flex flex-row items-center gap-4">
-              <div className="flex h-8 w-8 items-center justify-center rounded-full bg-amber-500">
+            <div className="mt-2 flex flex-row items-center gap-2">
+              <div className="flex h-8 w-8 items-center justify-center self-center rounded-full bg-amber-500 p-1">
                 <MapPin size={24} color="white" />
               </div>
-              <p className="mb-2 text-sm font-medium text-amber-950">
+              <p className="text-sm font-medium text-amber-950">
                 {place.address.street || "No street"},{" "}
                 {place.address.state || "No state"},{" "}
                 {place.address.country || "No country"}
               </p>
-            </span>
+            </div>
           ) : (
             <p className="text-base font-normal">Address is not available</p>
           )}
           <p className="mt-7 text-2xl font-semibold text-amber-950 md:mt-7">
             Operational Time
           </p>
-          <div className="mt-2">
+          <div className="mt-2 flex flex-col gap-2 md:gap-1">
             {place.operatingHours?.length > 0 ? (
               place.operatingHours.map((operatingHour, index) => (
                 <OperatingHourItem operatingHour={operatingHour} key={index} />

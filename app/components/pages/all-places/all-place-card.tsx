@@ -1,10 +1,9 @@
 /* eslint-disable react/display-name */
 
 import { useFetcher, useNavigate, useSearchParams } from "@remix-run/react";
-import { Clock3 } from "lucide-react";
 import React, { forwardRef } from "react";
 import { BiHeart } from "react-icons/bi";
-import { FaDollarSign, FaHeart } from "react-icons/fa6";
+import { FaClock, FaHeart } from "react-icons/fa6";
 
 import { PinIcon } from "~/components/icons/icons";
 import { Card, CardContent, CardTitle } from "~/components/ui/card";
@@ -34,7 +33,7 @@ const AllPlaceCard = forwardRef<HTMLDivElement, PlaceCardProps>(
       <Card
         ref={ref}
         key={place.id}
-        className="flex h-[15vh] w-full cursor-pointer border border-[#F9D9AA] md:h-[30vh]"
+        className="flex h-[20vh] w-full cursor-pointer border border-[#F9D9AA] md:h-[30vh]"
         onClick={() => navigate(`/places/${place.slug}`)} // Navigasi seluruh card
       >
         <img
@@ -80,7 +79,6 @@ const AllPlaceCard = forwardRef<HTMLDivElement, PlaceCardProps>(
           </CardTitle>
           <CardContent className="items-end p-0">
             <span className="mb-2 flex items-center gap-2 font-bold">
-              <FaDollarSign className="h-3 w-3 md:h-4 md:w-4" />
               <p className="text-xs md:text-sm">
                 {`${place.currency || "USD"} ${formatPrice(
                   parseInt(place.priceRangeMin || "0"),
@@ -88,11 +86,14 @@ const AllPlaceCard = forwardRef<HTMLDivElement, PlaceCardProps>(
               </p>
             </span>
             <span className="mb-2 flex items-center gap-2 font-bold">
-              <Clock3 className="h-3 w-3 md:h-4 md:w-4" />
+              <FaClock size={16} className="text-[#372816]" />
+
               <p className="text-xs md:text-sm">
-                {`${formatTime(place.openingTime || "00:00")} - ${formatTime(
-                  place.closingTime || "23:59",
-                )}`}
+                {place.openingTime && place.closingTime
+                  ? `${formatTime(place.openingTime || "00:00")} - ${formatTime(
+                      place.closingTime || "23:59",
+                    )}`
+                  : "No Operation Hours"}
               </p>
             </span>
           </CardContent>

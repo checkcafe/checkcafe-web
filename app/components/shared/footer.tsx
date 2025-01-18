@@ -2,7 +2,7 @@ import { Link } from "@remix-run/react";
 
 export function Footer() {
   return (
-    <footer className="flex flex-col items-center justify-between bg-amber-50 p-4 md:flex-row md:p-8">
+    <footer className="mt-10 flex flex-col items-center justify-between bg-amber-50 p-4 md:flex-row md:p-8">
       <div className="flex flex-col items-center gap-2 md:items-start">
         <h2 className="font-brand text-2xl tracking-tight text-gray-900 md:text-3xl">
           ☕ CheckCafe

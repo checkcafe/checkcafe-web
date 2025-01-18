@@ -51,7 +51,12 @@ export function Navbar({ user }: { user: AuthUser }) {
     const query = String(formData.get("q"));
     const city = String(formData.get("city"));
 
-    if (query) searchParams.set("q", query);
+    // set url query params when value search changes
+    if (query) {
+      searchParams.set("q", query);
+    } else {
+      searchParams.delete("q");
+    }
     if (city && city !== "null" && city !== "none") {
       searchParams.set("city", city);
     }
@@ -97,7 +102,7 @@ export function Navbar({ user }: { user: AuthUser }) {
           <Input
             type="search"
             name="q"
-            placeholder="Search..."
+            placeholder="Search Places..."
             defaultValue={searchParams.get("q") || ""}
             className="w-full border-none focus-visible:ring-0 focus-visible:ring-offset-0"
           />
@@ -233,7 +238,7 @@ export function Navbar({ user }: { user: AuthUser }) {
               <Input
                 type="search"
                 name="q"
-                placeholder="Search..."
+                placeholder="Search Places..."
                 className="w-full border-none focus-visible:ring-0 focus-visible:ring-offset-0"
               />
               <SelectCity />

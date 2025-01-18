@@ -61,17 +61,13 @@ export default function PopularPlaces({ places }: Props) {
                       <div className="flex flex-col gap-1">
                         {currency && (priceRangeMin || priceRangeMax) && (
                           <div className="flex items-center gap-2">
-                            <FaDollarSign
-                              size={16}
-                              className="text-[#372816]"
-                            />
                             <p className="text-xs font-normal text-[#372816]">
                               {`${currency} ${formatPriceRange(priceRangeMin, priceRangeMax)}`}
                             </p>
                           </div>
                         )}
                         <div className="flex items-center gap-2">
-                          <FaClock size={16} className="text-[#372816]" />
+                          <FaClock size={14} className="text-[#372816]" />
                           <p className="text-xs font-normal text-[#372816]">
                             {`${formatTime(openingTime)} - ${formatTime(closingTime)}`}
                           </p>
