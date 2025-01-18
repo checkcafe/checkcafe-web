@@ -15,25 +15,23 @@ import { Button } from "~/components/ui/button";
 interface DynamicDialogProps {
   open: boolean | undefined;
   setOpen: (open: boolean) => void;
-  buttonTriggerTitle: string;
   dialogTitle: string;
   dialogDescription: string;
   childrenFooter?: React.ReactNode;
+  childrenTrigger?: React.ReactNode;
 }
 
 const DynamicDialog: React.FC<DynamicDialogProps> = ({
   open,
   setOpen,
-  buttonTriggerTitle,
   dialogTitle,
   dialogDescription,
   childrenFooter,
+  childrenTrigger,
 }) => {
   return (
     <AlertDialog open={open} onOpenChange={setOpen}>
-      <AlertDialogTrigger asChild>
-        <Button variant="destructive">{buttonTriggerTitle}</Button>
-      </AlertDialogTrigger>
+      <AlertDialogTrigger asChild>{childrenTrigger}</AlertDialogTrigger>
       <AlertDialogContent>
         <AlertDialogHeader>
           <AlertDialogTitle>{dialogTitle}</AlertDialogTitle>
