@@ -11,7 +11,6 @@ type Marker = {
   longitude: number;
   latitude: number;
 } | null;
-
 export default function MapWithSearchbox({
   coordinate,
   setCoordinates,
@@ -20,13 +19,11 @@ export default function MapWithSearchbox({
   setCoordinates: (value: React.SetStateAction<Marker>) => void;
 }) {
   const mapContainerRef = useRef<HTMLDivElement>(null);
-
   const mapInstanceRef = useRef<mapboxgl.Map | undefined>(undefined);
-  const [mapLoaded, setMapLoaded] = useState(false);
   const [inputValue, setInputValue] = useState("");
+
   useEffect(() => {
     // Create the Map instance
-    console.log(coordinate, "coordinate");
     const map = new mapboxgl.Map({
       attributionControl: false,
       container: mapContainerRef.current || "", // container ID
@@ -36,6 +33,7 @@ export default function MapWithSearchbox({
       style: "mapbox://styles/mapbox/streets-v12",
     });
     mapInstanceRef.current = map;
+
     new mapboxgl.Marker({
       draggable: true,
     })
@@ -45,7 +43,6 @@ export default function MapWithSearchbox({
           : [118.64493557421042, 0.1972476798250682],
       )
       .on("dragend", e => {
-        "dragend";
         const { lng, lat } = e.target._lngLat;
         setCoordinates({
           longitude: lng,
@@ -53,6 +50,7 @@ export default function MapWithSearchbox({
         });
       })
       .addTo(map); // Add navigation control and marker
+
     map.addControl(new mapboxgl.NavigationControl());
 
     map.jumpTo({
@@ -68,36 +66,19 @@ export default function MapWithSearchbox({
     };
   }, [coordinate]);
 
-  // useEffect(() => {
-  //   // Create the Map instance
-  //   const map = new mapboxgl.Map({
-  //     attributionControl: false,
-  //     container: mapContainerRef.current || "", // container ID
-  //     center: coordinate
-  //       ? [Number(coordinate.longitude), Number(coordinate.latitude)]
-  //       : [118.64493557421042, 0.1972476798250682], // starting position [lng, lat]
-  //     zoom: coordinate ? 17 : 3, // starting zoom
-  //     accessToken: MAPBOX_ACCESS_TOKEN,
-  //     style: "mapbox://styles/mapbox/streets-v12",
-  //   });
-  //   map.on("load", () => {
-  //     setMapLoaded(true);
-  //   });
-  // }, []);
-
+  // Conditionally render the SearchBox only when the map is loaded
   return (
-    <>
+    <div>
       <SearchBox
         accessToken={MAPBOX_ACCESS_TOKEN}
         map={mapInstanceRef.current}
         mapboxgl={mapboxgl}
         value={inputValue}
-        onChange={d => {
+        onChange={(d: any) => {
           setInputValue(d);
         }}
-        onRetrieve={d => {
-          const data: any = d;
-          const { latitude, longitude } = getCoordinates(data);
+        onRetrieve={(d: any) => {
+          const { latitude, longitude } = getCoordinates(d);
           setCoordinates({
             latitude,
             longitude,
@@ -106,6 +87,6 @@ export default function MapWithSearchbox({
         marker={true}
       />
       <div id="map-container" ref={mapContainerRef} style={{ height: 300 }} />
-    </>
+    </div>
   );
 }
