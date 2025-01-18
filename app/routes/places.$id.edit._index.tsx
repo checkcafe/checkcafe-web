@@ -16,7 +16,7 @@ import {
 import {
   Form,
   Link,
-  // useActionData,
+  useActionData,
   useLoaderData,
   useNavigation,
 } from "@remix-run/react";
@@ -25,7 +25,7 @@ import "mapbox-gl/dist/mapbox-gl.css";
 import "@mapbox/mapbox-gl-geocoder/dist/mapbox-gl-geocoder.css";
 
 import { FileUploaderRegular } from "@uploadcare/react-uploader";
-import React from "react";
+import React, { lazy, useEffect, useRef } from "react";
 
 import "@uploadcare/react-uploader/core.css";
 
@@ -36,11 +36,11 @@ import {
 import { ArrowDown, ArrowUpIcon, TrashIcon } from "lucide-react";
 import { useState } from "react";
 import {
-  // Map,
-  // MapMouseEvent,
-  // MapRef,
+  Map,
+  MapMouseEvent,
+  MapRef,
   Marker,
-  // NavigationControl,
+  NavigationControl,
 } from "react-map-gl";
 
 import { Combobox } from "~/components/shared/form-input/combobox";
@@ -71,11 +71,11 @@ import {
   SelectTrigger,
   SelectValue,
 } from "~/components/ui/select";
-// import { Separator } from "~/components/ui/separator";
+import { Separator } from "~/components/ui/separator";
 import { Textarea } from "~/components/ui/textarea";
 import {
   BACKEND_API_URL,
-  // MAPBOX_ACCESS_TOKEN,
+  MAPBOX_ACCESS_TOKEN,
   UPLOADCARE_PUBLIC_KEY,
   UPLOADCARE_SECRET_KEY,
 } from "~/lib/env";
@@ -138,10 +138,19 @@ const DAYS_OF_WEEK = [
   "Saturday",
   "Sunday",
 ];
-export default function EditPlace() {
-  const { place, city, facilities } = useLoaderData<typeof loader>();
-  const [open, setOpen] = useState<boolean>();
 
+export default function EditPlace() {
+  const navigation = useNavigation();
+  const { place, city, facilities } = useLoaderData<typeof loader>();
+  console.log(place, "place");
+  const [cityId, setCityId] = useState(place.address.cityId);
+  const [open, setOpen] = useState<boolean>();
+  const [loading, setLoading] = useState<boolean>(false);
+  const [marker, setMarker] = useState<Marker>(
+    place.latitude && place.longitude
+      ? { latitude: place.latitude, longitude: place.longitude }
+      : null,
+  );
   // const actionData = useActionData<typeof action>();
 
   // const mapRef = useRef<MapRef | null>(null);
@@ -166,9 +175,57 @@ export default function EditPlace() {
   //   }
   // };
 
+  const [imageUrls, setImageUrls] = useState<placePhotosData[]>(place.photos);
+  const [form, fields] = useForm({
+    shouldValidate: "onBlur",
+    shouldRevalidate: "onInput",
+
+    // Setup client validation
+    onValidate({ formData }) {
+      return parseWithZod(formData, { schema: EditPlaceSchema });
+    },
+    defaultValue: {
+      // imageUrls: place.photos,
+      name: place.name,
+      streetAddress: place.address.street,
+      descriptionPlace: place.description,
+      priceRangeMin: place.priceRangeMin,
+      priceRangeMax: place.priceRangeMax,
+      latitude: place.latitude,
+      longitude: place.longitude,
+      operatingHours: place.operatingHours || [],
+      placeFacilities: place.placeFacilities || [],
+    },
+  });
+  function handleSetImageUrls(data: string[]) {
+    data.forEach(url =>
+      setImageUrls(imageUrls => [
+        ...imageUrls,
+        { order: imageUrls.length + 1, url },
+      ]),
+    );
+  }
+
+  function handleDeleteImageUrls(urlToRemove: string) {
+    setImageUrls(prevState =>
+      prevState.filter(item => item.url !== urlToRemove),
+    );
+  }
+  useEffect(() => {
+    setLoading(true);
+  }, []);
+
+  // MOVE TO SERVER-SIDE
+  async function deleteFiles(uuid: string) {
+    await deleteFile({ uuid }, { authSchema: uploadcareSimpleAuthSchema });
+  }
+
+  const operatingHoursItems = fields.operatingHours.getFieldList();
+  const canAddOperatingHour = operatingHoursItems.length < DAYS_OF_WEEK.length;
+  const facilitiesItem = fields.placeFacilities.getFieldList();
   return (
     <div className="flex justify-center">
-      <div className="w-full max-w-3xl space-y-8 px-4 py-4 md:py-20">
+      <div className="w-full max-w-3xl space-y-8 px-4 py-20">
         <section className="container-button flex justify-between">
           <div className="container-action-button">
             {/* <input type="hidden" name="placeId" value={place.} readOnly /> */}
@@ -239,7 +296,340 @@ export default function EditPlace() {
             </Form>
           </div>
         </section>
-        <EditPlaceForm place={place} city={city} facilities={facilities} />
+        {/* <EditPlaceForm key={place.id} place={place} /> */}
+        <Form method="post" className="space-y-4" {...getFormProps(form)}>
+          <input
+            type="hidden"
+            name="username"
+            value={place.submitter.username}
+            readOnly
+          />{" "}
+          <h1 className="text-2xl font-bold">Create Place</h1>
+          <Label
+            htmlFor="imageUrls"
+            className="block text-sm font-bold text-gray-700"
+          >
+            Add picture
+          </Label>
+          {imageUrls && imageUrls.length > 0 && (
+            <Sliders
+              imageSlides={imageUrls.map((imageUrl: { url: string }) => ({
+                imageUrl: imageUrl.url,
+              }))}
+              widthImage={200}
+            />
+          )}
+          <input
+            {...getInputProps(fields.placePhotos, { type: "text" })}
+            hidden
+            value={JSON.stringify(imageUrls) || "[]"}
+            readOnly
+          />
+          <div>
+            <FileUploaderRegular
+              ctxName="checkcafe"
+              sourceList="local, url, camera"
+              classNameUploader="uc-light"
+              pubkey={UPLOADCARE_PUBLIC_KEY}
+              multiple={true}
+              accept="image/png,image/jpeg"
+              confirmUpload={true}
+              // onFileUploadFailed={e => {
+              //   console.log(e, "failed");
+              // }}
+              // onFileUploadSuccess={e => {
+              //   console.log(e, "success");
+              // }}
+              onDoneClick={e => {
+                if (e.successEntries.length > 0) {
+                  const data = e.successEntries;
+                  const urlData = data.map(item => item.cdnUrl);
+                  handleSetImageUrls(urlData);
+                }
+              }}
+              onFileRemoved={e => {
+                if (e.uuid) deleteFiles(e.uuid);
+                if (e.isRemoved && e.cdnUrl) {
+                  handleDeleteImageUrls(e.cdnUrl);
+                }
+              }}
+              // className="hidden"
+            />
+          </div>
+          <div>
+            <Label
+              htmlFor="name"
+              className="block text-sm font-bold text-gray-700"
+            >
+              Name
+            </Label>
+            <Input
+              {...getInputProps(fields.name, { type: "text" })}
+              type="text"
+              id="name"
+              placeholder="Place name"
+              className={`mt-1 rounded-md border p-2 ${fields.name.errors ? "border-red-500" : "border-gray-300"}`}
+            />
+            {fields.name.errors && (
+              <p className="mt-1 text-sm text-red-700">{fields.name.errors}</p>
+            )}
+          </div>
+          <div>
+            <Label
+              htmlFor="streetAddress"
+              className="block text-sm font-bold text-gray-700"
+            >
+              Street Address
+            </Label>
+            <Input
+              {...getInputProps(fields.streetAddress, { type: "text" })}
+              type="text"
+              id="streetAddress"
+              placeholder="Enter your streetAddress "
+              className={cn(
+                "mt-1 rounded-md border p-2",
+                fields.streetAddress.errors
+                  ? "border-red-500"
+                  : "border-gray-300",
+              )}
+            />
+            {fields.streetAddress.errors && (
+              <p className="mt-1 text-sm text-red-700">
+                {fields.streetAddress.errors}
+              </p>
+            )}
+          </div>
+          <div>
+            <Label
+              htmlFor="cityId"
+              className="block text-sm font-bold text-gray-700"
+            >
+              City
+            </Label>
+            <input
+              {...getInputProps(fields.cityId, { type: "text" })}
+              name={fields.cityId.name}
+              hidden
+              defaultValue={cityId}
+            />
+            <Combobox cities={city} setCityId={setCityId} cityId={cityId} />
+
+            {fields.cityId.errors && (
+              <p className="mt-1 text-sm text-red-700">
+                {fields.cityId.errors}
+              </p>
+            )}
+          </div>
+          <div>
+            <Label
+              htmlFor="descriptionPlace"
+              className="block text-sm font-bold text-gray-700"
+            >
+              Description
+            </Label>
+            <Textarea
+              {...getTextareaProps(fields.descriptionPlace)}
+              id="description"
+              name={fields.descriptionPlace.name}
+              placeholder="Description of the place"
+              className={`mt-1 rounded-md border p-2 ${fields.descriptionPlace.errors ? "border-red-500" : "border-gray-300"}`}
+            />
+            {fields.descriptionPlace.errors && (
+              <p className="mt-1 text-sm text-red-700">
+                {fields.descriptionPlace.errors}
+              </p>
+            )}
+          </div>
+          <div className="flex flex-col gap-2">
+            <h2 className="text-lg font-semibold text-gray-800">
+              Average Price Range for Food and Beverage
+            </h2>
+            <div className="flex gap-10">
+              <div>
+                <Label
+                  htmlFor="priceRangeMin"
+                  className="block text-sm font-medium text-gray-700"
+                >
+                  Price (Min)
+                </Label>
+                <Input
+                  {...getInputProps(fields.priceRangeMin, { type: "text" })}
+                  type="number"
+                  id="priceRangeMin"
+                  name={fields.priceRangeMin.name}
+                  placeholder="Enter minimum price"
+                  min={0}
+                  className={`mt-1 rounded-md border p-2 ${
+                    fields.priceRangeMin.errors
+                      ? "border-red-500"
+                      : "border-gray-300"
+                  }`}
+                />
+                {fields.priceRangeMin.errors && (
+                  <p className="mt-1 text-sm text-red-700">
+                    {fields.priceRangeMin.errors}
+                  </p>
+                )}
+              </div>
+              <div>
+                <Label
+                  htmlFor="priceRangeMax"
+                  className="block text-sm font-medium text-gray-700"
+                >
+                  Price (Max)
+                </Label>
+                <Input
+                  {...getInputProps(fields.priceRangeMax, { type: "text" })}
+                  name={fields.priceRangeMax.name}
+                  type="number"
+                  id="priceRangeMax"
+                  min={0}
+                  placeholder="Enter maximum price"
+                  className={`mt-1 rounded-md border p-2 ${
+                    fields.priceRangeMax.errors
+                      ? "border-red-500"
+                      : "border-gray-300"
+                  }`}
+                />
+                {fields.priceRangeMax.errors && (
+                  <p className="mt-1 text-sm text-red-700">
+                    {fields.priceRangeMax.errors}
+                  </p>
+                )}
+              </div>
+            </div>
+          </div>
+          <Label className="block text-sm font-bold text-gray-700">
+            Set Point Location
+          </Label>
+          {fields.latitude.errors && (
+            <p className="mt-1 text-sm text-red-700">
+              {fields.latitude.errors}
+            </p>
+          )}
+          {loading && (
+            <MapWithSearchbox coordinate={marker} setCoordinates={setMarker} />
+          )}
+          {/* <Map
+            renderWorldCopies={true}
+            mapboxAccessToken={MAPBOX_ACCESS_TOKEN}
+            initialViewState={{
+              longitude: place.longitude ?? 118.64493557421042,
+              latitude: place.latitude ?? 0.1972476798250682,
+              zoom: place.latitude && place.longitude ? 10 : 3,
+            }}
+            style={{ width: "100%", height: "50vh", borderRadius: 5 }}
+            mapStyle="mapbox://styles/mapbox/streets-v12"
+            onClick={handleMapClick}
+            ref={mapRef}
+            // onLoad={handleMapLoad}
+          >
+            {marker && (
+              <Marker
+                longitude={marker.longitude}
+                latitude={marker.latitude}
+                color="red"
+                anchor="center"
+              />
+            )}
+            <NavigationControl />
+          </Map> */}
+          <input
+            type="number"
+            hidden
+            name="latitude"
+            value={marker ? String(marker.latitude) : ""}
+            readOnly
+          />
+          <input
+            type="number"
+            hidden
+            name="longitude"
+            value={marker ? marker.longitude : ""}
+            readOnly
+          />
+          <div className="my-4">
+            <Label
+              htmlFor="operatingHour"
+              className="block text-sm font-bold text-gray-700"
+            >
+              Operating Hours{" "}
+            </Label>{" "}
+            <div className="my-4 flex gap-4">
+              <Button
+                {...form.insert.getButtonProps({
+                  name: fields.operatingHours.name,
+                })}
+                disabled={!canAddOperatingHour}
+              >
+                Add Operating Hour
+              </Button>
+            </div>
+            {operatingHoursItems.length === 0 && (
+              <p>No operating hour yet, add one.</p>
+            )}
+            <ul className="space-y-2">
+              {operatingHoursItems.map((item, index) => {
+                const operatingHourFields = item.getFieldset();
+                return (
+                  <li key={item.key} className="flex items-center gap-2">
+                    <OperatingHoursItemFieldset
+                      config={operatingHourFields}
+                      index={index}
+                      form={form}
+                      fields={fields}
+                      itemLength={operatingHoursItems.length}
+                    />
+                  </li>
+                );
+              })}
+            </ul>
+          </div>
+          <div className="my-4">
+            <Label
+              htmlFor="placeFacilities"
+              className="block text-sm font-bold text-gray-700"
+            >
+              Place Facilities{" "}
+            </Label>{" "}
+            <div className="my-4 flex gap-4">
+              <Button
+                {...form.insert.getButtonProps({
+                  name: fields.placeFacilities.name,
+                })}
+              >
+                Add Facility
+              </Button>
+            </div>
+            {facilitiesItem.length === 0 && <p>No facility yet, add one.</p>}
+            <ul className="space-y-2">
+              {facilitiesItem.map((item, index) => {
+                const facilityFields = item.getFieldset();
+                return (
+                  <li key={item.key} className="flex items-center gap-2">
+                    <FacilitiesItemFieldset
+                      config={facilityFields}
+                      index={index}
+                      form={form}
+                      fields={fields}
+                      facilities={facilities}
+                      itemLength={facilitiesItem.length}
+                    />
+                  </li>
+                );
+              })}
+            </ul>
+          </div>
+          <div>
+            <Button type="submit">
+              {navigation.state === "submitting" ? (
+                <LoadingSpinner />
+              ) : (
+                "Save Place"
+              )}
+            </Button>
+          </div>
+        </Form>
       </div>
     </div>
   );
@@ -321,396 +711,6 @@ export async function action({ request, params }: ActionFunctionArgs) {
   }
 
   return null;
-}
-
-function EditPlaceForm({
-  place,
-  city,
-  facilities,
-}: {
-  place: Place;
-  city: City[];
-  facilities: Facility[];
-}) {
-  const navigation = useNavigation();
-  const [cityId, setCityId] = useState(place.address.cityId);
-  const [marker, setMarker] = useState<Marker>(
-    place.latitude && place.longitude
-      ? { latitude: place.latitude, longitude: place.longitude }
-      : null,
-  );
-
-  const [imageUrls, setImageUrls] = useState<placePhotosData[]>(place.photos);
-  const [form, fields] = useForm({
-    shouldValidate: "onBlur",
-    shouldRevalidate: "onInput",
-
-    // Setup client validation
-    onValidate({ formData }) {
-      return parseWithZod(formData, { schema: EditPlaceSchema });
-    },
-    defaultValue: {
-      // imageUrls: place.photos,
-      name: place.name,
-      streetAddress: place.address.street,
-      descriptionPlace: place.description,
-      priceRangeMin: place.priceRangeMin,
-      priceRangeMax: place.priceRangeMax,
-      latitude: place.latitude,
-      longitude: place.longitude,
-      operatingHours: place.operatingHours || [],
-      placeFacilities: place.placeFacilities || [],
-    },
-  });
-
-  function handleSetImageUrls(data: string[]) {
-    data.forEach(url =>
-      setImageUrls(imageUrls => [
-        ...imageUrls,
-        { order: imageUrls.length + 1, url },
-      ]),
-    );
-  }
-
-  function handleDeleteImageUrls(urlToRemove: string) {
-    setImageUrls(prevState =>
-      prevState.filter(item => item.url !== urlToRemove),
-    );
-  }
-
-  // MOVE TO SERVER-SIDE
-  async function deleteFiles(uuid: string) {
-    await deleteFile({ uuid }, { authSchema: uploadcareSimpleAuthSchema });
-  }
-
-  const operatingHoursItems = fields.operatingHours.getFieldList();
-  const canAddOperatingHour = operatingHoursItems.length < DAYS_OF_WEEK.length;
-  const facilitiesItem = fields.placeFacilities.getFieldList();
-
-  return (
-    <Form method="post" className="space-y-4" {...getFormProps(form)}>
-      <input
-        type="hidden"
-        name="username"
-        value={place.submitter.username}
-        readOnly
-      />{" "}
-      <h1 className="text-2xl font-bold">Create Place</h1>
-      <Label
-        htmlFor="imageUrls"
-        className="block text-sm font-bold text-gray-700"
-      >
-        Add picture
-      </Label>
-      {imageUrls && imageUrls.length > 0 && (
-        <Sliders
-          imageSlides={imageUrls.map((imageUrl: { url: string }) => ({
-            imageUrl: imageUrl.url,
-          }))}
-          widthImage={200}
-        />
-      )}
-      <input
-        {...getInputProps(fields.placePhotos, { type: "text" })}
-        hidden
-        value={JSON.stringify(imageUrls) || "[]"}
-        readOnly
-      />
-      <div>
-        <FileUploaderRegular
-          ctxName="checkcafe"
-          sourceList="local, url, camera"
-          classNameUploader="uc-light"
-          pubkey={UPLOADCARE_PUBLIC_KEY}
-          multiple={true}
-          accept="image/png,image/jpeg"
-          confirmUpload={true}
-          // onFileUploadFailed={e => {
-          //   console.log(e, "failed");
-          // }}
-          // onFileUploadSuccess={e => {
-          //   console.log(e, "success");
-          // }}
-          onDoneClick={e => {
-            if (e.successEntries.length > 0) {
-              const data = e.successEntries;
-              const urlData = data.map(item => item.cdnUrl);
-              handleSetImageUrls(urlData);
-            }
-          }}
-          onFileRemoved={e => {
-            if (e.uuid) deleteFiles(e.uuid);
-            if (e.isRemoved && e.cdnUrl) {
-              handleDeleteImageUrls(e.cdnUrl);
-            }
-          }}
-          // className="hidden"
-        />
-      </div>
-      <div>
-        <Label htmlFor="name" className="block text-sm font-bold text-gray-700">
-          Name
-        </Label>
-        <Input
-          {...getInputProps(fields.name, { type: "text" })}
-          type="text"
-          id="name"
-          placeholder="Place name"
-          className={`mt-1 rounded-md border p-2 ${fields.name.errors ? "border-red-500" : "border-gray-300"}`}
-        />
-        {fields.name.errors && (
-          <p className="mt-1 text-sm text-red-700">{fields.name.errors}</p>
-        )}
-      </div>
-      <div>
-        <Label
-          htmlFor="streetAddress"
-          className="block text-sm font-bold text-gray-700"
-        >
-          Street Address
-        </Label>
-        <Input
-          {...getInputProps(fields.streetAddress, { type: "text" })}
-          type="text"
-          id="streetAddress"
-          placeholder="Enter your streetAddress "
-          className={cn(
-            "mt-1 rounded-md border p-2",
-            fields.streetAddress.errors ? "border-red-500" : "border-gray-300",
-          )}
-        />
-        {fields.streetAddress.errors && (
-          <p className="mt-1 text-sm text-red-700">
-            {fields.streetAddress.errors}
-          </p>
-        )}
-      </div>
-      <div>
-        <Label
-          htmlFor="cityId"
-          className="block text-sm font-bold text-gray-700"
-        >
-          City
-        </Label>
-        <input
-          {...getInputProps(fields.cityId, { type: "text" })}
-          name={fields.cityId.name}
-          hidden
-          defaultValue={cityId}
-        />
-        <Combobox cities={city} setCityId={setCityId} cityId={cityId} />
-
-        {fields.cityId.errors && (
-          <p className="mt-1 text-sm text-red-700">{fields.cityId.errors}</p>
-        )}
-      </div>
-      <div>
-        <Label
-          htmlFor="descriptionPlace"
-          className="block text-sm font-bold text-gray-700"
-        >
-          Description
-        </Label>
-        <Textarea
-          {...getTextareaProps(fields.descriptionPlace)}
-          id="description"
-          name={fields.descriptionPlace.name}
-          placeholder="Description of the place"
-          className={`mt-1 rounded-md border p-2 ${fields.descriptionPlace.errors ? "border-red-500" : "border-gray-300"}`}
-        />
-        {fields.descriptionPlace.errors && (
-          <p className="mt-1 text-sm text-red-700">
-            {fields.descriptionPlace.errors}
-          </p>
-        )}
-      </div>
-      <div className="flex flex-col gap-2">
-        <h2 className="text-lg font-semibold text-gray-800">
-          Average Price Range for Food and Beverage
-        </h2>
-        <div className="flex gap-10">
-          <div>
-            <Label
-              htmlFor="priceRangeMin"
-              className="block text-sm font-medium text-gray-700"
-            >
-              Price (Min)
-            </Label>
-            <Input
-              {...getInputProps(fields.priceRangeMin, { type: "text" })}
-              type="number"
-              id="priceRangeMin"
-              name={fields.priceRangeMin.name}
-              placeholder="Enter minimum price"
-              min={0}
-              className={`mt-1 rounded-md border p-2 ${
-                fields.priceRangeMin.errors
-                  ? "border-red-500"
-                  : "border-gray-300"
-              }`}
-            />
-            {fields.priceRangeMin.errors && (
-              <p className="mt-1 text-sm text-red-700">
-                {fields.priceRangeMin.errors}
-              </p>
-            )}
-          </div>
-          <div>
-            <Label
-              htmlFor="priceRangeMax"
-              className="block text-sm font-medium text-gray-700"
-            >
-              Price (Max)
-            </Label>
-            <Input
-              {...getInputProps(fields.priceRangeMax, { type: "text" })}
-              name={fields.priceRangeMax.name}
-              type="number"
-              id="priceRangeMax"
-              min={0}
-              placeholder="Enter maximum price"
-              className={`mt-1 rounded-md border p-2 ${
-                fields.priceRangeMax.errors
-                  ? "border-red-500"
-                  : "border-gray-300"
-              }`}
-            />
-            {fields.priceRangeMax.errors && (
-              <p className="mt-1 text-sm text-red-700">
-                {fields.priceRangeMax.errors}
-              </p>
-            )}
-          </div>
-        </div>
-      </div>
-      <Label className="block text-sm font-bold text-gray-700">
-        Set Point Location
-      </Label>
-      {fields.latitude.errors && (
-        <p className="mt-1 text-sm text-red-700">{fields.latitude.errors}</p>
-      )}
-      <MapWithSearchbox coordinate={marker} setCoordinates={setMarker} />
-      {/* <Map
-      renderWorldCopies={true}
-      mapboxAccessToken={MAPBOX_ACCESS_TOKEN}
-      initialViewState={{
-        longitude: place.longitude ?? 118.64493557421042,
-        latitude: place.latitude ?? 0.1972476798250682,
-        zoom: place.latitude && place.longitude ? 10 : 3,
-      }}
-      style={{ width: "100%", height: "50vh", borderRadius: 5 }}
-      mapStyle="mapbox://styles/mapbox/streets-v12"
-      onClick={handleMapClick}
-      ref={mapRef}
-      onLoad={handleMapLoad}
-    >
-      {marker && (
-        <Marker
-          longitude={marker.longitude}
-          latitude={marker.latitude}
-          color="red"
-          anchor="center"
-        />
-      )}
-      <NavigationControl />
-    </Map> */}
-      <input
-        type="number"
-        hidden
-        name="latitude"
-        value={marker ? String(marker.latitude) : ""}
-        readOnly
-      />
-      <input
-        type="number"
-        hidden
-        name="longitude"
-        value={marker ? marker.longitude : ""}
-        readOnly
-      />
-      <div className="my-4">
-        <Label
-          htmlFor="operatingHour"
-          className="block text-sm font-bold text-gray-700"
-        >
-          Operating Hours{" "}
-        </Label>{" "}
-        <div className="my-4 flex gap-4">
-          <Button
-            {...form.insert.getButtonProps({
-              name: fields.operatingHours.name,
-            })}
-            disabled={!canAddOperatingHour}
-          >
-            Add Operating Hour
-          </Button>
-        </div>
-        {operatingHoursItems.length === 0 && (
-          <p>No operating hour yet, add one.</p>
-        )}
-        <ul className="space-y-2">
-          {operatingHoursItems.map((item, index) => {
-            const operatingHourFields = item.getFieldset();
-            return (
-              <li key={item.key} className="flex items-center gap-2">
-                <OperatingHoursItemFieldset
-                  config={operatingHourFields}
-                  index={index}
-                  form={form}
-                  fields={fields}
-                  itemLength={operatingHoursItems.length}
-                />
-              </li>
-            );
-          })}
-        </ul>
-      </div>
-      <div className="my-4">
-        <Label
-          htmlFor="placeFacilities"
-          className="block text-sm font-bold text-gray-700"
-        >
-          Place Facilities{" "}
-        </Label>{" "}
-        <div className="my-4 flex gap-4">
-          <Button
-            {...form.insert.getButtonProps({
-              name: fields.placeFacilities.name,
-            })}
-          >
-            Add Facility
-          </Button>
-        </div>
-        {facilitiesItem.length === 0 && <p>No facility yet, add one.</p>}
-        <ul className="space-y-2">
-          {facilitiesItem.map((item, index) => {
-            const facilityFields = item.getFieldset();
-            return (
-              <li key={item.key} className="flex items-center gap-2">
-                <FacilitiesItemFieldset
-                  config={facilityFields}
-                  index={index}
-                  form={form}
-                  fields={fields}
-                  facilities={facilities}
-                  itemLength={facilitiesItem.length}
-                />
-              </li>
-            );
-          })}
-        </ul>
-      </div>
-      <div>
-        <Button type="submit">
-          {navigation.state === "submitting" ? (
-            <LoadingSpinner />
-          ) : (
-            "Save Place"
-          )}
-        </Button>
-      </div>
-    </Form>
-  );
 }
 
 function OperatingHoursItemFieldset({
@@ -885,7 +885,6 @@ function FacilitiesItemFieldset({
             {...getSelectProps(config.facilityId)}
             value={config.facilityId.defaultValue}
             key={config.facilityId.key} // Pass key explicitly
-            defaultValue="Select facility"
           >
             <SelectTrigger className="w-full">
               <SelectValue placeholder="Select facility" />
