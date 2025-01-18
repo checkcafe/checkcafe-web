@@ -25,7 +25,7 @@ import "mapbox-gl/dist/mapbox-gl.css";
 import "@mapbox/mapbox-gl-geocoder/dist/mapbox-gl-geocoder.css";
 
 import { FileUploaderRegular } from "@uploadcare/react-uploader";
-import React, { lazy, useEffect, useRef } from "react";
+import React, { useEffect } from "react";
 
 import "@uploadcare/react-uploader/core.css";
 
@@ -33,7 +33,7 @@ import {
   deleteFile,
   UploadcareSimpleAuthSchema,
 } from "@uploadcare/rest-client";
-import { ArrowDown, ArrowUpIcon, TrashIcon } from "lucide-react";
+import { ArrowDown, ArrowUpIcon, ArrowUpRight, TrashIcon } from "lucide-react";
 import { useState } from "react";
 import {
   Map,
@@ -42,6 +42,7 @@ import {
   Marker,
   NavigationControl,
 } from "react-map-gl";
+import { toast } from "sonner";
 
 import { Combobox } from "~/components/shared/form-input/combobox";
 // import Tasks from "~/components/shared/form-input/try-array-nested";
@@ -52,16 +53,6 @@ import { generateTimeOptions } from "~/components/shared/select-hour";
 // import { MultipleOperatingHoursUpdate } from "~/components/shared/form-input/multiple-input-operating-hours-updated";
 // import { OperatingHoursForm } from "~/components/shared/form-input/operating-hours-form";
 import { Sliders } from "~/components/shared/sliders";
-import {
-  AlertDialog,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-  AlertDialogTrigger,
-} from "~/components/ui/alert-dialog";
 import { Button } from "~/components/ui/button";
 import { Input } from "~/components/ui/input";
 import { Label } from "~/components/ui/label";
@@ -143,16 +134,16 @@ const DAYS_OF_WEEK = [
 export default function EditPlace() {
   const navigation = useNavigation();
   const { place, city, facilities } = useLoaderData<typeof loader>();
-  console.log(place, "place");
   const [cityId, setCityId] = useState(place.address.cityId);
-  const [open, setOpen] = useState<boolean>();
+  const [openDelete, setOpenDelete] = useState<boolean>();
   const [loading, setLoading] = useState<boolean>(false);
   const [marker, setMarker] = useState<Marker>(
     place.latitude && place.longitude
       ? { latitude: place.latitude, longitude: place.longitude }
       : null,
   );
-  // const actionData = useActionData<typeof action>();
+  const actionData = useActionData<typeof action>();
+  // console.log(actionData?.success, "actionData");
 
   // const mapRef = useRef<MapRef | null>(null);
   // const handleMapClick = (event: MapMouseEvent) => {
@@ -198,6 +189,24 @@ export default function EditPlace() {
       placeFacilities: place.placeFacilities || [],
     },
   });
+
+  useEffect(() => {
+    setLoading(true);
+  }, []);
+
+  useEffect(() => {
+    const data = actionData as { message: string; success: boolean };
+    if (data) {
+      if (data.success) {
+        toast.success(data.message, {
+          action: {
+            label: "Close",
+            onClick: () => {},
+          },
+        });
+      }
+    }
+  }, [actionData]);
   function handleSetImageUrls(data: string[]) {
     data.forEach(url =>
       setImageUrls(imageUrls => [
@@ -212,9 +221,6 @@ export default function EditPlace() {
       prevState.filter(item => item.url !== urlToRemove),
     );
   }
-  useEffect(() => {
-    setLoading(true);
-  }, []);
 
   // MOVE TO SERVER-SIDE
   async function deleteFiles(uuid: string) {
@@ -230,9 +236,11 @@ export default function EditPlace() {
         <section className="container-button flex justify-between">
           <div className="container-action-button">
             <DynamicDialog
-              open={open}
-              setOpen={setOpen}
-              buttonTriggerTitle="Delete Place"
+              childrenTrigger={
+                <Button variant="destructive">Delete Place</Button>
+              }
+              open={openDelete}
+              setOpen={setOpenDelete}
               dialogTitle="Are you absolutely sure?"
               dialogDescription="  This action cannot be undone. This will permanently delete your place data and remove your data from our servers."
               childrenFooter={
@@ -253,7 +261,7 @@ export default function EditPlace() {
                   <Button
                     variant="destructive"
                     type="submit"
-                    onClick={() => setOpen(false)}
+                    onClick={() => setOpenDelete(false)}
                   >
                     <span className="flex items-center gap-2">
                       <TrashIcon />
@@ -270,7 +278,7 @@ export default function EditPlace() {
                 to={`/places/${place.slug}`}
                 className="flex items-center gap-2"
               >
-                View
+                Review
               </Link>
             </Button>
             <Form method="post" id="change-status-publish">
@@ -281,6 +289,13 @@ export default function EditPlace() {
                 {place?.isPublished ? "Unpublish" : "Publish"}
               </Button>
             </Form>
+            {place?.isPublished && (
+              <Link to={`/places/${place.slug}`}>
+                <Button type="button" variant={"outline"}>
+                  <p>Visit Place</p> <ArrowUpRight size={16} />
+                </Button>
+              </Link>
+            )}
           </div>
         </section>
         {/* <EditPlaceForm key={place.id} place={place} /> */}
@@ -671,13 +686,14 @@ export async function action({ request, params }: ActionFunctionArgs) {
         Authorization: `Bearer ${accessToken}`,
       },
     });
-    const result: { message: string } = await responseDelete.json();
+    const result = await responseDelete.json();
     if (!result) {
       throw new Response(null, { status: 404, statusText: "Place Not Found" });
     }
     return redirect(`/dashboard/${username}`, { headers });
   } else if (action === "isPublish") {
-    const responseDelete = await fetch(
+    console.log(id, "id");
+    const responseIsPublish = await fetch(
       `${BACKEND_API_URL}/places/${id}/isPublished`,
       {
         method: "PATCH",
@@ -687,14 +703,30 @@ export async function action({ request, params }: ActionFunctionArgs) {
         },
       },
     );
-    const result: { message: string } = await responseDelete.json();
+    if (responseIsPublish.status !== 200) {
+      throw new Response(null, {
+        status: responseIsPublish.status,
+        statusText: responseIsPublish.statusText,
+      });
+    }
+    const result: { messasge: string; isPublished: boolean } =
+      await responseIsPublish.json();
     if (!result) {
       throw new Response(null, {
         status: 404,
         statusText: "Change Status Failed",
       });
     }
-    return null;
+
+    return json(
+      {
+        success: true,
+        message: result.isPublished
+          ? "You place is published"
+          : "You place is unpublished",
+      },
+      { headers },
+    );
   }
 
   return null;
