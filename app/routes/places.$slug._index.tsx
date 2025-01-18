@@ -9,6 +9,7 @@ import {
   Link,
   redirect,
   useLoaderData,
+  useNavigate,
   useParams,
 } from "@remix-run/react";
 import { MapIcon, MapPin, Receipt } from "lucide-react";
@@ -112,6 +113,7 @@ export const meta: MetaFunction<typeof loader> = ({ data }) => {
 };
 
 export default function PlaceSlug() {
+  const navigate = useNavigate();
   const { place, favoritePlace, nearbyPlaces, username } =
     useLoaderData<typeof loader>();
   const { slug } = useParams();
@@ -134,14 +136,14 @@ export default function PlaceSlug() {
   const method = favoritePlace ? "delete" : "post";
 
   const isOwner = place.submitter.username === username;
-
+  const handleGoBack = () => {
+    navigate(-1); // This goes back to the previous page
+  };
   return (
     <div className="px-4 py-8 md:px-32 md:py-10">
       <div className="mb-4 flex flex-row justify-between gap-4">
-        <Button asChild className="">
-          <Link to={`/places`} className="bg-amber-950 text-primary">
-            Back
-          </Link>
+        <Button type="submit" className="" onClick={handleGoBack}>
+          Back
         </Button>{" "}
         <Button
           onClick={() => setShowMap((prev: boolean) => !prev)}
