@@ -79,18 +79,21 @@ export const Sliders = ({
             </CarouselItem>
           ))}
         </CarouselContent>
+        {imageSlides.length > 1 && (
+          <>
+            <div className="absolute left-16 top-1/2 -translate-y-1/2 transform">
+              <CarouselPrevious className="rounded-full bg-gray-600 p-2 text-white hover:bg-gray-500">
+                {prevButtonText}
+              </CarouselPrevious>
+            </div>
 
-        <div className="absolute left-16 top-1/2 -translate-y-1/2 transform">
-          <CarouselPrevious className="rounded-full bg-gray-600 p-2 text-white hover:bg-gray-500">
-            {prevButtonText}
-          </CarouselPrevious>
-        </div>
-
-        <div className="absolute right-16 top-1/2 -translate-y-1/2 transform">
-          <CarouselNext className="rounded-full bg-gray-600 p-2 text-white hover:bg-gray-500">
-            {nextButtonText}
-          </CarouselNext>
-        </div>
+            <div className="absolute right-16 top-1/2 -translate-y-1/2 transform">
+              <CarouselNext className="rounded-full bg-gray-600 p-2 text-white hover:bg-gray-500">
+                {nextButtonText}
+              </CarouselNext>
+            </div>
+          </>
+        )}
       </Carousel>
     </div>
   );
