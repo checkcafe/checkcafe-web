@@ -111,7 +111,7 @@ export function Layout({ children }: { children: React.ReactNode }) {
         <div className="min-h-screen">{children}</div>
         <Footer />
         <ScrollRestoration />
-        <Toaster />
+        <Toaster position="top-right" richColors />
         <Scripts />
         <Analytics />
       </body>
