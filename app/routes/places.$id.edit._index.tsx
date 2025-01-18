@@ -46,6 +46,7 @@ import {
 import { Combobox } from "~/components/shared/form-input/combobox";
 // import Tasks from "~/components/shared/form-input/try-array-nested";
 import LoadingSpinner from "~/components/shared/loader-spinner";
+import DynamicDialog from "~/components/shared/places/dynamic-dialog";
 import MapWithSearchbox from "~/components/shared/searchbox/mapWithSearchbox.client";
 import { generateTimeOptions } from "~/components/shared/select-hour";
 // import { MultipleOperatingHoursUpdate } from "~/components/shared/form-input/multiple-input-operating-hours-updated";
@@ -228,54 +229,40 @@ export default function EditPlace() {
       <div className="w-full max-w-3xl space-y-8 px-4 py-20">
         <section className="container-button flex justify-between">
           <div className="container-action-button">
-            {/* <input type="hidden" name="placeId" value={place.} readOnly /> */}
-            <AlertDialog open={open} onOpenChange={setOpen}>
-              <AlertDialogTrigger asChild>
-                <Button variant="destructive">Delete</Button>
-              </AlertDialogTrigger>
-              <AlertDialogContent>
-                <AlertDialogHeader>
-                  <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
-                  <AlertDialogDescription>
-                    This action cannot be undone. This will permanently delete
-                    your place data and remove your data from our servers.
-                  </AlertDialogDescription>
-                </AlertDialogHeader>
-                <AlertDialogFooter>
-                  <AlertDialogCancel>Cancel</AlertDialogCancel>
-                  <Form method="post" id="user-delete-place-by-id">
-                    <input
-                      type="hidden"
-                      name="username"
-                      value={place.submitter.username}
-                      readOnly
-                    />{" "}
-                    <input
-                      type="hidden"
-                      name="action"
-                      value="delete"
-                      readOnly
-                    />
-                    <input
-                      type="hidden"
-                      name="placeId"
-                      value={place.id}
-                      readOnly
-                    />{" "}
-                    <Button
-                      variant={"destructive"}
-                      type="submit"
-                      onClick={() => setOpen(false)}
-                    >
-                      <span className="flex items-center gap-2">
-                        <TrashIcon />
-                        <p>Delete Places</p>
-                      </span>
-                    </Button>
-                  </Form>
-                </AlertDialogFooter>
-              </AlertDialogContent>
-            </AlertDialog>
+            <DynamicDialog
+              open={open}
+              setOpen={setOpen}
+              buttonTriggerTitle="Delete Place"
+              dialogTitle="Are you absolutely sure?"
+              dialogDescription="  This action cannot be undone. This will permanently delete your place data and remove your data from our servers."
+              childrenFooter={
+                <form method="post" id="user-delete-place-by-id">
+                  <input
+                    type="hidden"
+                    name="username"
+                    value={place.submitter.username}
+                    readOnly
+                  />
+                  <input type="hidden" name="action" value="delete" readOnly />
+                  <input
+                    type="hidden"
+                    name="placeId"
+                    value={place.id}
+                    readOnly
+                  />
+                  <Button
+                    variant="destructive"
+                    type="submit"
+                    onClick={() => setOpen(false)}
+                  >
+                    <span className="flex items-center gap-2">
+                      <TrashIcon />
+                      <p>Delete Places</p>
+                    </span>
+                  </Button>
+                </form>
+              }
+            />
           </div>
           <div className="container-publish-button flex gap-4">
             <Button variant={"outline"} type="submit">
