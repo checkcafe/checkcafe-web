@@ -7,8 +7,8 @@
     "build": "bun gen-types:prod && remix vite:build",
     "dev": "bun gen-types:prod && remix vite:dev",
     "format": "prettier --write --ignore-path .gitignore .",
-    "gen-types": "openapi-typescript http://localhost:3000/openapi.json --output ./app/types/schema.d.ts",
-    "gen-types:prod": "openapi-typescript https://api.checkcafe.com/openapi.json --output ./app/types/schema.d.ts",
+    "gen-types": "openapi-typescript https://checkcafe-api.onrender.com/openapi.json --output ./app/types/schema.d.ts",
+    "gen-types:prod": "openapi-typescript https://checkcafe-api.onrender.com/openapi.json --output ./app/types/schema.d.ts",
     "lint": "eslint --ignore-path .gitignore --cache --cache-location ./node_modules/.cache/eslint .",
     "start": "remix-serve ./build/server/index.js",
     "typecheck": "tsc --noEmit"
